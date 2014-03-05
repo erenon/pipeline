@@ -40,6 +40,21 @@ from(Container& container)
   );
 }
 
+template <typename Iterator>
+segment<detail::range_reader<Iterator>, typename Iterator::value_type>
+from(const Iterator& begin, const Iterator& end)
+{
+  typedef typename Iterator::value_type value_type;
+  typedef detail::range_reader<Iterator> c_range_reader;
+
+  c_range_reader range(begin, end);
+
+  return segment<c_range_reader, value_type>(
+    range,
+    std::function<value_type(value_type)>(&identity<value_type>)
+  );
+}
+
 } // namespace pipeline
 } // namespace boost
 
