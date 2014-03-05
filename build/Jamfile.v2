@@ -1,4 +1,7 @@
+# Boost.Pipeline main Jamfile
+# 
 # Copyright 2014 Benedek Thaler
+# 
 # Distributed under the Boost Software License, Version 1.0. 
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
@@ -10,7 +13,7 @@ alias pipeline
   : <include>../include
   ;
 
-project boost/pipeline-example
+project boost/pipeline/example
   : source-location ../example
   : build-dir /var/tmp/pipeline/build/example
   : requirements
