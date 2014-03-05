@@ -5,9 +5,13 @@
 #include <iterator>
 #include <iostream>
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include <boost/pipeline.hpp>
 
-std::string grep(const std::string& re, const std::string& item) {
+
+std::string grep(const std::string& re, const std::string& item)
+{
   std::regex regex(re);
 
   if (std::regex_match(item, regex))
@@ -20,35 +24,32 @@ std::string grep(const std::string& re, const std::string& item) {
   }
 }
 
-std::string grep_error(const std::string& item)
+std::string trim(const std::string& item)
 {
-  std::regex regex("Error.*");
-
-  if (std::regex_match(item, regex))
-  {
-    return item;
-  }
-  else
-  {
-    return "no match";
-  }
+  return boost::algorithm::trim_copy(item);
 }
 
 int main()
 {
   std::vector<std::string> input = {
     "Error: foobar",
-    "Warning: barbaz",
+    " Warning: barbaz",
     "Notice: qux",
-    "Error: abc"
+    "\tError: abc"
   };
 
-//  auto grep_error = std::bind(grep, "Error.*", std::placeholders::_1);
+  auto grep_error = std::bind(grep, "Error.*", std::placeholders::_1);
 
   std::vector<std::string> output;
   auto out_it = std::back_inserter(output);
 
-  (boost::pipeline::from(input) | grep_error).run(out_it);
+  // boost::pipeline::from(input.begin(), input.end()) also works
+
+  (boost::pipeline::from(input)
+    | trim
+    | grep_error
+    | [] (const std::string& item) { return "->" + item; }
+  ).run(out_it);
 
   for (auto& out_item : output)
   {

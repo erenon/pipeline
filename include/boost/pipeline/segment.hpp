@@ -41,20 +41,13 @@ public:
      _function(function)
   {}
 
-  template<typename ChildOutput>
-  auto operator|(std::function<ChildOutput(value_type)>& function)
-    -> segment<decltype(*this), ChildOutput>
+  template<typename Function>
+  auto operator|(const Function& function)
+    -> segment<decltype(*this), decltype(function(std::declval<value_type>()))>
   {
-    return segment<decltype(*this), ChildOutput>(*this, function);
-  }
-
-  template<typename ChildOutput>
-  auto operator|(ChildOutput function(const value_type&))
-    -> segment<decltype(*this), ChildOutput>
-  {
-    return segment<decltype(*this), ChildOutput>(
+    return segment<decltype(*this), decltype(function(std::declval<value_type>()))>(
       *this,
-      std::function<ChildOutput(value_type)>(function)
+      function
     );
   }
 
