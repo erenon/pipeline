@@ -1,0 +1,43 @@
+# Boost.Pipeline main Jamfile
+# 
+# Copyright 2014 Benedek Thaler
+# 
+# Distributed under the Boost Software License, Version 1.0. 
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+using testing ;
+
+alias pipeline
+  : # no sources
+  : # no build requirements
+  : # no default build
+  : <include>../include
+  ;
+  
+project boost/pipeline/test
+  : build-dir /var/tmp/pipeline/build/test
+  : requirements
+  	<include>.
+    <library>pipeline
+    <threading>multi
+    <warnings>all
+    <link>shared:<define>BOOST_TEST_DYN_LINK
+    <toolset>gcc:<cxxflags>-Wextra
+    <toolset>gcc:<cxxflags>-std=c++11
+    <toolset>clang:<cxxflags>-Wextra
+    <toolset>clang:<cxxflags>-std=c++11
+  ;
+  
+lib boost_unit_test_framework : : <name>boost_unit_test_framework ;
+
+rule pipeline-test ( name : includes * )
+{
+  unit-test $(name) : $(name).cpp boost_unit_test_framework ;
+}
+
+alias pipline-test-suite :
+  [ pipeline-test segment_test ]
+  [ pipeline-test detail/range_reader_test ]
+  ; 
+	  

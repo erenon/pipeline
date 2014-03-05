@@ -25,11 +25,11 @@ namespace pipeline {
 template <typename Parent, typename Output>
 class segment
 {
-private:
-  typedef segment<Parent, Output> self_type;
-
 public:
-  typedef typename std::remove_reference<Parent>::type::value_type input_type;
+  typedef typename std::remove_reference<
+    typename std::remove_reference<Parent>::type::value_type
+  >::type input_type;
+
   typedef Output value_type;
   typedef std::function<value_type(const input_type&)> function_type;
 
@@ -61,7 +61,7 @@ public:
 
     for (auto& input_item : input)
     {
-      out_it = _function(input_item);
+      *out_it = _function(input_item);
       ++out_it;
     }
   }

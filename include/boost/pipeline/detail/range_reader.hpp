@@ -13,6 +13,8 @@
 #ifndef BOOST_PIPELINE_DETAIL_RANGE_READER_HPP
 #define BOOST_PIPELINE_DETAIL_RANGE_READER_HPP
 
+#include <type_traits>
+
 namespace boost {
 namespace pipeline {
 namespace detail {
@@ -21,7 +23,7 @@ template <typename Iterator>
 class range_reader
 {
 public:
-  typedef typename Iterator::value_type value_type;
+  typedef decltype(*std::declval<Iterator>()) value_type;
 
   range_reader(const Iterator& begin, const Iterator& end)
     :_current(begin),
@@ -33,7 +35,7 @@ public:
   {
     while (_current != _end)
     {
-      output_it = *_current;
+      *output_it = *_current;
       ++_current;
       ++output_it;
     }
