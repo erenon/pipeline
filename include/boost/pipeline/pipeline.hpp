@@ -14,18 +14,29 @@
 #define BOOST_PIPELINE_PIPELINE__HPP
 
 #include <boost/pipeline/segment.hpp>
+#include <boost/pipeline/detail/range_reader.hpp>
 
 namespace boost {
 namespace pipeline {
 
+template <typename T>
+constexpr T identity(const T& t)
+{
+  return t;
+}
+
 template <typename Container>
-segment<Container, typename Container::value_type>
+segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
 from(Container& container)
 {
   typedef typename Container::value_type value_type;
-  return segment<Container, value_type>(
-    container,
-    std::function<value_type(value_type)>()
+  typedef detail::range_reader<typename Container::iterator> c_range_reader;
+
+  c_range_reader range(container.begin(), container.end());
+
+  return segment<c_range_reader, value_type>(
+    range,
+    std::function<value_type(value_type)>(&identity<value_type>)
   );
 }
 
