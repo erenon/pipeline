@@ -1,0 +1,4 @@
+# ignore eclipse cdt resources
+.project
+.cproject
+.settings/
