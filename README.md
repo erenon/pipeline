@@ -31,9 +31,9 @@ However, there are examples and tests to be build:
     # build examples
     # artifacts will be in: /var/tmp/pipeline/
     cd pipeline/build
-    bjam toolset=gcc # or llvm
+    bjam toolset=gcc # or clang
     # build and run tests
     cd ../test
-    bjam toolset=gcc # or llvm
+    bjam toolset=gcc # or clang
 
 [0]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html
