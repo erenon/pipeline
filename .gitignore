@@ -2,3 +2,6 @@
 .project
 .cproject
 .settings/
+
+# ignore boost build resources
+bin/
