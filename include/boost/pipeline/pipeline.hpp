@@ -19,11 +19,15 @@
 namespace boost {
 namespace pipeline {
 
+namespace {
+
 template <typename T>
 constexpr T identity(const T& t)
 {
   return t;
 }
+
+} // namespace
 
 template <typename Container>
 segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
