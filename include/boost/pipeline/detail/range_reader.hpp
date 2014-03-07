@@ -14,11 +14,17 @@
 #define BOOST_PIPELINE_DETAIL_RANGE_READER_HPP
 
 #include <type_traits>
+#include <algorithm>
 
 namespace boost {
 namespace pipeline {
 namespace detail {
 
+/**
+ * Represents a range denoted by two iterators.
+ *
+ * Purpose of this class is to feed a range to a pipeline.
+ */
 template <typename Iterator>
 class range_reader
 {
@@ -33,12 +39,7 @@ public:
   template <typename OutputIt>
   void run(OutputIt output_it)
   {
-    while (_current != _end)
-    {
-      *output_it = *_current;
-      ++_current;
-      ++output_it;
-    }
+    std::copy(_current, _end, output_it);
   }
 
 private:

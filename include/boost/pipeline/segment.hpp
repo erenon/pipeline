@@ -22,6 +22,21 @@
 namespace boost {
 namespace pipeline {
 
+/**
+ * Represents a series of connected operations.
+ *
+ * Template arguments:
+ *
+ *  - Parent: type of the segment before this segment in the pipline;
+ *    in case of (foo | bar | baz) baz has a type of
+ *    segment<segment<segment<?, Out>, Out> Out>
+ *
+ *    Parent must have a run<OutIt>(OutIt) method and value_type typedef.
+ *    The method run feeds instances of value_type into a range
+ *    pointed by the given iterator.
+ *
+ *  - Output: type of emitted entries
+ */
 template <typename Parent, typename Output>
 class segment
 {
@@ -33,6 +48,11 @@ public:
   typedef Output value_type;
   typedef std::function<value_type(const input_type&)> function_type;
 
+  /**
+   * Creates a new segment by concatenating `function` after `parent`.
+   *
+   * Parent and function_type must be copy constructible
+   */
   segment(
     const Parent& parent,
     const function_type& function
@@ -41,6 +61,12 @@ public:
      _function(function)
   {}
 
+  /**
+   * Creates a new segment by concatenating `function` after *this
+   *
+   * Function must be copy constructible. The Output template argument
+   * of the returned segment is deduced from the return type of `function`.
+   */
   template<typename Function>
   auto operator|(const Function& function)
     -> segment<decltype(*this), decltype(function(std::declval<value_type>()))>
@@ -51,6 +77,13 @@ public:
     );
   }
 
+  /**
+   * Runs the segment.
+   *
+   * Gets the output of the `_parent` segment,
+   * transforms each entry using `_function`
+   * and feeds them into `out_it`.
+   */
   template <typename OutputIt>
   void run(OutputIt out_it)
   {
@@ -66,8 +99,9 @@ public:
     }
   }
 
-  Parent _parent;
-  function_type _function;
+private:
+  Parent _parent;          /**< parent segment, provider of input */
+  function_type _function; /**< transformation function of input */
 };
 
 } // namespace pipeline

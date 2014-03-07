@@ -29,6 +29,9 @@ constexpr T identity(const T& t)
 
 } // namespace
 
+/**
+ * Creates a segment operating on `container`.
+ */
 template <typename Container>
 segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
 from(Container& container)
@@ -44,6 +47,9 @@ from(Container& container)
   );
 }
 
+/**
+ * Creates a segment operating on a range.
+ */
 template <typename Iterator>
 segment<detail::range_reader<Iterator>, typename Iterator::value_type>
 from(const Iterator& begin, const Iterator& end)
