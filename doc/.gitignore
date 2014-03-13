@@ -1,0 +1,4 @@
+# ignore generated files
+bin/
+html/
+apidoc.xml
