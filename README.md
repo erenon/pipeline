@@ -3,7 +3,8 @@ Boost.Pipeline
 
 C++ Pipeline implementation based on [n3534][0]. 
 This preview is a supplement of a GSoC 2014 proposal to Boost.
-
+The project also have an [example documentation][1], generated using quickbook.
+The [submitted proposal][2] is publicly available to review and comment.
 
 Example
 -------
@@ -37,3 +38,5 @@ However, there are examples and tests to be build:
     bjam toolset=gcc # or clang
 
 [0]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html
+[1]: http://erenon.hu/pipeline/
+[2]: https://gist.github.com/erenon/9537711
