@@ -33,7 +33,7 @@ constexpr T identity(const T& t)
  * Creates a segment operating on `container`.
  */
 template <typename Container>
-segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
+one_one_segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
 from(Container& container)
 {
   typedef typename Container::value_type value_type;
@@ -41,7 +41,7 @@ from(Container& container)
 
   c_range_reader range(container.begin(), container.end());
 
-  return segment<c_range_reader, value_type>(
+  return one_one_segment<c_range_reader, value_type>(
     range,
     std::function<value_type(value_type)>(&identity<value_type>)
   );
@@ -51,7 +51,7 @@ from(Container& container)
  * Creates a segment operating on a range.
  */
 template <typename Iterator>
-segment<detail::range_reader<Iterator>, typename Iterator::value_type>
+one_one_segment<detail::range_reader<Iterator>, typename Iterator::value_type>
 from(const Iterator& begin, const Iterator& end)
 {
   typedef typename Iterator::value_type value_type;
@@ -59,7 +59,7 @@ from(const Iterator& begin, const Iterator& end)
 
   c_range_reader range(begin, end);
 
-  return segment<c_range_reader, value_type>(
+  return one_one_segment<c_range_reader, value_type>(
     range,
     std::function<value_type(value_type)>(&identity<value_type>)
   );

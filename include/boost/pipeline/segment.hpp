@@ -22,6 +22,16 @@
 namespace boost {
 namespace pipeline {
 
+// forward declarations
+
+template <typename Parent, typename Output>
+class one_one_segment;
+
+template <typename Parent, typename Output>
+class one_n_segment;
+
+// end forward declarations
+
 /**
  * Represents a series of connected operations.
  *
@@ -38,7 +48,7 @@ namespace pipeline {
  *  - Output: type of emitted entries
  */
 template <typename Parent, typename Output>
-class segment
+class basic_segment
 {
 public:
   typedef typename std::remove_reference<
@@ -46,18 +56,36 @@ public:
   >::type input_type;
 
   typedef Output value_type;
-  typedef std::function<value_type(const input_type&)> function_type;
 
   /**
    * Creates a new segment by concatenating `function` after `parent`.
    *
    * Parent and function_type must be copy constructible
    */
-  segment(
+  basic_segment(const Parent& parent)
+    :_parent(parent)
+  {}
+
+protected:
+  Parent _parent;          /**< parent segment, provider of input */
+};
+
+template <typename Parent, typename Output>
+class one_one_segment : public basic_segment<Parent, Output>
+{
+  typedef basic_segment<Parent, Output> base_segment;
+
+public:
+  typedef typename base_segment::value_type value_type;
+  typedef typename base_segment::input_type input_type;
+
+  typedef std::function<value_type(const input_type&)> function_type;
+
+  one_one_segment(
     const Parent& parent,
     const function_type& function
   )
-    :_parent(parent),
+    :base_segment(parent),
      _function(function)
   {}
 
@@ -67,11 +95,32 @@ public:
    * Function must be copy constructible. The Output template argument
    * of the returned segment is deduced from the return type of `function`.
    */
-  template<typename Function>
+  template <typename Function>
   auto operator|(const Function& function)
-    -> segment<decltype(*this), decltype(function(std::declval<value_type>()))>
+    -> one_one_segment<decltype(*this), decltype(function(std::declval<value_type>()))>
   {
-    return segment<decltype(*this), decltype(function(std::declval<value_type>()))>(
+    return one_one_segment<decltype(*this), decltype(function(std::declval<value_type>()))>(
+      *this,
+      function
+    );
+  }
+
+  // TODO take care of std::bind
+//  template <typename Function>
+//  auto operator|(const Function& function)
+//    -> one_n_segment<decltype(*this), typename Function::result_type>
+//  {
+//    return one_n_segment<decltype(*this), typename Function::result_type>(
+//      *this,
+//      function
+//    );
+//  }
+
+  template <typename FInput, typename FOutputIt>
+  auto operator|(void function(FInput, FOutputIt&))
+    -> one_n_segment<decltype(*this), FOutputIt>
+  {
+    return one_n_segment<decltype(*this), FOutputIt>(
       *this,
       function
     );
@@ -90,7 +139,7 @@ public:
     std::vector<input_type> input;
     auto parent_out_it = std::back_inserter(input);
 
-    _parent.run(parent_out_it);
+    base_segment::_parent.run(parent_out_it);
 
     for (auto& input_item : input)
     {
@@ -100,7 +149,66 @@ public:
   }
 
 private:
-  Parent _parent;          /**< parent segment, provider of input */
+  function_type _function; /**< transformation function of input */
+};
+
+template <typename Parent, typename OutputIt>
+class one_n_segment : public basic_segment<Parent, typename OutputIt::container_type::value_type>
+{
+  typedef basic_segment<Parent, typename OutputIt::container_type::value_type> base_segment;
+
+public:
+  typedef typename base_segment::value_type value_type;
+  typedef typename base_segment::input_type input_type;
+
+  typedef std::function<void(const input_type&, OutputIt&)> function_type;
+
+  one_n_segment(
+    const Parent& parent,
+    const function_type& function
+  )
+    :base_segment(parent),
+     _function(function)
+  {}
+
+  template <typename Function>
+  auto operator|(const Function& function)
+    -> one_one_segment<decltype(*this), decltype(function(std::declval<value_type>()))>
+  {
+    return one_one_segment<decltype(*this), decltype(function(std::declval<value_type>()))>(
+      *this,
+      function
+    );
+  }
+
+  template <typename FInput, typename FOutputIt>
+  auto operator|(void function(FInput, FOutputIt&))
+    -> one_n_segment<decltype(*this), FOutputIt>
+  {
+    return one_n_segment<decltype(*this), FOutputIt>(
+      *this,
+      function
+    );
+  }
+
+  void run(OutputIt out_it)
+  {
+    typedef typename std::decay<
+      typename function_type::second_argument_type
+    >::type::container_type input_container;
+
+    input_container input;
+    auto parent_out_it = std::back_inserter(input);
+
+    base_segment::_parent.run(parent_out_it);
+
+    for (auto& input_item : input)
+    {
+      _function(input_item, out_it);
+    }
+  }
+
+private:
   function_type _function; /**< transformation function of input */
 };
 

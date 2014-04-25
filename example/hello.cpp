@@ -4,6 +4,7 @@
 #include <functional>
 #include <iterator>
 #include <iostream>
+#include <deque>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -23,6 +24,21 @@ std::string grep(const std::string& re, const std::string& item)
     return "no match";
   }
 }
+
+//void grep(
+//  const std::string& re,
+//  const std::string& item,
+//  std::back_insert_iterator<std::deque<std::string>>& it
+//)
+//{
+//  std::regex regex(re);
+//
+//  if (std::regex_match(item, regex))
+//  {
+//    *it = item;
+//    ++it;
+//  }
+//}
 
 std::string trim(const std::string& item)
 {
