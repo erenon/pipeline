@@ -28,26 +28,48 @@ class capture
     {
       return "std::size_t";
     }
+
     if (idx == std::type_index(typeid(std::string)))
     {
       return "std::string";
     }
+
     if (idx == std::type_index(typeid(void)))
     {
       return "void";
     }
+
     if (idx == std::type_index(typeid(boost::pipeline::queue<std::size_t>)))
     {
       return "boost::pipeline::queue<std::size_t>";
     }
+
+    if (idx == std::type_index(typeid(boost::pipeline::queue_front<std::size_t>)))
+    {
+      return "boost::pipeline::queue_front<std::size_t>";
+    }
+
+    if (idx == std::type_index(typeid(boost::pipeline::queue_back<std::size_t>)))
+    {
+      return "boost::pipeline::queue_back<std::size_t>";
+    }
+
     if (idx == std::type_index(typeid(boost::pipeline::queue<std::string>)))
     {
       return "boost::pipeline::queue<std::string>";
     }
-    else
+
+    if (idx == std::type_index(typeid(boost::pipeline::queue_front<std::string>)))
     {
-      return idx.name();
+      return "boost::pipeline::queue_front<std::string>";
     }
+
+    if (idx == std::type_index(typeid(boost::pipeline::queue_back<std::string>)))
+    {
+      return "boost::pipeline::queue_back<std::string>";
+    }
+
+    return idx.name();
   }
 protected:
   template <typename R, typename A, typename B>
@@ -151,7 +173,7 @@ std::size_t len1(const std::string& str)
   return str.size();
 }
 
-void len2(const std::string& str, boost::pipeline::queue<std::size_t>& out)
+void len2(const std::string& str, boost::pipeline::queue_front<std::size_t>& out)
 {
   auto len = str.size();
   if (len >= 3)
@@ -161,8 +183,8 @@ void len2(const std::string& str, boost::pipeline::queue<std::size_t>& out)
 }
 
 void len3(
-  const boost::pipeline::queue<std::string>& in,
-  boost::pipeline::queue<std::size_t>& out
+  const boost::pipeline::queue_back<std::string>& in,
+  boost::pipeline::queue_front<std::size_t>& out
 )
 {
   for (const auto& str : in)
@@ -191,12 +213,14 @@ BOOST_AUTO_TEST_CASE(SegmentCaptureStdFunction)
   auto f1 = std::function<std::size_t(const std::string&)>(len1);
   smt.capture(f1);
 
-  auto f2 = std::function<void(const std::string&, boost::pipeline::queue<std::size_t>&)>(len2);
+  auto f2 = std::function<
+    void(const std::string&, boost::pipeline::queue_front<std::size_t>&)
+  >(len2);
   smt.capture(f2);
 
   auto f3 = std::function<void(
-    const boost::pipeline::queue<std::string>& in,
-    boost::pipeline::queue<std::size_t>& out
+    const boost::pipeline::queue_back<std::string>& in,
+    boost::pipeline::queue_front<std::size_t>& out
   )>(len3);
   smt.capture(f3);
 }
@@ -210,13 +234,17 @@ BOOST_AUTO_TEST_CASE(SegmentCaptureLambda)
   smt.capture([](const std::string& str) { return str.size(); });
   smt.capture([](const std::string& str) mutable { return str.size(); });
 
-  smt.capture([](const std::string& str, boost::pipeline::queue<std::size_t>& out)
+  smt.capture([](const std::string& str, boost::pipeline::queue_front<std::size_t>& out)
     {
       out.push_back(str.size());
     }
   );
 
-  smt.capture([](const boost::pipeline::queue<std::string>& in, boost::pipeline::queue<std::size_t>& out)
+  smt.capture(
+    [](
+      const boost::pipeline::queue_back<std::string>& in,
+      boost::pipeline::queue_front<std::size_t>& out
+    )
     {
       for (const auto& str : in)
       {
@@ -278,7 +306,7 @@ class bind_capture : private capture
       typename std::enable_if<std::is_same<
         R1,
         decltype(std::declval<Bind1>()(
-          std::declval<boost::pipeline::queue<Value>&>()
+          std::declval<boost::pipeline::queue_back<Value>&>()
         ))
       >::value, int>::type = 0
     >
@@ -308,14 +336,14 @@ class bind_capture : private capture
       R,
       decltype(std::declval<Bind>()(
         std::declval<Value>(),
-        std::declval<boost::pipeline::queue<R>&>()
+        std::declval<boost::pipeline::queue_front<R>&>()
       ))
     >::value
   && ! is_one_one_trafo<Bind, R>::value
   >::type
   captureCallOpTemplate()
   {
-    printCapture<R, Value, boost::pipeline::queue<R>&>();
+    printCapture<R, Value, boost::pipeline::queue_front<R>&>();
   }
 
   // operator() template, N-1
@@ -325,7 +353,7 @@ class bind_capture : private capture
   >::type
   captureCallOpTemplate()
   {
-    printCapture<R, boost::pipeline::queue<Value>&, void>();
+    printCapture<R, boost::pipeline::queue_back<Value>&, void>();
   }
 
   // operator() template, N-M
@@ -334,15 +362,19 @@ class bind_capture : private capture
     std::is_same<
       R,
       decltype(std::declval<Bind>()(
-        std::declval<boost::pipeline::queue<Value>&>(),
-        std::declval<boost::pipeline::queue<R>&>()
+        std::declval<boost::pipeline::queue_back<Value>&>(),
+        std::declval<boost::pipeline::queue_front<R>&>()
       ))
     >::value
   && ! is_n_one_trafo<Bind, R>::value
   >::type
   captureCallOpTemplate()
   {
-    printCapture<R, boost::pipeline::queue<Value>&, boost::pipeline::queue<R>&>();
+    printCapture<
+      R,
+      boost::pipeline::queue_front<Value>&,
+      boost::pipeline::queue_back<R>&
+    >();
   }
 
 public:
@@ -364,7 +396,7 @@ std::size_t len_ntimes(std::size_t n, const std::string& str)
 std::size_t len_min(
   std::size_t min,
   const std::string& str,
-  boost::pipeline::queue<std::size_t>& out
+  boost::pipeline::queue_front<std::size_t>& out
 )
 {
   auto len = str.size();
@@ -378,7 +410,7 @@ std::size_t len_min(
 
 std::size_t aggr_len_min(
   std::size_t min,
-  boost::pipeline::queue<std::string>& in
+  boost::pipeline::queue_back<std::string>& in
 )
 {
   std::size_t out = 0;
@@ -395,8 +427,8 @@ std::size_t aggr_len_min(
 
 std::size_t len_min_ntimes(
   std::size_t min,
-  boost::pipeline::queue<std::string>& in,
-  boost::pipeline::queue<std::size_t>& out
+  boost::pipeline::queue_back<std::string>& in,
+  boost::pipeline::queue_front<std::size_t>& out
 )
 {
   for (const auto& str : in)

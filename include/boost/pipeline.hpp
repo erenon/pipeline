@@ -14,5 +14,6 @@
 #define BOOST_PIPELINE_HPP
 
 #include <boost/pipeline/pipeline.hpp>
+#include <boost/pipeline/queue.hpp>
 
 #endif // BOOST_PIPELINE_HPP

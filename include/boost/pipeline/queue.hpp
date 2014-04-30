@@ -21,6 +21,12 @@ namespace pipeline {
 template <typename T>
 using queue = std::deque<T>;
 
+template <typename T>
+using queue_back = std::deque<T>;
+
+template <typename T>
+using queue_front = std::deque<T>;
+
 } // namespace pipeline
 } // namespace boost
 
