@@ -38,7 +38,6 @@ rule pipeline-test ( name : includes * )
 
 alias pipline-test-suite :
   [ pipeline-test segment_test ]
-  [ pipeline-test segment_capture ]
   [ pipeline-test detail/connector_test ]
   [ pipeline-test detail/range_reader_test ]
   ; 
