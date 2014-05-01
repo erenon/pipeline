@@ -26,10 +26,7 @@ BOOST_AUTO_TEST_CASE(RangeReaderVectorTest)
 
   range_reader<std::vector<int>::iterator> range(nums.begin(), nums.end());
 
-  std::vector<int> nums_out;
-  auto out_it = std::back_inserter(nums_out);
-
-  range.run(out_it);
+  auto nums_out = range.run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);
@@ -45,8 +42,7 @@ BOOST_AUTO_TEST_CASE(RangeReaderIntArrayTest)
 
   range_reader<int*> range(nums, nums + sizeof(nums)/sizeof(int));
 
-  int nums_out[] = {-1, -1, -1, -1};
-  range.run(nums_out);
+  auto nums_out = range.run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);

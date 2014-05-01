@@ -16,6 +16,8 @@
 #include <type_traits>
 #include <algorithm>
 
+#include <boost/pipeline/queue.hpp>
+
 namespace boost {
 namespace pipeline {
 namespace detail {
@@ -29,17 +31,23 @@ template <typename Iterator>
 class range_reader
 {
 public:
-  typedef decltype(*std::declval<Iterator>()) value_type;
+  typedef typename std::remove_reference<
+    decltype(*std::declval<Iterator>())
+  >::type value_type;
 
   range_reader(const Iterator& begin, const Iterator& end)
     :_current(begin),
      _end(end)
   {}
 
-  template <typename OutputIt>
-  void run(OutputIt output_it)
+  queue_back<value_type> run()
   {
+    queue<value_type> q;
+
+    auto output_it = std::back_inserter(q);
     std::copy(_current, _end, output_it);
+
+    return q;
   }
 
 private:
