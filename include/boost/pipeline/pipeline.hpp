@@ -15,54 +15,33 @@
 
 #include <boost/pipeline/segment.hpp>
 #include <boost/pipeline/detail/range_reader.hpp>
+#include <boost/pipeline/detail/operator.hpp>
 
 namespace boost {
 namespace pipeline {
 
-namespace {
-
-template <typename T>
-constexpr T identity(const T& t)
-{
-  return t;
-}
-
-} // namespace
-
 /**
- * Creates a segment operating on `container`.
+ * Creates a range_reader operating on `container`.
  */
 template <typename Container>
-one_one_segment<detail::range_reader<typename Container::iterator>, typename Container::value_type>
+detail::range_reader<typename Container::iterator>
 from(Container& container)
 {
-  typedef typename Container::value_type value_type;
   typedef detail::range_reader<typename Container::iterator> c_range_reader;
 
-  c_range_reader range(container.begin(), container.end());
-
-  return one_one_segment<c_range_reader, value_type>(
-    range,
-    std::function<value_type(value_type)>(&identity<value_type>)
-  );
+  return c_range_reader(container.begin(), container.end());
 }
 
 /**
- * Creates a segment operating on a range.
+ * Creates a range_reader operating on a range.
  */
 template <typename Iterator>
-one_one_segment<detail::range_reader<Iterator>, typename Iterator::value_type>
+detail::range_reader<Iterator>
 from(const Iterator& begin, const Iterator& end)
 {
-  typedef typename Iterator::value_type value_type;
   typedef detail::range_reader<Iterator> c_range_reader;
 
-  c_range_reader range(begin, end);
-
-  return one_one_segment<c_range_reader, value_type>(
-    range,
-    std::function<value_type(value_type)>(&identity<value_type>)
-  );
+  return c_range_reader(begin, end);
 }
 
 } // namespace pipeline
