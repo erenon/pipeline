@@ -44,6 +44,8 @@ using not_queue_back = typename std::enable_if<
 template <typename Plan, typename Trafo>
 class connector
 {
+  struct invalid_trafo {};
+
   typedef typename Plan::value_type input;
 
   template <typename Q>
@@ -96,9 +98,16 @@ class connector
     -> typename bind_connector<Plan, Bind>::type
   ;
 
-//  static invalid_transformation connect(...);
+  template <typename>
+  static invalid_trafo connect(...);
+
 public:
   typedef decltype(connect(std::declval<Trafo>())) type;
+
+  static_assert(
+    ! std::is_same<type, invalid_trafo>::value,
+    "Invalid transformation"
+  );
 };
 
 template <typename Plan, typename Callable>
