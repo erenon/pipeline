@@ -10,35 +10,21 @@
 
 #include <boost/pipeline.hpp>
 
-
-std::string grep(const std::string& re, const std::string& item)
+std::string grep(
+  const std::string& re,
+  const std::string& item,
+  boost::pipeline::queue<std::string>& output
+)
 {
   std::regex regex(re);
 
   if (std::regex_match(item, regex))
   {
-    return item;
+    output.push_back(item);
   }
-  else
-  {
-    return "no match";
-  }
-}
 
-//void grep(
-//  const std::string& re,
-//  const std::string& item,
-//  std::back_insert_iterator<std::deque<std::string>>& it
-//)
-//{
-//  std::regex regex(re);
-//
-//  if (std::regex_match(item, regex))
-//  {
-//    *it = item;
-//    ++it;
-//  }
-//}
+  return item;
+}
 
 std::string trim(const std::string& item)
 {
@@ -47,6 +33,8 @@ std::string trim(const std::string& item)
 
 int main()
 {
+  using namespace std::placeholders; // _1 and _2
+
   std::vector<std::string> input = {
     "Error: foobar",
     " Warning: barbaz",
@@ -54,18 +42,16 @@ int main()
     "\tError: abc"
   };
 
-  auto grep_error = std::bind(grep, "Error.*", std::placeholders::_1);
-
-  std::vector<std::string> output;
-  auto out_it = std::back_inserter(output);
+  auto grep_error = std::bind(grep, "Error.*", _1, _2);
 
   // boost::pipeline::from(input.begin(), input.end()) also works
 
+  auto output =
   (boost::pipeline::from(input)
     | trim
     | grep_error
     | [] (const std::string& item) { return "->" + item; }
-  ).run(out_it);
+  ).run();
 
   for (auto& out_item : output)
   {
