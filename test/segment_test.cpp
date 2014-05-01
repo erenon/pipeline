@@ -11,7 +11,6 @@
  */
 
 #include <vector>
-#include <iterator>
 #include <functional>
 #include <cstdlib>
 #include <deque>
@@ -35,16 +34,14 @@ BOOST_AUTO_TEST_CASE(SegmentTest)
 {
   std::vector<int> nums = {0, 1, 2, 3};
 
-  std::vector<int> nums_out;
-  auto out_it = std::back_inserter(nums_out);
-
   auto add_2 = std::bind(add, 2, std::placeholders::_1);
 
+  auto nums_out =
   (boost::pipeline::from(nums)
     | twice
     | add_2
     | [] (const int& input) { return 10 * input; }
-  ).run(out_it);
+  ).run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 20);
   BOOST_CHECK_EQUAL(nums_out[1], 40);
@@ -56,11 +53,10 @@ BOOST_AUTO_TEST_CASE(SegmentPreallocTest)
 {
   std::vector<int> nums = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
-  std::vector<int> nums_out(10, -1);
-
+  auto nums_out =
   (boost::pipeline::from(nums)
     | twice
-  ).run(nums_out.begin());
+  ).run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 2);
@@ -77,11 +73,11 @@ BOOST_AUTO_TEST_CASE(SegmentPreallocTest)
 BOOST_AUTO_TEST_CASE(SegmentTypeCrossing)
 {
   std::vector<const char*> nums{{"0"}, {"1"}, {"2"}, {"3"}, {"4"}};
-  std::vector<int> nums_out(5, -1);
 
+  auto nums_out =
   (boost::pipeline::from(nums)
     | atoi
-  ).run(nums_out.begin());
+  ).run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);
@@ -92,25 +88,23 @@ BOOST_AUTO_TEST_CASE(SegmentTypeCrossing)
 
 void keep_and_twice(
   const int& item,
-  std::back_insert_iterator<std::vector<int>>& it
+  boost::pipeline::queue_front<int>& out
 ) {
-  *it = item;
-  ++it;
-  *it = item * 2;
-  ++it;
+  out.push_back(item);
+  out.push_back(item * 2);
 }
 
 BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
 {
   std::vector<int> nums = {0, 1, 2, 3, 4};
-  std::vector<int> nums_out(10, -1);
 
   auto add_2 = std::bind(add, 2, std::placeholders::_1);
 
+  auto nums_out =
   (boost::pipeline::from(nums)
     | keep_and_twice
     | add_2
-  ).run(nums_out.begin());
+  ).run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 2);
   BOOST_CHECK_EQUAL(nums_out[1], 2);
@@ -124,36 +118,31 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
   BOOST_CHECK_EQUAL(nums_out[9], 10);
 }
 
-/*std::back_insert_iterator<std::deque<std::string>>*/
-void
-grep(
+void grep(
   const std::string& equals_to,
   const std::string& item,
-  std::back_insert_iterator<std::deque<std::string>>& it
+  boost::pipeline::queue_front<std::string>& out
 )
 {
   if (equals_to == item)
   {
-    *it = item;
-    ++it;
+    out.push_back(item);
   }
-
-  //return it;
 }
 
 BOOST_AUTO_TEST_CASE(SegmentOneToNTrafoBind)
 {
   std::deque<std::string> strs = {"a", "b", "a", "a", "c"};
-  std::deque<std::string> strs_out(5);
 
   std::string pattern("a");
 
   auto grepA = std::bind(grep, pattern,
     std::placeholders::_1, std::placeholders::_2);
 
+  auto strs_out =
   (boost::pipeline::from(strs)
-    | grep
-  ).run(strs_out.begin());
+    | grepA
+  ).run();
 
   BOOST_CHECK_EQUAL(strs_out[0], pattern);
   BOOST_CHECK_EQUAL(strs_out[1], pattern);
