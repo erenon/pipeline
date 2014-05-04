@@ -44,6 +44,7 @@ using not_queue_back = typename std::enable_if<
 template <typename Plan, typename Trafo>
 class connector
 {
+  // if no match found:
   struct invalid_trafo {};
 
   typedef typename Plan::value_type input;
@@ -74,13 +75,29 @@ class connector
   template <typename R, typename A, typename B, if_queue_back<A> = 0>
   static n_m_segment<Plan, typename std::remove_reference<B>::type::value_type, R> connect(R(function)(A, B));
 
+  // Check if Callable has operator()
+  template <typename Callable>
+  class is_callable
+  {
+    struct not_callable {};
+
+    template <typename Callable2>
+    static decltype(&Callable2::operator()) test(int);
+
+    template <typename Callable2>
+    static not_callable test(...);
+
+  public:
+    enum { value = ! std::is_same<not_callable, decltype(test<Callable>(0))>::value};
+  };
+
   //
   // Connect functor types which has operator() but not bind
   // (includes lambda expressions and std::function)
   //
 
   template <typename Callable, typename std::enable_if<
-         std::is_class<Callable>::value
+         is_callable<Callable>::value
     && ! std::is_bind_expression<Callable>::value
   ,int>::type = 0>
   static auto connect(const Callable& lambda)
@@ -98,7 +115,6 @@ class connector
     -> typename bind_connector<Plan, Bind>::type
   ;
 
-  template <typename>
   static invalid_trafo connect(...);
 
 public:
