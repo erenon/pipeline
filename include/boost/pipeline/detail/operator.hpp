@@ -13,7 +13,9 @@
 #ifndef BOOST_PIPELINE_OPERATOR_HPP
 #define BOOST_PIPELINE_OPERATOR_HPP
 
-#include <boost/pipeline/segment.hpp>
+#include <type_traits>
+
+#include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/range_reader.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 

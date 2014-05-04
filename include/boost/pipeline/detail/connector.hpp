@@ -15,7 +15,7 @@
 
 #include <type_traits>
 
-#include <boost/pipeline/segment.hpp>
+#include <boost/pipeline/detail/segment.hpp>
 
 namespace boost {
 namespace pipeline {

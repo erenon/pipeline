@@ -23,6 +23,7 @@
 
 namespace boost {
 namespace pipeline {
+namespace detail {
 
 /**
  * Represents a series of connected operations.
@@ -237,8 +238,7 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
-
-
+} // namespace detail
 } // namespace pipeline
 } // namespace boost
 
