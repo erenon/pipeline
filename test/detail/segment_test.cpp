@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(SegmentPreallocTest)
 
 BOOST_AUTO_TEST_CASE(SegmentTypeCrossing)
 {
-  std::vector<const char*> nums{{"0"}, {"1"}, {"2"}, {"3"}, {"4"}};
+  std::vector<const char*> nums{"0", "1", "2", "3", "4"};
 
   auto nums_out =
   (boost::pipeline::from(nums)

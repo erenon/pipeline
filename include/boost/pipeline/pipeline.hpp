@@ -18,6 +18,7 @@
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/range_reader.hpp>
 #include <boost/pipeline/detail/operator.hpp>
+#include <boost/pipeline/detail/open_segment.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -44,6 +45,31 @@ from(const Iterator& begin, const Iterator& end)
   typedef detail::range_reader<Iterator> c_range_reader;
 
   return c_range_reader(begin, end);
+}
+
+/**
+ * Creates on open_segment representing `function`
+ */
+template <typename Function, typename std::enable_if<
+  ! std::is_function<Function>::value
+,int>::type = 0>
+detail::open_segment<Function>
+make(const Function& function)
+{
+  return detail::open_segment<Function>(function);
+}
+
+/**
+ * Creates on open_segment representing `function`,
+ * when `function` is of a function type.
+ */
+template <typename Function, typename std::enable_if<
+  std::is_function<Function>::value
+,int>::type = 0>
+detail::open_segment<typename std::add_pointer<Function>::type>
+make(const Function& function)
+{
+  return detail::open_segment<typename std::add_pointer<Function>::type>(&function);
 }
 
 } // namespace pipeline

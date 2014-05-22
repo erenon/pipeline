@@ -55,6 +55,16 @@ private:
   Iterator _end;
 };
 
+//
+// is_range_reader predicate
+//
+
+template <typename NotRangeReader>
+struct is_range_reader : public std::false_type {};
+
+template <typename Iterator>
+struct is_range_reader<range_reader<Iterator>> : public std::true_type {};
+
 } // namespace detail
 } // namespace pipeline
 } // namespace boost

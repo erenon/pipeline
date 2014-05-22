@@ -238,6 +238,28 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
+//
+// is_segment predicate
+//
+
+template <typename NotSegment>
+struct is_segment : public std::false_type {};
+
+template <typename P, typename O>
+struct is_segment<basic_segment<P, O>> : public std::true_type {};
+
+template <typename P, typename O>
+struct is_segment<one_one_segment<P, O>> : public std::true_type {};
+
+template <typename P, typename O, typename R>
+struct is_segment<one_n_segment<P, O, R>> : public std::true_type {};
+
+template <typename P, typename O>
+struct is_segment<n_one_segment<P, O>> : public std::true_type {};
+
+template <typename P, typename O, typename R>
+struct is_segment<n_m_segment<P, O, R>> : public std::true_type {};
+
 } // namespace detail
 } // namespace pipeline
 } // namespace boost

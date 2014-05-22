@@ -16,6 +16,7 @@
 #include <type_traits>
 
 #include <boost/pipeline/detail/segment.hpp>
+#include <boost/pipeline/detail/open_segment.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -38,15 +39,15 @@ using not_queue_back = typename std::enable_if<
   ! std::is_same<typename std::decay<Q>::type, queue_back<Input>>::value
 ,int>::type;
 
+// if no match found:
+struct invalid_trafo {};
+
 /**
  * Connector
  */
 template <typename Plan, typename Trafo>
 class connector
 {
-  // if no match found:
-  struct invalid_trafo {};
-
   typedef typename Plan::value_type input;
 
   template <typename Q>
@@ -119,11 +120,6 @@ class connector
 
 public:
   typedef decltype(connect(std::declval<Trafo>())) type;
-
-  static_assert(
-    ! std::is_same<type, invalid_trafo>::value,
-    "Invalid transformation"
-  );
 };
 
 template <typename Plan, typename Callable>
