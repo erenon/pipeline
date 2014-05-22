@@ -5,3 +5,6 @@
 
 # ignore boost build resources
 bin/
+
+# ignore sandbox test
+test/sandbox.cpp
