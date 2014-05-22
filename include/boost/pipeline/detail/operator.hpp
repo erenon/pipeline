@@ -41,55 +41,22 @@ Result operator|(const range_reader<RangeIt>& range, const Function& f)
   return Result(range, f);
 }
 
-// TODO the following four with is_segment?
-
-// one_one_segment | trafo
-template <
-  typename Parent, typename Output, typename Function,
-  typename Result = typename connector<one_one_segment<Parent, Output>, Function>::type,
-  valid_connection<Result> = 0
->
-Result operator|(const one_one_segment<Parent, Output>& segment, const Function& f)
-{
-  return Result(segment, f);
-}
-
-// one_n_segment | trafo
-template <
-  typename Parent, typename Output,
-  typename R, typename Function,
-  typename Result = typename connector<one_n_segment<Parent, Output, R>, Function>::type,
-  valid_connection<Result> = 0
->
-Result operator|(const one_n_segment<Parent, Output, R>& segment, const Function& f)
-{
-  return Result(segment, f);
-}
-
-// n_one_segment | trafo
-template <
-  typename Parent, typename Output, typename Function,
-  typename Result = typename connector<n_one_segment<Parent, Output>, Function>::type,
-  valid_connection<Result> = 0
->
-Result operator|(const n_one_segment<Parent, Output>& segment, const Function& f)
-{
-  return Result(segment, f);
-}
-
-// n_m_segment | trafo
-template <typename Parent, typename Output, typename R, typename Function>
-auto operator|(const n_m_segment<Parent, Output, R>& segment, const Function& f)
- -> typename connector<n_m_segment<Parent, Output, R>, Function>::type
-{
-  typedef typename connector<n_m_segment<Parent, Output, R>, Function>::type result;
-  return result(segment, f);
-}
-
 template <typename Segment>
 using enable_if_segment = typename std::enable_if<
   is_segment<Segment>::value
 ,int>::type;
+
+// segment | transformation
+template <
+  typename Segment, typename Function,
+  enable_if_segment<Segment> = 0,
+  typename Result = typename connector<Segment, Function>::type,
+  valid_connection<Result> = 0
+>
+Result operator|(const Segment& segment, const Function& f)
+{
+  return Result(segment, f);
+}
 
 // segment | open_segment
 template <typename Segment, typename... Trafos, enable_if_segment<Segment> = 0>
