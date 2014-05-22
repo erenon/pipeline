@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace boost::pipeline;
+using namespace boost::pipeline::detail;
 using boost::pipeline::detail::connector;
 
 //#define BOOST_PIPELINE_TEST_DEBUG 1
