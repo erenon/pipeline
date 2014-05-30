@@ -10,8 +10,8 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#ifndef BOOST_PIPELINE_PIPELINE__HPP
-#define BOOST_PIPELINE_PIPELINE__HPP
+#ifndef BOOST_PIPELINE_PIPELINE_HPP
+#define BOOST_PIPELINE_PIPELINE_HPP
 
 #include <type_traits>
 
@@ -75,4 +75,4 @@ make(const Function& function)
 } // namespace pipeline
 } // namespace boost
 
-#endif // BOOST_PIPELINE_PIPELINE__HPP
+#endif // BOOST_PIPELINE_PIPELINE_HPP
