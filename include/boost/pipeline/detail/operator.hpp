@@ -16,7 +16,6 @@
 #include <type_traits>
 
 #include <boost/pipeline/detail/segment.hpp>
-#include <boost/pipeline/detail/range_reader.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
 
@@ -29,17 +28,6 @@ using valid_connection = typename std::enable_if<
   ! std::is_same<Connection, invalid_trafo>::value
 ,int>::type;
 
-
-// pipeline::from(input) | trafo
-template <
-  typename RangeIt, typename Function,
-  typename Result = typename connector<range_reader<RangeIt>, Function>::type,
-  valid_connection<Result> = 0
->
-Result operator|(const range_reader<RangeIt>& range, const Function& f)
-{
-  return Result(range, f);
-}
 
 template <typename Segment>
 using enable_if_segment = typename std::enable_if<
@@ -64,19 +52,6 @@ auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
   -> decltype(open_s.connect_to(segment))
 {
   return open_s.connect_to(segment);
-}
-
-template <typename RangeReader>
-using enable_if_range_reader = typename std::enable_if<
-  is_range_reader<RangeReader>::value
-,int>::type;
-
-// range_reader | open_segment
-template <typename RangeReader, typename... Trafos, enable_if_range_reader<RangeReader> = 0>
-auto operator|(const RangeReader& reader, const open_segment<Trafos...>& open_s)
-  -> decltype(open_s.connect_to(reader))
-{
-  return open_s.connect_to(reader);
 }
 
 } // namespace detail

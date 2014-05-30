@@ -16,7 +16,6 @@
 #include <type_traits>
 
 #include <boost/pipeline/detail/segment.hpp>
-#include <boost/pipeline/detail/range_reader.hpp>
 #include <boost/pipeline/detail/operator.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
 
@@ -24,27 +23,27 @@ namespace boost {
 namespace pipeline {
 
 /**
- * Creates a range_reader operating on `container`.
+ * Creates an input_segment operating on `container`.
  */
 template <typename Container>
-detail::range_reader<typename Container::iterator>
+detail::input_segment<typename Container::iterator>
 from(Container& container)
 {
-  typedef detail::range_reader<typename Container::iterator> c_range_reader;
+  typedef detail::input_segment<typename Container::iterator> c_input_segment;
 
-  return c_range_reader(container.begin(), container.end());
+  return c_input_segment(container.begin(), container.end());
 }
 
 /**
- * Creates a range_reader operating on a range.
+ * Creates an input_segment operating on a range.
  */
 template <typename Iterator>
-detail::range_reader<Iterator>
+detail::input_segment<Iterator>
 from(const Iterator& begin, const Iterator& end)
 {
-  typedef detail::range_reader<Iterator> c_range_reader;
+  typedef detail::input_segment<Iterator> range_input_segment;
 
-  return c_range_reader(begin, end);
+  return range_input_segment(begin, end);
 }
 
 /**

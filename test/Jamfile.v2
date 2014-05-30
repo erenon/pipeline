@@ -39,7 +39,6 @@ rule pipeline-test ( name : includes * )
 alias pipline-test-suite :
   [ pipeline-test detail/segment_test ]
   [ pipeline-test detail/connector_test ]
-  [ pipeline-test detail/range_reader_test ]
   [ pipeline-test detail/open_segment_test ]
   # [ pipeline-test sandbox ]
   ; 

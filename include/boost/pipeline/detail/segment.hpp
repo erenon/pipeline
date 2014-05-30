@@ -238,6 +238,32 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
+template <typename Iterator>
+class input_segment
+{
+public:
+  typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
+
+  input_segment(const Iterator& begin, const Iterator& end)
+    :_current(begin),
+     _end(end)
+  {}
+
+  queue_back<value_type> run()
+  {
+    queue<value_type> q;
+
+    auto output_it = std::back_inserter(q);
+    std::copy(_current, _end, output_it);
+
+    return q;
+  }
+
+private:
+  Iterator _current;
+  Iterator _end;
+};
+
 //
 // is_segment predicate
 //
@@ -259,6 +285,9 @@ struct is_segment<n_one_segment<P, O>> : public std::true_type {};
 
 template <typename P, typename O, typename R>
 struct is_segment<n_m_segment<P, O, R>> : public std::true_type {};
+
+template <typename I>
+struct is_segment<input_segment<I>> : public std::true_type {};
 
 } // namespace detail
 } // namespace pipeline
