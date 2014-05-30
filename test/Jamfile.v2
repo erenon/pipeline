@@ -18,7 +18,7 @@ alias pipeline
 project boost/pipeline/test
   : build-dir /var/tmp/pipeline/build/test
   : requirements
-  	<include>.
+    <include>.
     <library>pipeline
     <threading>multi
     <warnings>all
@@ -29,15 +29,20 @@ project boost/pipeline/test
     <toolset>clang:<cxxflags>-std=c++11
   ;
   
-lib boost_unit_test_framework : : <name>boost_unit_test_framework ;
+# Create an alias for the boost unit test framework. You don't need this
+# if you're using minimal or lightweight test.
+use-project /boost/test : $(BOOST_ROOT)/libs/test/build ;
+alias boost_unit_test_framework : /boost/test//boost_unit_test_framework ;
+#lib boost_unit_test_framework : : <name>boost_unit_test_framework ;
 
 rule pipeline-test ( name : includes * )
 {
   unit-test $(name) : $(name).cpp boost_unit_test_framework ;
 }
 
+#test-suite pipelines : 
 alias pipline-test-suite :
-  [ pipeline-test detail/segment_test ]
+  [ pipeline-test detail/segment_test  ]
   [ pipeline-test detail/connector_test ]
   [ pipeline-test detail/open_segment_test ]
   # [ pipeline-test sandbox ]
