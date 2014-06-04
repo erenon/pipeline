@@ -46,6 +46,18 @@ Result operator|(const Segment& segment, const Function& f)
   return Result(segment, f);
 }
 
+// segment | container
+template <
+  typename Segment, typename Container,
+  enable_if_segment<Segment> = 0,
+  typename Result = typename connector<Segment, Container>::type,
+  valid_connection<Result> = 0
+>
+Result operator|(const Segment& segment, Container& c)
+{
+  return Result(segment, c);
+}
+
 // segment | open_segment
 template <typename Segment, typename... Trafos, enable_if_segment<Segment> = 0>
 auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)

@@ -20,6 +20,7 @@
 #include <type_traits>
 
 #include <boost/pipeline/queue.hpp>
+#include <boost/pipeline/execution.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -262,6 +263,39 @@ public:
 private:
   Iterator _current;
   Iterator _end;
+};
+
+
+
+template <typename Container, typename Parent>
+class output_segment: public basic_segment<Parent, void>
+{
+  typedef basic_segment<Parent, void> base_segment;
+
+public:
+  output_segment(
+    const Parent& parent,
+    Container& container
+  )
+    :base_segment(parent),
+     _container(container)
+  {}
+
+  execution run()
+  {
+    auto in_queue = base_segment::_parent.run();
+    auto out_it = std::back_inserter(_container);
+
+    for (const auto& in_item : in_queue)
+    {
+      *out_it = in_item;
+    }
+
+    return execution{};
+  }
+
+private:
+  Container& _container;
 };
 
 //

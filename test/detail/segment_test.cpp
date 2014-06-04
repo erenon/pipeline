@@ -33,14 +33,15 @@ constexpr int add(const int& a, const int& b)
 BOOST_AUTO_TEST_CASE(SegmentTest)
 {
   std::vector<int> nums = {0, 1, 2, 3};
+  std::vector<int> nums_out;
 
   auto add_2 = std::bind(add, 2, std::placeholders::_1);
 
-  auto nums_out =
   (boost::pipeline::from(nums)
     | twice
     | add_2
     | [] (const int& input) { return 10 * input; }
+    | nums_out
   ).run();
 
   BOOST_CHECK_EQUAL(nums_out[0], 20);

@@ -14,6 +14,7 @@
 #define BOOST_PIPELINE_CONNECTOR_HPP
 
 #include <type_traits>
+#include <iterator>
 
 #include <boost/pipeline/detail/segment.hpp>
 
@@ -114,6 +115,37 @@ class connector
   static auto connect(const Bind& bind)
     -> typename bind_connector<Plan, Bind>::type
   ;
+
+  template <typename T, typename Container>
+  struct is_container
+  {
+    struct not_container;
+
+    template <typename Container2>
+    static std::back_insert_iterator<Container2> test(int);
+
+    template <typename>
+    static not_container test(...);
+
+    struct wrong_type;
+
+    template <typename Container2>
+    static typename Container2::value_type testType(int);
+
+    template <typename>
+    static wrong_type testType(...);
+
+  public:
+    enum { value =
+       ! std::is_same<not_container, decltype(test<Container>(0))>::value
+    &&   std::is_convertible<T, decltype(testType<Container>(0))>::value
+    };
+  };
+
+  template <typename Container, typename std::enable_if<
+    is_container<typename Plan::value_type, Container>::value
+  ,int>::type = 0>
+  static output_segment<Container, Plan> connect(Container container);
 
   static invalid_trafo connect(...);
 
