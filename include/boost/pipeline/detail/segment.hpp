@@ -181,13 +181,19 @@ public:
    * Runs the segment.
    *
    * Gets the output of the `_parent` segment,
-   * aggregates every entry into a single one
-   * using `_function`.
+   * and runs `_function` until queue is not closed.
    */
-  Output run()
+  queue_back<Output> run()
   {
     auto in_queue = base_segment::_parent.run();
-    return _function(in_queue);
+    queue_back<Output> out_queue;
+
+    while (!in_queue.empty())
+    {
+      out_queue.push_back(_function(in_queue));
+    }
+
+    return out_queue;
   }
 
 private:
@@ -264,8 +270,6 @@ private:
   Iterator _current;
   Iterator _end;
 };
-
-
 
 template <typename Container, typename Parent>
 class output_segment: public basic_segment<Parent, void>

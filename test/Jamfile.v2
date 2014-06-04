@@ -40,11 +40,10 @@ rule pipeline-test ( name : includes * )
   unit-test $(name) : $(name).cpp boost_unit_test_framework ;
 }
 
-#test-suite pipelines : 
 alias pipline-test-suite :
-  [ pipeline-test detail/segment_test  ]
+  [ pipeline-test detail/segment_test ]
   [ pipeline-test detail/connector_test ]
   [ pipeline-test detail/open_segment_test ]
+  [ pipeline-test google_pipeline_test ]
   # [ pipeline-test sandbox ]
   ; 
-	  
