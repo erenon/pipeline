@@ -10,8 +10,8 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#ifndef BOOST_PIPELINE_OPEN_SEGMENT_HPP
-#define BOOST_PIPELINE_OPEN_SEGMENT_HPP
+#ifndef BOOST_PIPELINE_DETAIL_OPEN_SEGMENT_HPP
+#define BOOST_PIPELINE_DETAIL_OPEN_SEGMENT_HPP
 
 #include <tuple>
 #include <type_traits>
@@ -119,4 +119,4 @@ private:
 } // namespace pipeline
 } // namespace boost
 
-#endif // BOOST_PIPELINE_OPEN_SEGMENT_HPP
+#endif // BOOST_PIPELINE_DETAIL_OPEN_SEGMENT_HPP

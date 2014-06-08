@@ -10,8 +10,8 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#ifndef BOOST_PIPELINE_OPERATOR_HPP
-#define BOOST_PIPELINE_OPERATOR_HPP
+#ifndef BOOST_PIPELINE_DETAIL_OPERATOR_HPP
+#define BOOST_PIPELINE_DETAIL_OPERATOR_HPP
 
 #include <type_traits>
 
@@ -70,4 +70,4 @@ auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
 } // namespace pipeline
 } // namespace boost
 
-#endif // BOOST_PIPELINE_OPERATOR_HPP
+#endif // BOOST_PIPELINE_DETAIL_OPERATOR_HPP

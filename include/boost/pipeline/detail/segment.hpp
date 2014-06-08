@@ -10,8 +10,8 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#ifndef BOOST_PIPELINE__HPP
-#define BOOST_PIPELINE__HPP
+#ifndef BOOST_PIPELINE_DETAIL_SEGMENT_HPP
+#define BOOST_PIPELINE_DETAIL_SEGMENT_HPP
 
 #include <iterator>
 #include <functional>
@@ -331,4 +331,4 @@ struct is_segment<input_segment<I>> : public std::true_type {};
 } // namespace pipeline
 } // namespace boost
 
-#endif // BOOST_PIPELINE__HPP
+#endif // BOOST_PIPELINE_DETAIL_SEGMENT_HPP

@@ -10,8 +10,8 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#ifndef BOOST_PIPELINE_CONNECTOR_HPP
-#define BOOST_PIPELINE_CONNECTOR_HPP
+#ifndef BOOST_PIPELINE_DETAIL_CONNECTOR_HPP
+#define BOOST_PIPELINE_DETAIL_CONNECTOR_HPP
 
 #include <type_traits>
 #include <iterator>
@@ -321,4 +321,4 @@ public:
 } // namespace pipeline
 } // namespace boost
 
-#endif // BOOST_PIPELINE_CONNECTOR_HPP
+#endif // BOOST_PIPELINE_DETAIL_CONNECTOR_HPP
