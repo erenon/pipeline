@@ -18,9 +18,12 @@
 #include <vector>
 #include <algorithm>
 #include <type_traits>
+#include <memory>
 
 #include <boost/pipeline/queue.hpp>
 #include <boost/pipeline/execution.hpp>
+#include <boost/pipeline/threading.hpp>
+#include <boost/pipeline/detail/log.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -256,19 +259,44 @@ public:
      _end(end)
   {}
 
-  queue_back<value_type> run()
+  queue_back<value_type> run(thread_pool& pool)
   {
-    queue<value_type> q;
+    auto queuePtr = std::make_shared<queue<value_type>>();
+    queue_back<value_type> qb(queuePtr);
 
-    auto output_it = std::back_inserter(q);
-    std::copy(_current, _end, output_it);
+    auto task = [this, &pool] (std::shared_ptr<queue<value_type>> queuePtr)
+    {
+      auto& q(*queuePtr);
 
-    return q;
+      while (_current != _end)
+      {
+        LOG("[PROD] Try push: %d", *_current);
+        auto status = q.try_push(*_current);
+        if (status == queue<value_type>::op_status::SUCCESS)
+        {
+          LOG("[PROD] Push Success : %d", *_current);
+          ++_current;
+        }
+        else
+        {
+          LOG("[PROD] Push Failure : %d", *_current);
+          pool.schedule_one_or_yield();
+        }
+      }
+
+      LOG0("[PROD] Closing queue");
+      q.close();
+    };
+
+    auto p_task = std::bind(task, queuePtr);
+    pool.submit(p_task);
+
+    return qb;
   }
 
 private:
   Iterator _current;
-  Iterator _end;
+  const Iterator _end;
 };
 
 template <typename Container, typename Parent>
@@ -285,17 +313,44 @@ public:
      _container(container)
   {}
 
-  execution run()
+  execution run(thread_pool& pool)
   {
-    auto in_queue = base_segment::_parent.run();
-    auto out_it = std::back_inserter(_container);
-
-    for (const auto& in_item : in_queue)
+    auto future = boost::async(pool, [this, &pool] (Parent& parent)
     {
-      *out_it = in_item;
-    }
+      auto qb = parent.run(pool);
+      auto out_it = std::back_inserter(_container);
 
-    return execution{};
+      while (true)
+      {
+        typedef decltype(qb) queue_back_t;
+        typedef typename queue_back_t::value_type entry_t;
+        typedef typename queue_back_t::op_status op_status;
+
+        entry_t entry;
+
+        LOG0("[CONS] Try pop");
+        auto status = qb.try_pop(entry);
+        if (status == op_status::SUCCESS)
+        {
+          LOG("[CONS] Entry popped: %d", entry);
+          *out_it = entry;
+        }
+        else if (status == op_status::CLOSED) // only if queue is empty
+        {
+          LOG0("[CONS] Stop, queue closed");
+          return true;
+        }
+        else // queue was empty but not closed, more entries may arrive
+        {
+          LOG0("[CONS] Yield, queue empty");
+          pool.schedule_one_or_yield();
+        }
+      }
+
+      return true;
+    }, std::ref(base_segment::_parent));
+
+    return execution(std::move(future));
   }
 
 private:
@@ -304,6 +359,8 @@ private:
 
 //
 // is_segment predicate
+// TODO rename to is_connectable_segment,
+// since output_segment is segment but not connectable
 //
 
 template <typename NotSegment>
