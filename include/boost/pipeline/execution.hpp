@@ -13,10 +13,25 @@
 #ifndef BOOST_PIPELINE_EXECUTION_HPP
 #define BOOST_PIPELINE_EXECUTION_HPP
 
+#include <boost/pipeline/queue.hpp>
+#include <boost/pipeline/threading.hpp>
+
 namespace boost {
 namespace pipeline {
 
-struct execution {};
+class execution
+{
+public:
+  execution(boost::future<bool>&& future)
+    :_future(std::move(future))
+  {}
+
+  bool is_done() { return _future.is_ready(); }
+  void wait()    { _future.wait(); }
+
+private:
+  boost::future<bool> _future;
+};
 
 } // namespace pipeline
 } // namespace boost
