@@ -15,5 +15,6 @@
 
 #include <boost/pipeline/pipeline.hpp>
 #include <boost/pipeline/queue.hpp>
+#include <boost/pipeline/threading.hpp>
 
 #endif // BOOST_PIPELINE_HPP
