@@ -22,15 +22,16 @@ namespace pipeline {
 class execution
 {
 public:
-  execution(boost::future<bool>&& future)
+  execution(std::future<bool>&& future)
     :_future(std::move(future))
   {}
 
-  bool is_done() { return _future.is_ready(); }
+  // TODO use wait_until
+//  bool is_done() { return _future.is_ready(); }
   void wait()    { _future.wait(); }
 
 private:
-  boost::future<bool> _future;
+  std::future<bool> _future;
 };
 
 } // namespace pipeline

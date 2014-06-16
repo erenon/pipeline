@@ -264,7 +264,7 @@ public:
     auto queuePtr = std::make_shared<queue<value_type>>();
     queue_back<value_type> qb(queuePtr);
 
-    auto task = [this, &pool] (std::shared_ptr<queue<value_type>> queuePtr)
+    auto task = [this] (std::shared_ptr<queue<value_type>> queuePtr) -> bool
     {
       auto& q(*queuePtr);
 
@@ -280,14 +280,17 @@ public:
         else
         {
           LOG("[PROD] Push Failure : %d", *_current);
-          pool.schedule_one_or_yield();
+          return false; // not finished
         }
       }
 
       LOG0("[PROD] Closing queue");
       q.close();
+
+      return true;
     };
 
+    // TODO avoid bind by capturing queuePtr
     auto p_task = std::bind(task, queuePtr);
     pool.submit(p_task);
 
@@ -315,45 +318,71 @@ public:
 
   execution run(thread_pool& pool)
   {
-    auto future = boost::async(pool, [this, &pool] (Parent& parent)
-    {
-      auto qb = parent.run(pool);
-      auto out_it = std::back_inserter(_container);
+    auto promise_ptr = std::make_shared<std::promise<bool>>();
+    auto future = promise_ptr->get_future();
+    auto queue_back = base_segment::_parent.run(pool);
+    auto out_it = std::back_inserter(_container);
 
-      while (true)
-      {
-        typedef decltype(qb) queue_back_t;
-        typedef typename queue_back_t::value_type entry_t;
-        typedef typename queue_back_t::op_status op_status;
+    Task task(promise_ptr, queue_back, out_it);
+    std::function<bool()> f_task(task);
 
-        entry_t entry;
-
-        LOG0("[CONS] Try pop");
-        auto status = qb.try_pop(entry);
-        if (status == op_status::SUCCESS)
-        {
-          LOG("[CONS] Entry popped: %d", entry);
-          *out_it = entry;
-        }
-        else if (status == op_status::CLOSED) // only if queue is empty
-        {
-          LOG0("[CONS] Stop, queue closed");
-          return true;
-        }
-        else // queue was empty but not closed, more entries may arrive
-        {
-          LOG0("[CONS] Yield, queue empty");
-          pool.schedule_one_or_yield();
-        }
-      }
-
-      return true;
-    }, std::ref(base_segment::_parent));
+    pool.submit(std::move(f_task));
 
     return execution(std::move(future));
   }
 
 private:
+  class Task
+  {
+  public:
+    typedef queue_back<typename Parent::value_type> queue_back_t;
+
+    Task(
+      const std::shared_ptr<std::promise<bool>>& promise_ptr,
+      const queue_back_t& queue_back,
+      const std::back_insert_iterator<Container>& out_it
+    )
+      :_promise_ptr(promise_ptr),
+       _queue_back(queue_back),
+       _out_it(out_it)
+    {}
+
+    bool operator()()
+    {
+      typedef typename queue_back_t::value_type entry_t;
+      typedef typename queue_back_t::op_status op_status;
+
+      while (true)
+      {
+        entry_t entry;
+
+        LOG0("[CONS] Try pop");
+        auto status = _queue_back.try_pop(entry);
+        if (status == op_status::SUCCESS)
+        {
+          LOG("[CONS] Entry popped: %d", entry);
+          *_out_it = entry;
+        }
+        else if (status == op_status::CLOSED) // only if queue is empty
+        {
+          LOG0("[CONS] Stop, queue closed");
+          _promise_ptr->set_value(true);
+          return true;
+        }
+        else // queue was empty but not closed, more entries may arrive
+        {
+          LOG0("[CONS] Yield, queue empty");
+          return false; // not finished
+        }
+      }
+    }
+
+  private:
+    std::shared_ptr<std::promise<bool>> _promise_ptr;
+    queue_back_t _queue_back;
+    std::back_insert_iterator<Container> _out_it;
+  };
+
   Container& _container;
 };
 

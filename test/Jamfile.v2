@@ -32,12 +32,12 @@ project boost/pipeline/test
 use-project /boost/test : $(BOOST_ROOT)/libs/test/build ;
 alias boost_unit_test_framework : /boost/test//boost_unit_test_framework ;
 
-use-project /boost/thread : $(BOOST_ROOT)/libs/thread/build ;
-alias boost_thread : /boost/thread//boost_thread ;
+# use-project /boost/thread : $(BOOST_ROOT)/libs/thread/build ;
+# alias boost_thread : /boost/thread//boost_thread ;
 
 rule pipeline-test ( name : includes * )
 {
-  unit-test $(name) : $(name).cpp boost_unit_test_framework boost_thread ;
+  unit-test $(name) : $(name).cpp boost_unit_test_framework ;
 }
 
 alias pipline-test-suite :

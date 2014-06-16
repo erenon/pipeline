@@ -35,15 +35,7 @@ constexpr int add(const int& a, const int& b)
 
 BOOST_AUTO_TEST_CASE(SegmentTest)
 {
-  std::vector<int> nums(10, 1);     /* (1) */
-  //std::vector<int> nums(1025, 1); /* (2) */
-
-  /*
-   * (1) works, (2) does not, because the input
-   * is longer than the queue capacity, thread
-   * executing from(nums) can't yield to
-   * 'nums_out' (output_segment)
-   */
+  std::vector<int> nums(1025, 1);
 
   int n(0);
   std::generate(nums.begin(), nums.end(), [&]{ return n++; });
