@@ -324,9 +324,7 @@ public:
     auto out_it = std::back_inserter(_container);
 
     Task task(promise_ptr, queue_back, out_it);
-    std::function<bool()> f_task(task);
-
-    pool.submit(std::move(f_task));
+    pool.submit(task);
 
     return execution(std::move(future));
   }
