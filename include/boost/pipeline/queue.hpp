@@ -51,10 +51,37 @@ public:
     if (!success)
     {
       return (_closed) ? op_status::CLOSED : op_status::FAILURE;
-                         // no more item    // buffer is empty
+                         // no more items    // buffer is empty
     }
 
     return op_status::SUCCESS;
+  }
+
+  op_status try_pop()
+  {
+    auto success = _buffer.pop();
+    if (!success)
+    {
+      return (_closed) ? op_status::CLOSED : op_status::FAILURE;
+                         // no more items    // buffer is empty
+    }
+
+    return op_status::SUCCESS;
+  }
+
+  bool empty() const
+  {
+    return _buffer.read_available() == 0;
+  }
+
+  bool full() const
+  {
+    return _buffer.write_available() == 0;
+  }
+
+  const T& front() const
+  {
+    return _buffer.front();
   }
 
   bool is_closed() const { return _closed; }
@@ -83,6 +110,10 @@ public:
   {
     return _queuePtr->try_push(item);
   }
+  bool full() const
+  {
+    return _queuePtr->full();
+  }
 
   void close() { _queuePtr->close(); }
 
@@ -106,7 +137,22 @@ public:
     return _queuePtr->try_pop(ret);
   }
 
-  bool is_closed() { return _queuePtr->is_closed(); }
+  op_status try_pop()
+  {
+    return _queuePtr->try_pop();
+  }
+
+  bool empty() const
+  {
+    return _queuePtr->empty();
+  }
+
+  const T& front() const
+  {
+    return _queuePtr->front();
+  }
+
+  bool is_closed() const { return _queuePtr->is_closed(); }
 
 private:
   queuePtr<T> _queuePtr;
