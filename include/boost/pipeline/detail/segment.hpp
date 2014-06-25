@@ -93,20 +93,77 @@ public:
    * transforms each item using `_function`
    * and feeds them into the returned queue.
    */
-  queue_back<Output> run()
+  queue_back<value_type> run(thread_pool& pool)
   {
-    auto in_queue = base_segment::_parent.run();
-    queue<Output> out_queue;
+    auto qb = base_segment::_parent.run(pool);
+    auto downstream_ptr = std::make_shared<queue<value_type>>();
+    queue_front<value_type> qf(downstream_ptr);
 
-    for (const auto& in_item : in_queue)
-    {
-      out_queue.push_back(_function(in_item));
-    }
+    Task task(qb, qf, _function);
 
-    return out_queue;
+    pool.submit(task);
+
+    return downstream_ptr;
   }
 
 private:
+  class Task
+  {
+  public:
+    typedef typename Parent::value_type in_entry;
+    typedef typename queue_back<in_entry>::op_status op_status;
+
+    Task(
+      const queue_back<in_entry>& queue_back,
+      const queue_front<value_type>& queue_front,
+      const function_type& function
+    )
+      :_queue_back(queue_back),
+       _queue_front(queue_front),
+       _function(function)
+    {}
+
+    bool operator()()
+    {
+      while (true)
+      {
+        if ( ! _queue_back.empty())
+        {
+          const auto& input = _queue_back.front();
+          const auto output = _function(input);
+          auto status = _queue_front.try_push(output);
+
+          if (status == op_status::SUCCESS)
+          {
+            _queue_back.try_pop();
+          }
+          else if (status == op_status::FAILURE)
+          {
+            // downstream queue is full, yield
+            return false;
+          }
+        }
+        else // upstream queue is empty
+        {
+          if (_queue_back.is_closed())
+          {
+            _queue_front.close();
+            return true; // task finished
+          }
+          else
+          {
+            return false; // yield
+          }
+        }
+      }
+    }
+
+  private:
+    queue_back<in_entry> _queue_back;
+    queue_front<value_type> _queue_front;
+    function_type _function;
+  };
+
   function_type _function; /**< transformation function of input */
 };
 
@@ -142,20 +199,62 @@ public:
    * queue to `_function`, it's the transformations
    * responsibility to feed the queue at will.
    */
-  queue_back<Output> run()
+  queue_back<Output> run(thread_pool& pool)
   {
-    auto in_queue = base_segment::_parent.run();
-    queue<Output> out_queue;
+    auto qb = base_segment::_parent.run(pool);
+    auto downstream_ptr = std::make_shared<queue<value_type>>();
+    queue_front<value_type> qf(downstream_ptr);
 
-    for (const auto& in_item : in_queue)
-    {
-      _function(in_item, out_queue);
-    }
+    Task task(qb, qf, _function);
 
-    return out_queue;
+    pool.submit(task);
+
+    return downstream_ptr;
   }
 
 private:
+  class Task
+  {
+  public:
+    Task(
+      const queue_back<in_entry>& queue_back,
+      const queue_front<value_type>& queue_front,
+      const function_type& function
+    )
+      :_queue_back(queue_back),
+       _queue_front(queue_front),
+       _function(function)
+    {}
+
+    bool operator()()
+    {
+      while (true)
+      {
+        if (_queue_back.is_closed() && _queue_back.empty())
+        {
+          _queue_front.close();
+          return true; // task finished
+        }
+
+        if ( ! _queue_back.empty() && ! _queue_front.full() )
+        {
+          const auto& input = _queue_back.front();
+          _function(input, _queue_front);
+          _queue_back.try_pop();
+        }
+        else
+        {
+          return false; // yield
+        }
+      }
+    }
+
+  private:
+    queue_back<in_entry> _queue_back;
+    queue_front<value_type> _queue_front;
+    function_type _function;
+  };
+
   function_type _function; /**< transformation function of input */
 };
 
@@ -186,20 +285,81 @@ public:
    * Gets the output of the `_parent` segment,
    * and runs `_function` until queue is not closed.
    */
-  queue_back<Output> run()
+  queue_back<Output> run(thread_pool& pool)
   {
-    auto in_queue = base_segment::_parent.run();
-    queue_back<Output> out_queue;
+    auto qb = base_segment::_parent.run(pool);
+    auto downstream_ptr = std::make_shared<queue<value_type>>();
+    queue_front<value_type> qf(downstream_ptr);
 
-    while (!in_queue.empty())
-    {
-      out_queue.push_back(_function(in_queue));
-    }
+    Task task(qb, qf, _function);
 
-    return out_queue;
+    pool.submit(task);
+
+    return downstream_ptr;
   }
 
 private:
+  class Task
+  {
+  public:
+    typedef typename Parent::value_type in_entry;
+    typedef typename queue_back<in_entry>::op_status op_status;
+
+    Task(
+      const queue_back<in_entry>& queue_back,
+      const queue_front<value_type>& queue_front,
+      const function_type& function
+    )
+      :_queue_back(queue_back),
+       _queue_front(queue_front),
+       _function(function)
+    {}
+
+    bool operator()()
+    {
+      while (true)
+      {
+        // try buffer
+        if (_has_buffered)
+        {
+          auto status = _queue_front.try_push(_buffer);
+          if (status == op_status::SUCCESS)
+          {
+            _has_buffered = false;
+          }
+          else
+          {
+            // downstream queue is still full
+            return false; // yield
+          }
+        }
+
+        auto output = _function(_queue_back);
+        auto status = _queue_front.try_push(_buffer);
+        if (status == op_status::FAILURE)
+        {
+          // downstream queue is full, buffer output
+          _has_buffered = true;
+          _buffer = output;
+          return false; // yield
+        }
+
+        if (_queue_back.is_closed() && _queue_back.empty())
+        {
+          _queue_front.close();
+          return true;
+        }
+      }
+    }
+
+  private:
+    queue_back<in_entry> _queue_back;
+    queue_front<value_type> _queue_front;
+    function_type _function;
+    bool _has_buffered = false;
+    value_type _buffer;
+  };
+
   function_type _function; /**< transformation function of input */
 };
 
@@ -264,7 +424,7 @@ public:
     auto queuePtr = std::make_shared<queue<value_type>>();
     queue_back<value_type> qb(queuePtr);
 
-    auto task = [this] (std::shared_ptr<queue<value_type>> queuePtr) -> bool
+    auto task = [this, queuePtr] () -> bool
     {
       auto& q(*queuePtr);
 
@@ -290,9 +450,7 @@ public:
       return true;
     };
 
-    // TODO avoid bind by capturing queuePtr
-    auto p_task = std::bind(task, queuePtr);
-    pool.submit(p_task);
+    pool.submit(task);
 
     return qb;
   }
