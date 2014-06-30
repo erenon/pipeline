@@ -20,6 +20,7 @@
 #define BOOST_TEST_MODULE OpenSegment
 #include <boost/test/unit_test.hpp>
 
+using namespace boost::pipeline;
 using namespace boost::pipeline::detail;
 
 int iidentity(const int a)
@@ -48,7 +49,7 @@ int not_equals_to(
 {
   if (item != filter)
   {
-    out.push_back(item);
+    out.try_push(item);
   }
 
   return item;
@@ -72,7 +73,7 @@ void if_multiple_of(
 {
   if (multiple % divisor == 0)
   {
-    out.push_back(multiple);
+    out.try_push(multiple);
   }
 }
 
@@ -86,12 +87,17 @@ BOOST_AUTO_TEST_CASE(SegmentOpen)
   auto plan3 = plan1 | plan2;
 
   std::vector<int> input{1, 2, 3, 4, 5, 6, 7, 8, 9};
+  std::vector<int> output;
+
   auto segment = boost::pipeline::from(input);
 
-  auto output =
-    (segment | plan1 | plan3).run();
+  thread_pool pool{1};
 
-  std::deque<int> expected{3,3,9,9};
+  auto exec =
+    (segment | plan1 | plan3 | output).run(pool);
+  exec.wait();
+
+  std::vector<int> expected{3,3,9,9};
 
   BOOST_CHECK(output == expected);
 }

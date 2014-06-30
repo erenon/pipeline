@@ -79,11 +79,17 @@ BOOST_AUTO_TEST_CASE(SegmentTestOneToOne)
 BOOST_AUTO_TEST_CASE(SegmentTypeCrossing)
 {
   std::vector<const char*> nums{"0", "1", "2", "3", "4"};
+  std::vector<int> nums_out;
 
-  auto nums_out =
+  thread_pool pool{1};
+
+  auto exec =
   (boost::pipeline::from(nums)
     | atoi
-  ).run();
+    | nums_out
+  ).run(pool);
+
+  exec.wait();
 
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);
