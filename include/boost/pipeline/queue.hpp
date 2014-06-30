@@ -20,61 +20,59 @@
 namespace boost {
 namespace pipeline {
 
+enum class queue_op_status { SUCCESS, FULL, EMPTY, CLOSED };
+
 template <typename T>
 class queue
 {
   typedef boost::lockfree::spsc_queue<T, boost::lockfree::capacity<1 << 10>> buffer;
 
 public:
-  enum class op_status { SUCCESS, FAILURE, CLOSED };
-
   typedef T value_type;
 
   queue() = default;
   queue(const queue&) = delete;
   queue& operator=(const queue&) = delete;
 
-  op_status try_push(const T& item)
+  queue_op_status try_push(const T& item)
   {
     auto success = _buffer.push(item);
     if (!success)
     {
-      return op_status::FAILURE; // buffer is full
+      return queue_op_status::FULL;
     }
 
-    return op_status::SUCCESS;
+    return queue_op_status::SUCCESS;
   }
 
-  op_status try_pop(T& ret)
+  queue_op_status try_pop(T& ret)
   {
     auto success = _buffer.pop(ret);
     if (!success)
     {
-      return (_closed) ? op_status::CLOSED : op_status::FAILURE;
-                         // no more items    // buffer is empty
+      return (_closed) ? queue_op_status::CLOSED : queue_op_status::EMPTY;
     }
 
-    return op_status::SUCCESS;
+    return queue_op_status::SUCCESS;
   }
 
-  op_status try_pop()
+  queue_op_status try_pop()
   {
     auto success = _buffer.pop();
     if (!success)
     {
-      return (_closed) ? op_status::CLOSED : op_status::FAILURE;
-                         // no more items    // buffer is empty
+      return (_closed) ? queue_op_status::CLOSED : queue_op_status::EMPTY;
     }
 
-    return op_status::SUCCESS;
+    return queue_op_status::SUCCESS;
   }
 
-  bool empty() const
+  bool is_empty() const
   {
     return _buffer.read_available() == 0;
   }
 
-  bool full() const
+  bool is_full() const
   {
     return _buffer.write_available() == 0;
   }
@@ -99,20 +97,19 @@ template <typename T>
 class queue_front
 {
 public:
-  typedef typename queue<T>::op_status op_status;
   typedef typename queue<T>::value_type value_type;
 
   queue_front(const queuePtr<T>& queuePtr)
     :_queuePtr(queuePtr)
   {}
 
-  op_status try_push(const T& item)
+  queue_op_status try_push(const T& item)
   {
     return _queuePtr->try_push(item);
   }
-  bool full() const
+  bool is_full() const
   {
-    return _queuePtr->full();
+    return _queuePtr->is_full();
   }
 
   void close() { _queuePtr->close(); }
@@ -125,26 +122,25 @@ template <typename T>
 class queue_back
 {
 public:
-  typedef typename queue<T>::op_status op_status;
   typedef typename queue<T>::value_type value_type;
 
   queue_back(const queuePtr<T>& queuePtr)
     :_queuePtr(queuePtr)
   {}
 
-  op_status try_pop(T& ret)
+  queue_op_status try_pop(T& ret)
   {
     return _queuePtr->try_pop(ret);
   }
 
-  op_status try_pop()
+  queue_op_status try_pop()
   {
     return _queuePtr->try_pop();
   }
 
-  bool empty() const
+  bool is_empty() const
   {
-    return _queuePtr->empty();
+    return _queuePtr->is_empty();
   }
 
   const T& front() const

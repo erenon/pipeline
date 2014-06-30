@@ -21,19 +21,21 @@ using namespace boost::pipeline;
 
 namespace std {
 
-std::ostream& operator<<(std::ostream& out, const queue<int>::op_status& st)
+std::ostream& operator<<(std::ostream& out, const queue_op_status& st)
 {
-  using status = queue<int>::op_status;
 
   switch (st)
   {
-  case status::SUCCESS:
+  case queue_op_status::SUCCESS:
     out << "SUCCESS";
     break;
-  case status::FAILURE:
-      out << "FAILURE";
+  case queue_op_status::FULL:
+      out << "FULL";
       break;
-  case status::CLOSED:
+  case queue_op_status::EMPTY:
+      out << "EMPTY";
+      break;
+  case queue_op_status::CLOSED:
       out << "CLOSED";
       break;
   }
@@ -44,19 +46,18 @@ std::ostream& operator<<(std::ostream& out, const queue<int>::op_status& st)
 
 BOOST_AUTO_TEST_CASE(InterfaceBasics)
 {
-  using status = queue<int>::op_status;
   queue<int> q;
 
   int v = 0;
 
-  status fail = q.try_pop(v);
-  BOOST_CHECK_EQUAL(fail, status::FAILURE);
+  queue_op_status empty = q.try_pop(v);
+  BOOST_CHECK_EQUAL(empty, queue_op_status::EMPTY);
 
-  status succ = q.try_push(1);
-  BOOST_CHECK_EQUAL(succ, status::SUCCESS);
+  queue_op_status succ = q.try_push(1);
+  BOOST_CHECK_EQUAL(succ, queue_op_status::SUCCESS);
 
   succ = q.try_pop(v);
-  BOOST_CHECK_EQUAL(succ, status::SUCCESS);
+  BOOST_CHECK_EQUAL(succ, queue_op_status::SUCCESS);
   BOOST_CHECK_EQUAL(v, 1);
 }
 
@@ -72,7 +73,6 @@ BOOST_AUTO_TEST_CASE(Close)
 
 BOOST_AUTO_TEST_CASE(FrontPop)
 {
-  using status = queue<int>::op_status;
   queue<int> q;
 
   q.try_push(1);
@@ -88,27 +88,25 @@ BOOST_AUTO_TEST_CASE(FrontPop)
   BOOST_CHECK_EQUAL(front, 2);
   q.try_pop();
 
-  status failure = q.try_pop();
-  BOOST_CHECK_EQUAL(failure, status::FAILURE);
+  queue_op_status empty = q.try_pop();
+  BOOST_CHECK_EQUAL(empty, queue_op_status::EMPTY);
 }
 
 BOOST_AUTO_TEST_CASE(EmptyFull)
 {
-  using status = queue<int>::op_status;
-
   queue<int> q;
-  BOOST_CHECK(q.empty());
-  BOOST_CHECK( ! q.full());
+  BOOST_CHECK(q.is_empty());
+  BOOST_CHECK( ! q.is_full());
 
-  while(status::SUCCESS == q.try_push(1))
+  while(queue_op_status::SUCCESS == q.try_push(1))
     /* nop */;
 
-  BOOST_CHECK( ! q.empty());
-  BOOST_CHECK(q.full());
+  BOOST_CHECK( ! q.is_empty());
+  BOOST_CHECK(q.is_full());
 
-  while(status::SUCCESS == q.try_pop())
+  while(queue_op_status::SUCCESS == q.try_pop())
     /* nop */;
 
-  BOOST_CHECK(q.empty());
-  BOOST_CHECK( ! q.full());
+  BOOST_CHECK(q.is_empty());
+  BOOST_CHECK( ! q.is_full());
 }

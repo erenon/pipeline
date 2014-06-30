@@ -111,7 +111,6 @@ private:
   {
   public:
     typedef typename Parent::value_type in_entry;
-    typedef typename queue_front<value_type>::op_status op_status;
 
     Task(
       const queue_back<in_entry>& queue_back,
@@ -127,17 +126,17 @@ private:
     {
       while (true)
       {
-        if ( ! _queue_back.empty())
+        if ( ! _queue_back.is_empty())
         {
           const auto& input = _queue_back.front();
           const auto output = _function(input);
           auto status = _queue_front.try_push(output);
 
-          if (status == op_status::SUCCESS)
+          if (status == queue_op_status::SUCCESS)
           {
             _queue_back.try_pop();
           }
-          else if (status == op_status::FAILURE)
+          else if (status == queue_op_status::FULL)
           {
             // downstream queue is full, yield
             return false;
@@ -232,13 +231,13 @@ private:
     {
       while (true)
       {
-        if (_queue_back.is_closed() && _queue_back.empty())
+        if (_queue_back.is_closed() && _queue_back.is_empty())
         {
           _queue_front.close();
           return true; // task finished
         }
 
-        if ( ! _queue_back.empty() && ! _queue_front.full() )
+        if ( ! _queue_back.is_empty() && ! _queue_front.is_full() )
         {
           const auto& input = _queue_back.front();
           _function(input, _queue_front);
@@ -305,7 +304,6 @@ private:
   {
   public:
     typedef typename Parent::value_type in_entry;
-    typedef typename queue_front<value_type>::op_status op_status;
 
     Task(
       const queue_back<in_entry>& queue_back,
@@ -325,7 +323,7 @@ private:
         if (_has_buffered)
         {
           auto status = _queue_front.try_push(_buffer);
-          if (status == op_status::SUCCESS)
+          if (status == queue_op_status::SUCCESS)
           {
             _has_buffered = false;
           }
@@ -338,7 +336,7 @@ private:
 
         auto output = _function(_queue_back);
         auto status = _queue_front.try_push(_buffer);
-        if (status == op_status::FAILURE)
+        if (status == queue_op_status::FULL)
         {
           // downstream queue is full, buffer output
           _has_buffered = true;
@@ -346,7 +344,7 @@ private:
           return false; // yield
         }
 
-        if (_queue_back.is_closed() && _queue_back.empty())
+        if (_queue_back.is_closed() && _queue_back.is_empty())
         {
           _queue_front.close();
           return true;
@@ -434,7 +432,7 @@ public:
       {
 //        LOG("[PROD] Try push: %d", *_current);
         auto status = q.try_push(*_current);
-        if (status == queue<value_type>::op_status::SUCCESS)
+        if (status == queue_op_status::SUCCESS)
         {
 //          LOG("[PROD] Push Success : %d", *_current);
           ++_current;
@@ -508,7 +506,6 @@ private:
     bool operator()()
     {
       typedef typename queue_back_t::value_type entry_t;
-      typedef typename queue_back_t::op_status op_status;
 
       while (true)
       {
@@ -516,12 +513,12 @@ private:
 
 //        LOG0("[CONS] Try pop");
         auto status = _queue_back.try_pop(entry);
-        if (status == op_status::SUCCESS)
+        if (status == queue_op_status::SUCCESS)
         {
 //          LOG("[CONS] Entry popped: %d", entry);
           *_out_it = entry;
         }
-        else if (status == op_status::CLOSED) // only if queue is empty
+        else if (status == queue_op_status::CLOSED) // only if queue is empty
         {
 //          LOG0("[CONS] Stop, queue closed");
           _promise_ptr->set_value(true);
