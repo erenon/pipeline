@@ -13,6 +13,8 @@
 #ifndef BOOST_PIPELINE_EXECUTION_HPP
 #define BOOST_PIPELINE_EXECUTION_HPP
 
+#include <chrono>
+
 #include <boost/pipeline/queue.hpp>
 #include <boost/pipeline/threading.hpp>
 
@@ -26,8 +28,11 @@ public:
     :_future(std::move(future))
   {}
 
-  // TODO use wait_until
-//  bool is_done() { return _future.is_ready(); }
+  bool is_done()
+  {
+    return _future.wait_for(std::chrono::microseconds(1)) == std::future_status::ready;
+  }
+
   void wait()    { _future.wait(); }
 
 private:
