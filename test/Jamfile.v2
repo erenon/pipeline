@@ -24,6 +24,7 @@ project boost/pipeline/test
     <warnings>all
     <link>shared:<define>BOOST_TEST_DYN_LINK
     <toolset>gcc:<cxxflags>-Wextra
+    <toolset>gcc:<cxxflags>-Werror
     <toolset>gcc:<cxxflags>-std=c++11
     <toolset>clang:<cxxflags>-Wextra
     <toolset>clang:<cxxflags>-std=c++11
@@ -44,7 +45,7 @@ alias pipline-test-suite :
   [ pipeline-test detail/segment_test ]
   [ pipeline-test detail/connector_test ]
   [ pipeline-test detail/open_segment_test ]
-  [ pipeline-test google_pipeline_test ]
+  #[ pipeline-test google_pipeline_test ]
   [ pipeline-test queue ]
   # [ pipeline-test sandbox ]
   ; 
