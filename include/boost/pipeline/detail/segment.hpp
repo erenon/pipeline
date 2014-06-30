@@ -111,7 +111,7 @@ private:
   {
   public:
     typedef typename Parent::value_type in_entry;
-    typedef typename queue_back<in_entry>::op_status op_status;
+    typedef typename queue_front<value_type>::op_status op_status;
 
     Task(
       const queue_back<in_entry>& queue_back,
@@ -215,6 +215,8 @@ public:
 private:
   class Task
   {
+    typedef typename Parent::value_type in_entry;
+
   public:
     Task(
       const queue_back<in_entry>& queue_back,
@@ -303,7 +305,7 @@ private:
   {
   public:
     typedef typename Parent::value_type in_entry;
-    typedef typename queue_back<in_entry>::op_status op_status;
+    typedef typename queue_front<value_type>::op_status op_status;
 
     Task(
       const queue_back<in_entry>& queue_back,
@@ -430,21 +432,21 @@ public:
 
       while (_current != _end)
       {
-        LOG("[PROD] Try push: %d", *_current);
+//        LOG("[PROD] Try push: %d", *_current);
         auto status = q.try_push(*_current);
         if (status == queue<value_type>::op_status::SUCCESS)
         {
-          LOG("[PROD] Push Success : %d", *_current);
+//          LOG("[PROD] Push Success : %d", *_current);
           ++_current;
         }
         else
         {
-          LOG("[PROD] Push Failure : %d", *_current);
+//          LOG("[PROD] Push Failure : %d", *_current);
           return false; // not finished
         }
       }
 
-      LOG0("[PROD] Closing queue");
+//      LOG0("[PROD] Closing queue");
       q.close();
 
       return true;
@@ -512,22 +514,22 @@ private:
       {
         entry_t entry;
 
-        LOG0("[CONS] Try pop");
+//        LOG0("[CONS] Try pop");
         auto status = _queue_back.try_pop(entry);
         if (status == op_status::SUCCESS)
         {
-          LOG("[CONS] Entry popped: %d", entry);
+//          LOG("[CONS] Entry popped: %d", entry);
           *_out_it = entry;
         }
         else if (status == op_status::CLOSED) // only if queue is empty
         {
-          LOG0("[CONS] Stop, queue closed");
+//          LOG0("[CONS] Stop, queue closed");
           _promise_ptr->set_value(true);
           return true;
         }
         else // queue was empty but not closed, more entries may arrive
         {
-          LOG0("[CONS] Yield, queue empty");
+//          LOG0("[CONS] Yield, queue empty");
           return false; // not finished
         }
       }
