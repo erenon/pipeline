@@ -8,3 +8,6 @@ bin/
 
 # ignore sandbox test
 test/sandbox.cpp
+
+# ignore ycm files
+.ycm_extra_conf.py*
