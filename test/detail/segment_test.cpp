@@ -102,6 +102,9 @@ void keep_and_twice(
   const int& item,
   boost::pipeline::queue_back<int>& out
 ) {
+  while (out.write_available() < 2)
+    /* spin */;
+
   out.try_push(item);
   out.try_push(item * 2);
 }
@@ -124,6 +127,7 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
 
   exec.wait();
 
+  BOOST_CHECK_EQUAL(nums_out.size(), 10);
   BOOST_CHECK_EQUAL(nums_out[0], 2);
   BOOST_CHECK_EQUAL(nums_out[1], 2);
   BOOST_CHECK_EQUAL(nums_out[2], 3);
@@ -136,6 +140,51 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
   BOOST_CHECK_EQUAL(nums_out[9], 10);
 }
 
+void sum_diff_prod(
+  boost::pipeline::queue_front<int>& in,
+  boost::pipeline::queue_back<int>& out
+)
+{
+  if (in.read_available() < 2 || out.write_available() < 3)
+  {
+    return; // yield
+  }
+
+  int a;
+  int b;
+
+  in.try_pop(a);
+  in.try_pop(b);
+
+  out.try_push(a+b);
+  out.try_push(a-b);
+  out.try_push(a*b);
+}
+
+BOOST_AUTO_TEST_CASE(SegmentNToMTrafo)
+{
+  std::vector<int> nums = {0, 1, 2, 3};
+  std::vector<int> nums_out;
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from(nums)
+    | sum_diff_prod
+    | nums_out
+  ).run(pool);
+
+  exec.wait();
+
+  BOOST_CHECK_EQUAL(nums_out.size(), 6);
+  BOOST_CHECK_EQUAL(nums_out[0], 1);
+  BOOST_CHECK_EQUAL(nums_out[1], -1);
+  BOOST_CHECK_EQUAL(nums_out[2], 0);
+  BOOST_CHECK_EQUAL(nums_out[3], 5);
+  BOOST_CHECK_EQUAL(nums_out[4], -1);
+  BOOST_CHECK_EQUAL(nums_out[5], 6);
+}
+
 //int sum_two(boost::pipeline::queue_front<int>& in)
 //{
 //}
@@ -143,35 +192,4 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
 //BOOST_AUTO_TEST_CASE(SegmentNToOneTrafo)
 //{
 //
-//}
-
-//void grep(
-//  const std::string& equals_to,
-//  const std::string& item,
-//  boost::pipeline::queue_back<std::string>& out
-//)
-//{
-//  if (equals_to == item)
-//  {
-//    out.push_back(item);
-//  }
-//}
-//
-//BOOST_AUTO_TEST_CASE(SegmentOneToNTrafoBind)
-//{
-//  std::deque<std::string> strs = {"a", "b", "a", "a", "c"};
-//
-//  std::string pattern("a");
-//
-//  auto grepA = std::bind(grep, pattern,
-//    std::placeholders::_1, std::placeholders::_2);
-//
-//  auto strs_out =
-//  (boost::pipeline::from(strs)
-//    | grepA
-//  ).run();
-//
-//  BOOST_CHECK_EQUAL(strs_out[0], pattern);
-//  BOOST_CHECK_EQUAL(strs_out[1], pattern);
-//  BOOST_CHECK_EQUAL(strs_out[2], pattern);
 //}

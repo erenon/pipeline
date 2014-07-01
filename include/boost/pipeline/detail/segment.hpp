@@ -394,17 +394,57 @@ public:
    * It's the transformations responsibility
    * to feed the queue at will.
    */
-  queue_front<Output> run()
+  queue_front<Output> run(thread_pool& pool)
   {
-    auto in_queue = base_segment::_parent.run();
-    queue<Output> out_queue;
+    auto qf = base_segment::_parent.run(pool);
+    auto downstream_ptr = std::make_shared<queue<value_type>>();
+    queue_back<value_type> qb(downstream_ptr);
 
-    _function(in_queue, out_queue);
+    Task task(qf, qb, _function);
 
-    return out_queue;
+    pool.submit(task);
+
+    return downstream_ptr;
   }
 
 private:
+  class Task
+  {
+  public:
+    typedef typename Parent::value_type in_entry;
+
+    Task(
+      const queue_front<in_entry>& queue_front,
+      const queue_back<value_type>& queue_back,
+      const function_type& function
+    )
+      :_queue_front(queue_front),
+       _queue_back(queue_back),
+       _function(function)
+    {}
+
+    bool operator()()
+    {
+      while (_queue_front.read_available())
+      {
+        _function(_queue_front, _queue_back);
+      }
+
+      if (_queue_front.is_closed() == false)
+      {
+        return false; // yield
+      }
+
+      _queue_back.close();
+      return true;
+    }
+
+  private:
+    queue_front<in_entry> _queue_front;
+    queue_back<value_type> _queue_back;
+    function_type _function;
+  };
+
   function_type _function; /**< transformation function of input */
 };
 
