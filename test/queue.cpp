@@ -110,3 +110,32 @@ BOOST_AUTO_TEST_CASE(EmptyFull)
   BOOST_CHECK(q.is_empty());
   BOOST_CHECK( ! q.is_full());
 }
+
+BOOST_AUTO_TEST_CASE(ReadWriteAvailable)
+{
+  queue<int> q;
+  size_t r = 0;
+  size_t w = 0;
+
+  r = q.read_available();
+  w = q.write_available();
+
+  const size_t sum = r + w;
+
+  q.try_push(1);
+  q.try_push(1);
+  q.try_push(1);
+
+  r = q.read_available();
+  w = q.write_available();
+
+  BOOST_CHECK_EQUAL(sum, r + w);
+
+  q.try_pop();
+  q.try_pop();
+
+  r = q.read_available();
+  w = q.write_available();
+
+  BOOST_CHECK_EQUAL(sum, r + w);
+}

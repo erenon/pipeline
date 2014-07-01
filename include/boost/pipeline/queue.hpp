@@ -77,6 +77,16 @@ public:
     return _buffer.write_available() == 0;
   }
 
+  size_t read_available() const
+  {
+    return _buffer.read_available();
+  }
+
+  size_t write_available() const
+  {
+    return _buffer.write_available();
+  }
+
   const T& front() const
   {
     return _buffer.front();
@@ -107,9 +117,15 @@ public:
   {
     return _queuePtr->try_push(item);
   }
+
   bool is_full() const
   {
     return _queuePtr->is_full();
+  }
+
+  size_t write_available() const
+  {
+    return _queuePtr->write_available();
   }
 
   void close() { _queuePtr->close(); }
@@ -141,6 +157,11 @@ public:
   bool is_empty() const
   {
     return _queuePtr->is_empty();
+  }
+
+  size_t read_available() const
+  {
+    return _queuePtr->read_available();
   }
 
   const T& front() const
