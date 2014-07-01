@@ -94,12 +94,12 @@ template <typename T>
 using queuePtr = std::shared_ptr<queue<T>>;
 
 template <typename T>
-class queue_front
+class queue_back
 {
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_front(const queuePtr<T>& queuePtr)
+  queue_back(const queuePtr<T>& queuePtr)
     :_queuePtr(queuePtr)
   {}
 
@@ -119,12 +119,12 @@ private:
 };
 
 template <typename T>
-class queue_back
+class queue_front
 {
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_back(const queuePtr<T>& queuePtr)
+  queue_front(const queuePtr<T>& queuePtr)
     :_queuePtr(queuePtr)
   {}
 

@@ -34,9 +34,9 @@ struct unspec {};
 // (specific to this test, long -> int only)
 // std::function requires definition
 int    oo(long) { return 0; } // 1-1
-unspec on(long, queue_front<int>&) { return unspec(); } // 1-N
-unspec nm(queue_back<long>&, queue_front<int>&) { return unspec(); } // N-M
-int    no(queue_back<long>&) { return 0; } // N-1
+unspec on(long, queue_back<int>&) { return unspec(); } // 1-N
+unspec nm(queue_front<long>&, queue_back<int>&) { return unspec(); } // N-M
+int    no(queue_front<long>&) { return 0; } // N-1
 
 // Possible segment types, specific to this test
 template <typename T> struct dummy_plan_t { typedef T value_type; };
@@ -77,9 +77,9 @@ BOOST_AUTO_TEST_CASE(ConnectorFunctionPointer)
 BOOST_AUTO_TEST_CASE(ConnectorFunction)
 {
   auto f_oo = std::function<int(long)>(oo);
-  auto f_on = std::function<unspec(long, queue_front<int>&)>(on);
-  auto f_nm = std::function<unspec(queue_back<long>&, queue_front<int>&)>(nm);
-  auto f_no = std::function<int(queue_back<long>&)>(no);
+  auto f_on = std::function<unspec(long, queue_back<int>&)>(on);
+  auto f_nm = std::function<unspec(queue_front<long>&, queue_back<int>&)>(nm);
+  auto f_no = std::function<int(queue_front<long>&)>(no);
 
   TEST_CONNECTION(f_oo, seg_oo)
   TEST_CONNECTION(f_on, seg_on)
@@ -91,9 +91,9 @@ BOOST_AUTO_TEST_CASE(ConnectorLambda)
 {
   // non-mutable lambda
   auto l_oo = [](long) -> int { return 0; };
-  auto l_on = [](long, queue_front<int>&) { return unspec(); };
-  auto l_nm = [](queue_back<long>&, queue_front<int>&) { return unspec(); };
-  auto l_no = [](queue_back<long>&) -> int { return 0; };
+  auto l_on = [](long, queue_back<int>&) { return unspec(); };
+  auto l_nm = [](queue_front<long>&, queue_back<int>&) { return unspec(); };
+  auto l_no = [](queue_front<long>&) -> int { return 0; };
 
   TEST_CONNECTION(l_oo, seg_oo)
   TEST_CONNECTION(l_on, seg_on)
@@ -102,9 +102,9 @@ BOOST_AUTO_TEST_CASE(ConnectorLambda)
 
   // mutable lambda
   auto ml_oo = [](long) mutable -> int { return 0; };
-  auto ml_on = [](long, queue_front<int>&) mutable { return unspec(); };
-  auto ml_nm = [](queue_back<long>&, queue_front<int>&) mutable { return unspec(); };
-  auto ml_no = [](queue_back<long>&) mutable -> int { return 0; };
+  auto ml_on = [](long, queue_back<int>&) mutable { return unspec(); };
+  auto ml_nm = [](queue_front<long>&, queue_back<int>&) mutable { return unspec(); };
+  auto ml_no = [](queue_front<long>&) mutable -> int { return 0; };
 
   TEST_CONNECTION(ml_oo, seg_oo)
   TEST_CONNECTION(ml_on, seg_on)
@@ -114,9 +114,9 @@ BOOST_AUTO_TEST_CASE(ConnectorLambda)
 
 // functors
 struct oo_t { int    operator()(long) { return 0; } };
-struct on_t { unspec operator()(long, queue_front<int>&) { return unspec(); } };
-struct nm_t { unspec operator()(queue_back<long>&, queue_front<int>&) { return unspec(); } };
-struct no_t { int    operator()(queue_back<long>&) { return 0; } };
+struct on_t { unspec operator()(long, queue_back<int>&) { return unspec(); } };
+struct nm_t { unspec operator()(queue_front<long>&, queue_back<int>&) { return unspec(); } };
+struct no_t { int    operator()(queue_front<long>&) { return 0; } };
 
 BOOST_AUTO_TEST_CASE(ConnectorFunctor)
 {
@@ -133,13 +133,13 @@ BOOST_AUTO_TEST_CASE(ConnectorFunctor)
 
 // Boundable transformations
 int oo_b(char, long) { return 0; } // 1-1
-int on_b(char, long, queue_front<int>&) { return 0; } // 1-N
-int nm_b(char, queue_back<long>&, queue_front<int>&) { return 0; } // N-M
-int no_b(char, queue_back<long>&) { return 0; } // N-1
+int on_b(char, long, queue_back<int>&) { return 0; } // 1-N
+int nm_b(char, queue_front<long>&, queue_back<int>&) { return 0; } // N-M
+int no_b(char, queue_front<long>&) { return 0; } // N-1
 
 // T-T boundables
-void tt_on_b(char, long, queue_front<long>&) {} // 1-N
-void tt_nm_b(char, queue_back<long>&, queue_front<long>&) {} // N-M
+void tt_on_b(char, long, queue_back<long>&) {} // 1-N
+void tt_nm_b(char, queue_front<long>&, queue_back<long>&) {} // N-M
 
 BOOST_AUTO_TEST_CASE(ConnectorBind)
 {

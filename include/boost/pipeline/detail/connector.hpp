@@ -28,15 +28,15 @@ class member_connector;
 template <typename Plan, typename Bind>
 class bind_connector;
 
-// queue_back predicates
+// queue_front predicates
 template <typename Input, typename Q>
-using if_queue_back = typename std::enable_if<
-  std::is_same<typename std::decay<Q>::type, queue_back<Input>>::value
+using if_queue_front = typename std::enable_if<
+  std::is_same<typename std::decay<Q>::type, queue_front<Input>>::value
 ,int>::type;
 
 template <typename Input, typename Q>
-using not_queue_back = typename std::enable_if<
-  ! std::is_same<typename std::decay<Q>::type, queue_back<Input>>::value
+using not_queue_front = typename std::enable_if<
+  ! std::is_same<typename std::decay<Q>::type, queue_front<Input>>::value
 ,int>::type;
 
 // if no match found:
@@ -51,29 +51,29 @@ class connector
   typedef typename Plan::value_type input;
 
   template <typename Q>
-  using if_queue_back = if_queue_back<input, Q>;
+  using if_queue_front = if_queue_front<input, Q>;
 
   template <typename Q>
-  using not_queue_back = not_queue_back<input, Q>;
+  using not_queue_front = not_queue_front<input, Q>;
 
   //
   // Connect function pointers
   //
 
   // Function pointer, single non-queue arg -> 1-1 Trafo
-  template <typename R, typename A, not_queue_back<A> = 0>
+  template <typename R, typename A, not_queue_front<A> = 0>
   static one_one_segment<Plan, R> connect(R(function)(A));
 
   // Function pointer, single queue arg -> N-1 Trafo (Aggregation)
-  template <typename R, typename A, if_queue_back<A> = 0>
+  template <typename R, typename A, if_queue_front<A> = 0>
   static n_one_segment<Plan, R> connect(R(function)(A));
 
   // Function pointer, two args, first is non queue -> 1-N Trafo
-  template <typename R, typename A, typename B, not_queue_back<A> = 0>
+  template <typename R, typename A, typename B, not_queue_front<A> = 0>
   static one_n_segment<Plan, typename std::remove_reference<B>::type::value_type, R> connect(R(function)(A, B));
 
   // Function pointer, two args, first queue -> N-M Trafo
-  template <typename R, typename A, typename B, if_queue_back<A> = 0>
+  template <typename R, typename A, typename B, if_queue_front<A> = 0>
   static n_m_segment<Plan, typename std::remove_reference<B>::type::value_type, R> connect(R(function)(A, B));
 
   // Check if Callable has operator()
@@ -159,50 +159,50 @@ class member_connector
   typedef typename Plan::value_type input;
 
   template <typename Q>
-  using if_queue_back = if_queue_back<input, Q>;
+  using if_queue_front = if_queue_front<input, Q>;
 
   template <typename Q>
-  using not_queue_back = not_queue_back<input, Q>;
+  using not_queue_front = not_queue_front<input, Q>;
 
   // Note: mutable labdas have non-const operator()
 
   // operator() const, single non-queue arg -> 1-1 Trafo
-  template <typename R, typename A, not_queue_back<A> = 0>
+  template <typename R, typename A, not_queue_front<A> = 0>
   static one_one_segment<Plan, R>
   connect(R(Callable::*function)(A) const);
 
   // operator() non-const, single non-queue arg -> 1-1 Trafo
-  template <typename R, typename A, not_queue_back<A> = 0>
+  template <typename R, typename A, not_queue_front<A> = 0>
   static one_one_segment<Plan, R>
   connect(R(Callable::*function)(A));
 
   // operator() const, single queue arg -> N-1 Trafo (Aggregation)
-  template <typename R, typename A, if_queue_back<A> = 0>
+  template <typename R, typename A, if_queue_front<A> = 0>
   static n_one_segment<Plan, R>
   connect(R(Callable::*function)(A) const);
 
   // operator() non-const, single queue arg -> N-1 Trafo (Aggregation)
-  template <typename R, typename A, if_queue_back<A> = 0>
+  template <typename R, typename A, if_queue_front<A> = 0>
   static n_one_segment<Plan, R>
   connect(R(Callable::*function)(A));
 
   // operator() const, two args first is non queue -> 1-N Trafo
-  template <typename R, typename A, typename B, not_queue_back<A> = 0>
+  template <typename R, typename A, typename B, not_queue_front<A> = 0>
   static one_n_segment<Plan, typename std::remove_reference<B>::type::value_type, R>
   connect(R(Callable::*function)(A, B) const);
 
   // operator() non-const, two args first is non queue -> 1-N Trafo
-  template <typename R, typename A, typename B, not_queue_back<A> = 0>
+  template <typename R, typename A, typename B, not_queue_front<A> = 0>
   static one_n_segment<Plan, typename std::remove_reference<B>::type::value_type, R>
   connect(R(Callable::*function)(A, B));
 
   // operator() const, two args first queue -> N-M Trafo
-  template <typename R, typename A, typename B, if_queue_back<A> = 0>
+  template <typename R, typename A, typename B, if_queue_front<A> = 0>
   static n_m_segment<Plan, typename std::remove_reference<B>::type::value_type, R>
   connect(R(Callable::*function)(A, B) const);
 
   // operator() non-const, two args first queue -> N-M Trafo
-  template <typename R, typename A, typename B, if_queue_back<A> = 0>
+  template <typename R, typename A, typename B, if_queue_front<A> = 0>
   static n_m_segment<Plan, typename std::remove_reference<B>::type::value_type, R>
   connect(R(Callable::*function)(A, B));
 
@@ -254,7 +254,7 @@ class bind_connector
       typename std::enable_if<std::is_same<
         R2,
         decltype(std::declval<Bind2>()(
-          std::declval<queue_back<input>&>()
+          std::declval<queue_front<input>&>()
         ))
       >::value, int>::type = 0
     >
@@ -279,7 +279,7 @@ class bind_connector
       R,
       decltype(std::declval<Bind1>()(
         std::declval<input>(),
-        std::declval<boost::pipeline::queue_front<output>&>()
+        std::declval<boost::pipeline::queue_back<output>&>()
       ))
     >::value
   && ! is_one_one_trafo<Bind1, output>::value
@@ -297,8 +297,8 @@ class bind_connector
     std::is_same<
       R,
       decltype(std::declval<Bind1>()(
-        std::declval<boost::pipeline::queue_back<input>&>(),
-        std::declval<boost::pipeline::queue_front<output>&>()
+        std::declval<boost::pipeline::queue_front<input>&>(),
+        std::declval<boost::pipeline::queue_back<output>&>()
       ))
     >::value
   && ! is_n_one_trafo<Bind1, output>::value

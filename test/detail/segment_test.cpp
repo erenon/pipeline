@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE(SegmentTypeCrossing)
 
 void keep_and_twice(
   const int& item,
-  boost::pipeline::queue_front<int>& out
+  boost::pipeline::queue_back<int>& out
 ) {
   out.try_push(item);
   out.try_push(item * 2);
@@ -136,7 +136,7 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
   BOOST_CHECK_EQUAL(nums_out[9], 10);
 }
 
-//int sum_two(boost::pipeline::queue_back<int>& in)
+//int sum_two(boost::pipeline::queue_front<int>& in)
 //{
 //}
 //
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
 //void grep(
 //  const std::string& equals_to,
 //  const std::string& item,
-//  boost::pipeline::queue_front<std::string>& out
+//  boost::pipeline::queue_back<std::string>& out
 //)
 //{
 //  if (equals_to == item)

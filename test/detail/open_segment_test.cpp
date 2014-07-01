@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(OpenSegmentCtor)
 int not_equals_to(
   const int filter,
   const int item,
-  boost::pipeline::queue_front<int>& out
+  boost::pipeline::queue_back<int>& out
 )
 {
   if (item != filter)
@@ -68,7 +68,7 @@ int make_odd(const int item)
 void if_multiple_of(
   const int multiple,
   const int divisor,
-  boost::pipeline::queue_front<int>& out
+  boost::pipeline::queue_back<int>& out
 )
 {
   if (multiple % divisor == 0)
