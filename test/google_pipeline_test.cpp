@@ -76,8 +76,8 @@ void print_string(std::string s) {
 }
 
 void repeat(int i, queue_back<int> q) {
-  q.push_back(i);
-  q.push_back(i);
+  q.try_push(i);
+  q.try_push(i);
 }
 
 int sum_two(queue_front<int> q) {
@@ -87,7 +87,7 @@ int sum_two(queue_front<int> q) {
   }
 
   int i = q.front();
-  q.pop_front();
+  q.try_pop();
 
   if (q.empty())
   {
@@ -95,17 +95,17 @@ int sum_two(queue_front<int> q) {
   }
 
   int j = q.front();
-  q.pop_front();
+  q.try_pop();
 
   return i + j;
 }
 
 void produce_strings(queue_back<std::string>& queue) {
   printf("Producing strings\n");
-  queue.push_back("Produced String1");
-  queue.push_back("Produced String22");
-  queue.push_back("Produced String333");
-  queue.push_back("Produced String4444");
+  queue.try_push("Produced String1");
+  queue.try_push("Produced String22");
+  queue.try_push("Produced String333");
+  queue.try_push("Produced String4444");
 }
 // end verbatim copy
 
@@ -122,7 +122,10 @@ BOOST_AUTO_TEST_CASE(ManualBuild)
   auto p4 = make(consume_user); // TODO ::to is missing
 
   auto p = p3 | p4;
-  auto exec = p.run();
+
+  thread_pool pool{1};
+
+  auto exec = p.run(pool);
 
   // TODO queue.push and close
 }
@@ -138,24 +141,35 @@ BOOST_AUTO_TEST_CASE(Example)
 
   std::deque<User> out;
   auto p4 = p3 | out;
-  /*auto pex  = */ p4.run();
-  /*auto pex2 = */ (from(out) | consume_user).run();
 
-  // TODO check pex, pex2 is done, out is closed.
+  thread_pool pool{1};
+
+  auto pex  = p4.run(pool);
+  auto pex2 = (from(out) | consume_user).run(pool);
+
+  pex.wait();
+
+  BOOST_ASSERT(pex.is_done());
+  BOOST_ASSERT(pex2.is_done());
+
+  // TODO queue is closed
 }
 
 // TODO SimpleParallel
 // TODO ParallelExample
 
-BOOST_AUTO_TEST_CASE(ProduceExample)
-{
-  // TODO from(functor) not supported
-//  auto p5 = from(produce_strings) | find_uid | get_user | consume_user;
-
-  queue_back<std::string> queue;
-  produce_strings(queue);
-
-  auto p5 = from(queue) | find_uid | get_user | consume_user;
-
-  p5.run();
-}
+//BOOST_AUTO_TEST_CASE(ProduceExample)
+//{
+//  // TODO from(functor) not supported
+////  auto p5 = from(produce_strings) | find_uid | get_user | consume_user;
+//
+//  queue_back<std::string> queue;
+//  produce_strings(queue);
+//
+//  auto p5 = from(queue) | find_uid | get_user | consume_user;
+//
+//  thread_pool pool{1};
+//
+//  auto pex3 = p5.run(pool);
+//  pex3.wait();
+//}
