@@ -63,6 +63,27 @@ public:
     :_parent(parent)
   {}
 
+  /**
+   * Runs the segment.
+   *
+   * Gets the upstream queues front of the `_parent` segment,
+   * transforms each item using `_function`
+   * and feeds them into the downstream queue.
+   */
+  template <typename Task, typename Function>
+  queue_front<value_type> run(thread_pool& pool, Function& function)
+  {
+    auto qf = _parent.run(pool);
+    auto downstream_ptr = std::make_shared<queue<value_type>>();
+    queue_back<value_type> qb(downstream_ptr);
+
+    Task task(qf, qb, function);
+
+    pool.submit(task);
+
+    return downstream_ptr;
+  }
+
 protected:
   Parent _parent;          /**< parent segment, provider of input */
 };
@@ -86,24 +107,10 @@ public:
      _function(function)
   {}
 
-  /**
-   * Runs the segment.
-   *
-   * Gets the output of the `_parent` segment,
-   * transforms each item using `_function`
-   * and feeds them into the returned queue.
-   */
+  /** @copydoc basic_segment::run */
   queue_front<value_type> run(thread_pool& pool)
   {
-    auto qf = base_segment::_parent.run(pool);
-    auto downstream_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(downstream_ptr);
-
-    Task task(qf, qb, _function);
-
-    pool.submit(task);
-
-    return downstream_ptr;
+    return base_segment::template run<Task>(pool, _function);
   }
 
 private:
@@ -188,27 +195,10 @@ public:
      _function(function)
   {}
 
-  /**
-   * Runs the segment.
-   *
-   * Gets the output of the `_parent` segment,
-   * transforms each item using `_function`.
-   *
-   * Also passes the soon to be returned
-   * queue to `_function`, it's the transformations
-   * responsibility to feed the queue at will.
-   */
-  queue_front<Output> run(thread_pool& pool)
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool)
   {
-    auto qf = base_segment::_parent.run(pool);
-    auto downstream_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(downstream_ptr);
-
-    Task task(qf, qb, _function);
-
-    pool.submit(task);
-
-    return downstream_ptr;
+    return base_segment::template run<Task>(pool, _function);
   }
 
 private:
@@ -280,23 +270,10 @@ public:
      _function(function)
   {}
 
-  /**
-   * Runs the segment.
-   *
-   * Gets the output of the `_parent` segment,
-   * and runs `_function` until queue is not closed.
-   */
-  queue_front<Output> run(thread_pool& pool)
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool)
   {
-    auto qf = base_segment::_parent.run(pool);
-    auto downstream_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(downstream_ptr);
-
-    Task task(qf, qb, _function);
-
-    pool.submit(task);
-
-    return downstream_ptr;
+    return base_segment::template run<Task>(pool, _function);
   }
 
 private:
@@ -385,26 +362,10 @@ public:
      _function(function)
   {}
 
-  /**
-   * Runs the segment.
-   *
-   * Gets the output of the `_parent` segment,
-   * and passes the parent queue and the
-   * soon to be returned queue to `_function`.
-   * It's the transformations responsibility
-   * to feed the queue at will.
-   */
-  queue_front<Output> run(thread_pool& pool)
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool)
   {
-    auto qf = base_segment::_parent.run(pool);
-    auto downstream_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(downstream_ptr);
-
-    Task task(qf, qb, _function);
-
-    pool.submit(task);
-
-    return downstream_ptr;
+    return base_segment::template run<Task>(pool, _function);
   }
 
 private:
