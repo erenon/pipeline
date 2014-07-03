@@ -410,12 +410,12 @@ private:
 };
 
 template <typename Iterator>
-class input_segment
+class range_input_segment
 {
 public:
   typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
 
-  input_segment(const Iterator& begin, const Iterator& end)
+  range_input_segment(const Iterator& begin, const Iterator& end)
     :_current(begin),
      _end(end)
   {}
@@ -459,6 +459,41 @@ public:
 private:
   Iterator _current;
   const Iterator _end;
+};
+
+template <typename Callable, typename Output>
+class generator_input_segment
+{
+public:
+  typedef Output value_type;
+  typedef Callable function_type;
+
+  generator_input_segment(const function_type& generator)
+    :_generator(generator)
+  {}
+
+  queue_front<value_type> run(thread_pool& pool)
+  {
+    auto queuePtr = std::make_shared<queue<value_type>>();
+    queue_back<value_type> qb(queuePtr);
+    queue_front<value_type> qf(queuePtr);
+
+    auto task = [this, qb] () mutable -> bool
+    {
+      _generator(qb);
+
+      qb.close();
+
+      return true;
+    };
+
+    pool.submit(task);
+
+    return qf;
+  }
+
+private:
+  function_type _generator;
 };
 
 template <typename Container, typename Parent>
@@ -567,7 +602,10 @@ template <typename P, typename O, typename R>
 struct is_segment<n_m_segment<P, O, R>> : public std::true_type {};
 
 template <typename I>
-struct is_segment<input_segment<I>> : public std::true_type {};
+struct is_segment<range_input_segment<I>> : public std::true_type {};
+
+template <typename C, typename O>
+struct is_segment<generator_input_segment<C, O>> : public std::true_type {};
 
 } // namespace detail
 } // namespace pipeline

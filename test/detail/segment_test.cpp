@@ -185,6 +185,96 @@ BOOST_AUTO_TEST_CASE(SegmentNToMTrafo)
   BOOST_CHECK_EQUAL(nums_out[5], 6);
 }
 
+void generate_ints(queue_back<int>& qb)
+{
+  for (int i = 0; i < 5; ++i)
+  {
+    qb.try_push(i);
+  }
+}
+
+void generate_ints_from(queue_back<int>& qb, const int start)
+{
+  for (int i = start; i < 5; ++i)
+  {
+    qb.try_push(i);
+  }
+}
+
+template <typename Callable>
+void generated_segment_test(Callable& generator)
+{
+  std::vector<int> nums_out;
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from(generator)
+    | nums_out
+  ).run(pool);
+
+  exec.wait();
+
+  BOOST_CHECK_EQUAL(nums_out.size(), 5);
+  BOOST_CHECK_EQUAL(nums_out[0], 0);
+  BOOST_CHECK_EQUAL(nums_out[1], 1);
+  BOOST_CHECK_EQUAL(nums_out[2], 2);
+  BOOST_CHECK_EQUAL(nums_out[3], 3);
+  BOOST_CHECK_EQUAL(nums_out[4], 4);
+}
+
+BOOST_AUTO_TEST_CASE(GeneratedSegmentFp)
+{
+  generated_segment_test(generate_ints);
+}
+
+BOOST_AUTO_TEST_CASE(GeneratedSegmentFunction)
+{
+  std::function<void(queue_back<int>&)> gen = generate_ints;
+  generated_segment_test(gen);
+}
+
+template <typename Hint, typename Callable>
+void generated_segment_test_hinted(Callable& generator)
+{
+  std::vector<int> nums_out;
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from<Hint>(generator)
+    | nums_out
+  ).run(pool);
+
+  exec.wait();
+
+  BOOST_CHECK_EQUAL(nums_out.size(), 5);
+  BOOST_CHECK_EQUAL(nums_out[0], 0);
+  BOOST_CHECK_EQUAL(nums_out[1], 1);
+  BOOST_CHECK_EQUAL(nums_out[2], 2);
+  BOOST_CHECK_EQUAL(nums_out[3], 3);
+  BOOST_CHECK_EQUAL(nums_out[4], 4);
+}
+
+BOOST_AUTO_TEST_CASE(GeneratedSegmentLambda)
+{
+  auto gen = [] (queue_back<int> qb)
+  {
+    for (int i = 0; i < 5; ++i)
+    {
+      qb.try_push(i);
+    }
+  };
+
+  generated_segment_test_hinted<int>(gen);
+}
+
+BOOST_AUTO_TEST_CASE(GeneratedSegmentBind)
+{
+  auto gen = std::bind(generate_ints_from, std::placeholders::_1, 0);
+  generated_segment_test_hinted<int>(gen);
+}
+
 //int sum_two(boost::pipeline::queue_front<int>& in)
 //{
 //}

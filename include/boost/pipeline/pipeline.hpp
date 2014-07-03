@@ -26,10 +26,10 @@ namespace pipeline {
  * Creates an input_segment operating on `container`.
  */
 template <typename Container>
-detail::input_segment<typename Container::iterator>
+detail::range_input_segment<typename Container::iterator>
 from(Container& container)
 {
-  typedef detail::input_segment<typename Container::iterator> c_input_segment;
+  typedef detail::range_input_segment<typename Container::iterator> c_input_segment;
 
   return c_input_segment(container.begin(), container.end());
 }
@@ -38,12 +38,73 @@ from(Container& container)
  * Creates an input_segment operating on a range.
  */
 template <typename Iterator>
-detail::input_segment<Iterator>
+detail::range_input_segment<Iterator>
 from(const Iterator& begin, const Iterator& end)
 {
-  typedef detail::input_segment<Iterator> range_input_segment;
+  typedef detail::range_input_segment<Iterator> range_input_segment;
 
   return range_input_segment(begin, end);
+}
+
+/**
+ * Creates an input_segment operating on values
+ * produced by a generator, generator is an std::function
+ */
+template <typename QueueBack, typename R>
+detail::generator_input_segment<
+  std::function<R(QueueBack)>,
+  typename std::remove_reference<QueueBack>::type::value_type
+>
+from(const std::function<R(QueueBack)>& generator)
+{
+  typedef detail::generator_input_segment<
+    std::function<R(QueueBack)>,
+    typename std::remove_reference<QueueBack>::type::value_type
+  > input_segment;
+
+  return input_segment(generator);
+}
+
+/**
+ * Creates an input_segment operating on values
+ * produced by a generator, generator is a function pointer
+ */
+template <typename QueueBack, typename R>
+detail::generator_input_segment<
+  R(*)(QueueBack),
+  typename std::remove_reference<QueueBack>::type::value_type
+>
+from(R(*generator)(QueueBack))
+{
+  typedef detail::generator_input_segment<
+    R(*)(QueueBack),
+    typename std::remove_reference<QueueBack>::type::value_type
+  > input_segment;
+
+  return input_segment(generator);
+}
+
+/**
+ * Creates an input_segment operating on values
+ * produced by a generator, generator is callable:
+ * generator(queue_back<T>);
+ *
+ * The purpose of this overload is to support lambdas,
+ * bind expressions and functors.
+ *
+ * Example:
+ * from<int>([](queue_back<int>& qb) {...});
+ *
+ * TODO lambda and functor do not require a hint,
+ * bind does.
+ */
+template <typename T, typename Callable>
+detail::generator_input_segment<Callable, T>
+from(const Callable& generator)
+{
+  typedef detail::generator_input_segment<Callable, T> input_segment;
+
+  return input_segment(generator);
 }
 
 /**
