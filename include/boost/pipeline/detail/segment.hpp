@@ -497,12 +497,12 @@ private:
 };
 
 template <typename Container, typename Parent>
-class output_segment: public basic_segment<Parent, void>
+class range_output_segment: public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
 
 public:
-  output_segment(
+  range_output_segment(
     const Parent& parent,
     Container& container
   )
@@ -580,7 +580,7 @@ private:
 //
 // is_segment predicate
 // TODO rename to is_connectable_segment,
-// since output_segment is segment but not connectable
+// since *_output_segment is segment but not connectable
 //
 
 template <typename NotSegment>

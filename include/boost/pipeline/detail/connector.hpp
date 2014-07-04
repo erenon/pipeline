@@ -145,7 +145,7 @@ class connector
   template <typename Container, typename std::enable_if<
     is_container<typename Plan::value_type, Container>::value
   ,int>::type = 0>
-  static output_segment<Container, Plan> connect(Container container);
+  static range_output_segment<Container, Plan> connect(Container container);
 
   static invalid_trafo connect(...);
 
