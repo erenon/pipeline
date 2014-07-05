@@ -14,6 +14,7 @@
 #include <iostream>
 #include <string>
 #include <functional>
+#include <vector>
 
 #include <boost/pipeline.hpp>
 #include <boost/preprocessor/stringize.hpp>
@@ -38,6 +39,8 @@ unspec on(long, queue_back<int>&) { return unspec(); } // 1-N
 unspec nm(queue_front<long>&, queue_back<int>&) { return unspec(); } // N-M
 int    no(queue_front<long>&) { return 0; } // N-1
 
+void   co(long) { /* consume */ }
+
 // Possible segment types, specific to this test
 template <typename T> struct dummy_plan_t { typedef T value_type; };
 
@@ -47,14 +50,15 @@ typedef one_one_segment<dummy_plan, int> seg_oo;
 typedef one_n_segment<dummy_plan, int, unspec> seg_on;
 typedef n_m_segment<dummy_plan, int, unspec> seg_nm;
 typedef n_one_segment<dummy_plan, int> seg_no;
+typedef range_output_segment<std::vector<long>, dummy_plan> seg_ro;
 
 #if defined BOOST_PIPELINE_TEST_DEBUG
   #define TEST_CONNECTION(expr, expected) \
-    std::cout << "Actual  : " \
-              << get_type_name<connector<dummy_plan, decltype(expr)>::type>() \
-              << std::endl \
-              << "Expected: " << get_type_name<expected>() \
-              << std::endl; \
+  { \
+    auto actual = get_type_name<connector<dummy_plan, decltype(expr)>::type>(); \
+    auto expStr = get_type_name<expected>(); \
+    BOOST_CHECK_EQUAL(actual, expStr); \
+  } \
   /**/
 #else
   #define TEST_CONNECTION(expr, expected) \
@@ -136,6 +140,7 @@ int oo_b(char, long) { return 0; } // 1-1
 int on_b(char, long, queue_back<int>&) { return 0; } // 1-N
 int nm_b(char, queue_front<long>&, queue_back<int>&) { return 0; } // N-M
 int no_b(char, queue_front<long>&) { return 0; } // N-1
+void co_b(char, long) { /* consume */ }
 
 // T-T boundables
 void tt_on_b(char, long, queue_back<long>&) {} // 1-N
@@ -160,6 +165,12 @@ BOOST_AUTO_TEST_CASE(ConnectorBind)
 
   TEST_CONNECTION(std::bind(tt_on_b, 'a', _1, _2), void_seg_on)
   TEST_CONNECTION(std::bind(tt_nm_b, 'a', _1, _2), void_seg_nm)
+}
+
+BOOST_AUTO_TEST_CASE(ConnectorContainer)
+{
+  std::vector<long> container;
+  TEST_CONNECTION(container, seg_ro)
 }
 
 #if defined BOOST_PIPELINE_TEST_DEBUG

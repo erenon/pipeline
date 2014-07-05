@@ -76,6 +76,11 @@ class connector
   template <typename R, typename A, typename B, if_queue_front<A> = 0>
   static n_m_segment<Plan, typename std::remove_reference<B>::type::value_type, R> connect(R(function)(A, B));
 
+  //
+  // Connect functor types which has operator() but not bind
+  // (includes lambda expressions and std::function)
+  //
+
   // Check if Callable has operator()
   template <typename Callable>
   class is_callable
@@ -91,11 +96,6 @@ class connector
   public:
     enum { value = ! std::is_same<not_callable, decltype(test<Callable>(0))>::value};
   };
-
-  //
-  // Connect functor types which has operator() but not bind
-  // (includes lambda expressions and std::function)
-  //
 
   template <typename Callable, typename std::enable_if<
          is_callable<Callable>::value
@@ -115,6 +115,10 @@ class connector
   static auto connect(const Bind& bind)
     -> typename bind_connector<Plan, Bind>::type
   ;
+
+  //
+  // Connect container (sink)
+  //
 
   template <typename T, typename Container>
   struct is_container
@@ -147,6 +151,7 @@ class connector
   ,int>::type = 0>
   static range_output_segment<Container, Plan> connect(Container container);
 
+  // If none of the above matches: invalid transformation
   static invalid_trafo connect(...);
 
 public:
