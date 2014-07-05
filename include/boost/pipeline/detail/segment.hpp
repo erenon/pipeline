@@ -130,7 +130,7 @@ public:
 
   typedef std::function<void(const input_type&)> function_type;
 
-  typedef one_sink_task<input_type, function_type> task_type;
+  typedef single_consume_output_task<input_type, function_type> task_type;
 
   one_one_segment(
     const Parent& parent,
@@ -200,7 +200,7 @@ public:
   typedef typename base_segment::value_type value_type;
 
   typedef std::function<Output(
-    queue_front<Output>&
+    queue_front<input_type>&
   )> function_type;
 
   typedef n_one_task<input_type, value_type, function_type> task_type;
@@ -217,6 +217,45 @@ public:
   queue_front<value_type> run(thread_pool& pool)
   {
     return base_segment::template run<task_type>(pool, _function);
+  }
+
+private:
+  function_type _function; /**< transformation function of input */
+};
+
+template <typename Parent>
+class n_one_segment<Parent, void> : public basic_segment<Parent, void>
+{
+  typedef basic_segment<Parent, void> base_segment;
+
+public:
+  typedef typename base_segment::input_type input_type;
+  typedef void value_type;
+
+  typedef std::function<void(
+    queue_front<input_type>&
+  )> function_type;
+
+  typedef multi_consume_output_task<input_type, function_type> task_type;
+
+  n_one_segment(
+    const Parent& parent,
+    const function_type& function
+  )
+    :base_segment(parent),
+     _function(function)
+  {}
+
+  execution run(thread_pool& pool)
+  {
+    auto promise_ptr = std::make_shared<std::promise<bool>>();
+    auto future = promise_ptr->get_future();
+    auto queue_front = base_segment::_parent.run(pool);
+
+    task_type task(promise_ptr, queue_front, _function);
+    pool.submit(task);
+
+    return execution(std::move(future));
   }
 
 private:

@@ -72,49 +72,6 @@ private:
   Transformation _transformation;
 };
 
-template <typename Input, typename Consumer>
-class one_sink_task
-{
-public:
-  one_sink_task(
-    const std::shared_ptr<std::promise<bool>>& promise_ptr,
-    const queue_front<Input>& queue_front,
-    Consumer& consumer
-  )
-    :_promise_ptr(promise_ptr),
-     _queue_front(queue_front),
-     _consumer(consumer)
-  {}
-
-  bool operator()()
-  {
-    while (true)
-    {
-      Input entry;
-
-      auto status = _queue_front.try_pop(entry);
-      if (status == queue_op_status::SUCCESS)
-      {
-        _consumer(entry);
-      }
-      else if (status == queue_op_status::CLOSED) // only if queue is empty
-      {
-        _promise_ptr->set_value(true);
-        return true;
-      }
-      else // queue was empty but not closed, more entries may arrive
-      {
-        return false; // not finished
-      }
-    }
-  }
-
-private:
-  std::shared_ptr<std::promise<bool>> _promise_ptr;
-  queue_front<Input> _queue_front;
-  Consumer& _consumer;
-};
-
 template <typename Input, typename Output, typename Transformation>
 class one_n_task
 {
@@ -295,6 +252,91 @@ private:
   std::shared_ptr<std::promise<bool>> _promise_ptr;
   queue_front<Input> _queue_front;
   std::back_insert_iterator<Container> _out_it;
+};
+
+template <typename Input, typename Consumer>
+class single_consume_output_task
+{
+public:
+  single_consume_output_task(
+    const std::shared_ptr<std::promise<bool>>& promise_ptr,
+    const queue_front<Input>& queue_front,
+    Consumer& consumer
+  )
+    :_promise_ptr(promise_ptr),
+     _queue_front(queue_front),
+     _consumer(consumer)
+  {}
+
+  bool operator()()
+  {
+    while (true)
+    {
+      Input entry;
+
+      auto status = _queue_front.try_pop(entry);
+      if (status == queue_op_status::SUCCESS)
+      {
+        _consumer(entry);
+      }
+      else if (status == queue_op_status::CLOSED) // only if queue is empty
+      {
+        _promise_ptr->set_value(true);
+        return true;
+      }
+      else // queue was empty but not closed, more entries may arrive
+      {
+        return false; // not finished
+      }
+    }
+  }
+
+private:
+  std::shared_ptr<std::promise<bool>> _promise_ptr;
+  queue_front<Input> _queue_front;
+  Consumer& _consumer;
+};
+
+template <typename Input, typename Consumer>
+class multi_consume_output_task
+{
+public:
+  multi_consume_output_task(
+    const std::shared_ptr<std::promise<bool>>& promise_ptr,
+    const queue_front<Input>& queue_front,
+    Consumer& consumer
+  )
+    :_promise_ptr(promise_ptr),
+     _queue_front(queue_front),
+     _consumer(consumer)
+  {}
+
+  bool operator()()
+  {
+    while (true)
+    {
+      if (_queue_front.is_empty())
+      {
+        // finish if closed, yield if not
+        if (_queue_front.is_closed())
+        {
+          _promise_ptr->set_value(true);
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+      _consumer(_queue_front);
+    }
+  }
+
+private:
+  std::shared_ptr<std::promise<bool>> _promise_ptr;
+  queue_front<Input> _queue_front;
+  Consumer& _consumer;
 };
 
 } // namespace detail

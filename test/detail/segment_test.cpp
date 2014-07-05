@@ -275,11 +275,17 @@ BOOST_AUTO_TEST_CASE(GeneratedSegmentBind)
   generated_segment_test_hinted<int>(gen);
 }
 
-void consume(int) {}
+int consume_sum;
 
-BOOST_AUTO_TEST_CASE(SegmentProceduralConsumer)
+void consume(int input)
+{
+  consume_sum += input;
+}
+
+BOOST_AUTO_TEST_CASE(SegmentProceduralSingleConsumer)
 {
   std::vector<int> nums = {0, 1, 2, 3};
+  consume_sum = 0;
 
   thread_pool pool{1};
 
@@ -289,6 +295,43 @@ BOOST_AUTO_TEST_CASE(SegmentProceduralConsumer)
   ).run(pool);
 
   exec.wait();
+
+  BOOST_CHECK_EQUAL(consume_sum, 6);
+}
+
+void consume_n(boost::pipeline::queue_front<int>& qf)
+{
+  int input;
+  bool valid_input = true;
+  while (valid_input)
+  {
+    auto status = qf.try_pop(input);
+    if (status == queue_op_status::SUCCESS)
+    {
+      consume_sum += input;
+    }
+    else
+    {
+      valid_input = false;
+    }
+  }
+}
+
+BOOST_AUTO_TEST_CASE(SegmentProceduralMultiConsumer)
+{
+  std::vector<int> nums = {0, 1, 2, 3};
+  consume_sum = 0;
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from(nums)
+    | consume_n
+  ).run(pool);
+
+  exec.wait();
+
+  BOOST_CHECK_EQUAL(consume_sum, 6);
 }
 
 //int sum_two(boost::pipeline::queue_front<int>& in)
