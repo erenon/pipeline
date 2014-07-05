@@ -275,6 +275,22 @@ BOOST_AUTO_TEST_CASE(GeneratedSegmentBind)
   generated_segment_test_hinted<int>(gen);
 }
 
+void consume(int) {}
+
+BOOST_AUTO_TEST_CASE(SegmentProceduralConsumer)
+{
+  std::vector<int> nums = {0, 1, 2, 3};
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from(nums)
+    | consume
+  ).run(pool);
+
+  exec.wait();
+}
+
 //int sum_two(boost::pipeline::queue_front<int>& in)
 //{
 //}

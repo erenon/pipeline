@@ -23,7 +23,7 @@
 #include <boost/pipeline/queue.hpp>
 #include <boost/pipeline/execution.hpp>
 #include <boost/pipeline/threading.hpp>
-#include <boost/pipeline/detail/log.hpp>
+#include <boost/pipeline/detail/task.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -94,10 +94,12 @@ class one_one_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
-  typedef typename base_segment::value_type value_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   typedef std::function<value_type(const input_type&)> function_type;
+
+  typedef one_one_task<input_type, value_type, function_type> task_type;
 
   one_one_segment(
     const Parent& parent,
@@ -110,66 +112,47 @@ public:
   /** @copydoc basic_segment::run */
   queue_front<value_type> run(thread_pool& pool)
   {
-    return base_segment::template run<Task>(pool, _function);
+    return base_segment::template run<task_type>(pool, _function);
   }
 
 private:
-  class Task
+  function_type _function; /**< transformation function of input */
+};
+
+template <typename Parent>
+class one_one_segment<Parent, void> : public basic_segment<Parent, void>
+{
+  typedef basic_segment<Parent, void> base_segment;
+
+public:
+  typedef typename base_segment::input_type input_type;
+  typedef void value_type;
+
+  typedef std::function<void(const input_type&)> function_type;
+
+  typedef one_sink_task<input_type, function_type> task_type;
+
+  one_one_segment(
+    const Parent& parent,
+    const function_type& function
+  )
+    :base_segment(parent),
+     _function(function)
+  {}
+
+  execution run(thread_pool& pool)
   {
-  public:
-    typedef typename Parent::value_type in_entry;
+    auto promise_ptr = std::make_shared<std::promise<bool>>();
+    auto future = promise_ptr->get_future();
+    auto queue_front = base_segment::_parent.run(pool);
 
-    Task(
-      const queue_front<in_entry>& queue_front,
-      const queue_back<value_type>& queue_back,
-      const function_type& function
-    )
-      :_queue_front(queue_front),
-       _queue_back(queue_back),
-       _function(function)
-    {}
+    task_type task(promise_ptr, queue_front, _function);
+    pool.submit(task);
 
-    bool operator()()
-    {
-      while (true)
-      {
-        if ( ! _queue_front.is_empty())
-        {
-          const auto& input = _queue_front.front();
-          const auto output = _function(input);
-          auto status = _queue_back.try_push(output);
+    return execution(std::move(future));
+  }
 
-          if (status == queue_op_status::SUCCESS)
-          {
-            _queue_front.try_pop();
-          }
-          else if (status == queue_op_status::FULL)
-          {
-            // downstream queue is full, yield
-            return false;
-          }
-        }
-        else // upstream queue is empty
-        {
-          if (_queue_front.is_closed())
-          {
-            _queue_back.close();
-            return true; // task finished
-          }
-          else
-          {
-            return false; // yield
-          }
-        }
-      }
-    }
-
-  private:
-    queue_front<in_entry> _queue_front;
-    queue_back<value_type> _queue_back;
-    function_type _function;
-  };
-
+private:
   function_type _function; /**< transformation function of input */
 };
 
@@ -179,13 +162,15 @@ class one_n_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
-  typedef typename base_segment::value_type value_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   typedef std::function<R(
     const input_type&,
     queue_back<Output>&
   )> function_type;
+
+  typedef one_n_task<input_type, value_type, function_type> task_type;
 
   one_n_segment(
     const Parent& parent,
@@ -198,54 +183,10 @@ public:
   /** @copydoc basic_segment::run */
   queue_front<value_type> run(thread_pool& pool)
   {
-    return base_segment::template run<Task>(pool, _function);
+    return base_segment::template run<task_type>(pool, _function);
   }
 
 private:
-  class Task
-  {
-    typedef typename Parent::value_type in_entry;
-
-  public:
-    Task(
-      const queue_front<in_entry>& queue_front,
-      const queue_back<value_type>& queue_back,
-      const function_type& function
-    )
-      :_queue_front(queue_front),
-       _queue_back(queue_back),
-       _function(function)
-    {}
-
-    bool operator()()
-    {
-      while (true)
-      {
-        if (_queue_front.is_closed() && _queue_front.is_empty())
-        {
-          _queue_back.close();
-          return true; // task finished
-        }
-
-        if ( ! _queue_front.is_empty() && ! _queue_back.is_full() )
-        {
-          const auto& input = _queue_front.front();
-          _function(input, _queue_back);
-          _queue_front.try_pop();
-        }
-        else
-        {
-          return false; // yield
-        }
-      }
-    }
-
-  private:
-    queue_front<in_entry> _queue_front;
-    queue_back<value_type> _queue_back;
-    function_type _function;
-  };
-
   function_type _function; /**< transformation function of input */
 };
 
@@ -255,12 +196,14 @@ class n_one_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
-  typedef typename base_segment::value_type value_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   typedef std::function<Output(
     queue_front<Output>&
   )> function_type;
+
+  typedef n_one_task<input_type, value_type, function_type> task_type;
 
   n_one_segment(
     const Parent& parent,
@@ -273,70 +216,10 @@ public:
   /** @copydoc basic_segment::run */
   queue_front<value_type> run(thread_pool& pool)
   {
-    return base_segment::template run<Task>(pool, _function);
+    return base_segment::template run<task_type>(pool, _function);
   }
 
 private:
-  class Task
-  {
-  public:
-    typedef typename Parent::value_type in_entry;
-
-    Task(
-      const queue_front<in_entry>& queue_front,
-      const queue_back<value_type>& queue_back,
-      const function_type& function
-    )
-      :_queue_front(queue_front),
-       _queue_back(queue_back),
-       _function(function)
-    {}
-
-    bool operator()()
-    {
-      while (true)
-      {
-        // try buffer
-        if (_has_buffered)
-        {
-          auto status = _queue_back.try_push(_buffer);
-          if (status == queue_op_status::SUCCESS)
-          {
-            _has_buffered = false;
-          }
-          else
-          {
-            // downstream queue is still full
-            return false; // yield
-          }
-        }
-
-        auto output = _function(_queue_front);
-        auto status = _queue_back.try_push(_buffer);
-        if (status == queue_op_status::FULL)
-        {
-          // downstream queue is full, buffer output
-          _has_buffered = true;
-          _buffer = output;
-          return false; // yield
-        }
-
-        if (_queue_front.is_closed() && _queue_front.is_empty())
-        {
-          _queue_back.close();
-          return true;
-        }
-      }
-    }
-
-  private:
-    queue_front<in_entry> _queue_front;
-    queue_back<value_type> _queue_back;
-    function_type _function;
-    bool _has_buffered = false;
-    value_type _buffer;
-  };
-
   function_type _function; /**< transformation function of input */
 };
 
@@ -346,13 +229,15 @@ class n_m_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
-  typedef typename base_segment::value_type value_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   typedef std::function<R(
     queue_front<input_type>&,
     queue_back<Output>&
   )> function_type;
+
+  typedef n_m_task<input_type, value_type, function_type> task_type;
 
   n_m_segment(
     const Parent& parent,
@@ -365,47 +250,10 @@ public:
   /** @copydoc basic_segment::run */
   queue_front<value_type> run(thread_pool& pool)
   {
-    return base_segment::template run<Task>(pool, _function);
+    return base_segment::template run<task_type>(pool, _function);
   }
 
 private:
-  class Task
-  {
-  public:
-    typedef typename Parent::value_type in_entry;
-
-    Task(
-      const queue_front<in_entry>& queue_front,
-      const queue_back<value_type>& queue_back,
-      const function_type& function
-    )
-      :_queue_front(queue_front),
-       _queue_back(queue_back),
-       _function(function)
-    {}
-
-    bool operator()()
-    {
-      while (_queue_front.read_available())
-      {
-        _function(_queue_front, _queue_back);
-      }
-
-      if (_queue_front.is_closed() == false)
-      {
-        return false; // yield
-      }
-
-      _queue_back.close();
-      return true;
-    }
-
-  private:
-    queue_front<in_entry> _queue_front;
-    queue_back<value_type> _queue_back;
-    function_type _function;
-  };
-
   function_type _function; /**< transformation function of input */
 };
 
@@ -431,21 +279,17 @@ public:
 
       while (_current != _end)
       {
-//        LOG("[PROD] Try push: %d", *_current);
         auto status = q.try_push(*_current);
         if (status == queue_op_status::SUCCESS)
         {
-//          LOG("[PROD] Push Success : %d", *_current);
           ++_current;
         }
         else
         {
-//          LOG("[PROD] Push Failure : %d", *_current);
           return false; // not finished
         }
       }
 
-//      LOG0("[PROD] Closing queue");
       q.close();
 
       return true;
@@ -496,12 +340,14 @@ private:
   function_type _generator;
 };
 
-template <typename Container, typename Parent>
+template <typename Container, typename Parent> // TODO change Arg order
 class range_output_segment: public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
 
 public:
+  typedef typename base_segment::input_type input_type;
+
   range_output_segment(
     const Parent& parent,
     Container& container
@@ -517,63 +363,13 @@ public:
     auto queue_front = base_segment::_parent.run(pool);
     auto out_it = std::back_inserter(_container);
 
-    Task task(promise_ptr, queue_front, out_it);
+    range_output_task<input_type, Container> task(promise_ptr, queue_front, out_it);
     pool.submit(task);
 
     return execution(std::move(future));
   }
 
 private:
-  class Task
-  {
-  public:
-    typedef queue_front<typename Parent::value_type> queue_front_t;
-
-    Task(
-      const std::shared_ptr<std::promise<bool>>& promise_ptr,
-      const queue_front_t& queue_front,
-      const std::back_insert_iterator<Container>& out_it
-    )
-      :_promise_ptr(promise_ptr),
-       _queue_front(queue_front),
-       _out_it(out_it)
-    {}
-
-    bool operator()()
-    {
-      typedef typename queue_front_t::value_type entry_t;
-
-      while (true)
-      {
-        entry_t entry;
-
-//        LOG0("[CONS] Try pop");
-        auto status = _queue_front.try_pop(entry);
-        if (status == queue_op_status::SUCCESS)
-        {
-//          LOG("[CONS] Entry popped: %d", entry);
-          *_out_it = entry;
-        }
-        else if (status == queue_op_status::CLOSED) // only if queue is empty
-        {
-//          LOG0("[CONS] Stop, queue closed");
-          _promise_ptr->set_value(true);
-          return true;
-        }
-        else // queue was empty but not closed, more entries may arrive
-        {
-//          LOG0("[CONS] Yield, queue empty");
-          return false; // not finished
-        }
-      }
-    }
-
-  private:
-    std::shared_ptr<std::promise<bool>> _promise_ptr;
-    queue_front_t _queue_front;
-    std::back_insert_iterator<Container> _out_it;
-  };
-
   Container& _container;
 };
 
@@ -581,6 +377,7 @@ private:
 // is_segment predicate
 // TODO rename to is_connectable_segment,
 // since *_output_segment is segment but not connectable
+// aslo segments with Output = void are not connectable
 //
 
 template <typename NotSegment>
