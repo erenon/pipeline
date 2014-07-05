@@ -414,34 +414,40 @@ private:
 
 //
 // is_segment predicate
-// TODO rename to is_connectable_segment,
-// since *_output_segment is segment but not connectable
-// aslo segments with Output = void are not connectable
 //
 
 template <typename NotSegment>
-struct is_segment : public std::false_type {};
+struct is_connectable_segment : public std::false_type {};
 
 template <typename P, typename O>
-struct is_segment<basic_segment<P, O>> : public std::true_type {};
+struct is_connectable_segment<basic_segment<P, O>> : public std::true_type {};
+
+template <typename P>
+struct is_connectable_segment<basic_segment<P, void>> : public std::false_type {};
 
 template <typename P, typename O>
-struct is_segment<one_one_segment<P, O>> : public std::true_type {};
+struct is_connectable_segment<one_one_segment<P, O>> : public std::true_type {};
+
+template <typename P>
+struct is_connectable_segment<one_one_segment<P, void>> : public std::false_type {};
 
 template <typename P, typename O, typename R>
-struct is_segment<one_n_segment<P, O, R>> : public std::true_type {};
+struct is_connectable_segment<one_n_segment<P, O, R>> : public std::true_type {};
 
 template <typename P, typename O>
-struct is_segment<n_one_segment<P, O>> : public std::true_type {};
+struct is_connectable_segment<n_one_segment<P, O>> : public std::true_type {};
+
+template <typename P>
+struct is_connectable_segment<n_one_segment<P, void>> : public std::false_type {};
 
 template <typename P, typename O, typename R>
-struct is_segment<n_m_segment<P, O, R>> : public std::true_type {};
+struct is_connectable_segment<n_m_segment<P, O, R>> : public std::true_type {};
 
 template <typename I>
-struct is_segment<range_input_segment<I>> : public std::true_type {};
+struct is_connectable_segment<range_input_segment<I>> : public std::true_type {};
 
 template <typename C, typename O>
-struct is_segment<generator_input_segment<C, O>> : public std::true_type {};
+struct is_connectable_segment<generator_input_segment<C, O>> : public std::true_type {};
 
 } // namespace detail
 } // namespace pipeline

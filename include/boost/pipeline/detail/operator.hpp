@@ -31,7 +31,7 @@ using valid_connection = typename std::enable_if<
 
 template <typename Segment>
 using enable_if_segment = typename std::enable_if<
-  is_segment<Segment>::value
+  is_connectable_segment<Segment>::value
 ,int>::type;
 
 // segment | transformation
