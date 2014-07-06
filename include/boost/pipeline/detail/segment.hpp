@@ -88,7 +88,7 @@ protected:
   Parent _parent;          /**< parent segment, provider of input */
 };
 
-template <typename Parent, typename Output>
+template <typename Parent, typename Output, bool IsSink = std::is_same<Output, void>::value>
 class one_one_segment : public basic_segment<Parent, Output>
 {
   typedef basic_segment<Parent, Output> base_segment;
@@ -119,8 +119,8 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
-template <typename Parent>
-class one_one_segment<Parent, void> : public basic_segment<Parent, void>
+template <typename Parent, typename Output>
+class one_one_segment<Parent, Output, true> : public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
 
@@ -128,7 +128,7 @@ public:
   typedef typename base_segment::input_type input_type;
   typedef void value_type;
 
-  typedef std::function<void(const input_type&)> function_type;
+  typedef std::function<Output(const input_type&)> function_type;
 
   typedef single_consume_output_task<input_type, function_type> task_type;
 
@@ -190,7 +190,7 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
-template <typename Parent, typename Output>
+template <typename Parent, typename Output, bool IsSink = std::is_same<Output, void>::value>
 class n_one_segment : public basic_segment<Parent, Output>
 {
   typedef basic_segment<Parent, Output> base_segment;
@@ -223,8 +223,8 @@ private:
   function_type _function; /**< transformation function of input */
 };
 
-template <typename Parent>
-class n_one_segment<Parent, void> : public basic_segment<Parent, void>
+template <typename Parent, typename Output>
+class n_one_segment<Parent, Output, true> : public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
 
@@ -232,7 +232,7 @@ public:
   typedef typename base_segment::input_type input_type;
   typedef void value_type;
 
-  typedef std::function<void(
+  typedef std::function<Output(
     queue_front<input_type>&
   )> function_type;
 
@@ -448,6 +448,25 @@ struct is_connectable_segment<range_input_segment<I>> : public std::true_type {}
 
 template <typename C, typename O>
 struct is_connectable_segment<generator_input_segment<C, O>> : public std::true_type {};
+
+//
+// to_sink_segment
+//
+
+template <typename NotSinkableSegment>
+struct to_sink_segment {};
+
+template <typename P, typename O, bool S>
+struct to_sink_segment<one_one_segment<P, O, S>>
+{
+  typedef one_one_segment<P, O, true> type;
+};
+
+template <typename P, typename O, bool S>
+struct to_sink_segment<n_one_segment<P, O, S>>
+{
+  typedef n_one_segment<P, O, true> type;
+};
 
 } // namespace detail
 } // namespace pipeline

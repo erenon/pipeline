@@ -18,6 +18,7 @@
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/operator.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
+#include <boost/pipeline/detail/closed_segment.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -130,6 +131,34 @@ detail::open_segment<typename std::add_pointer<Function>::type>
 make(const Function& function)
 {
   return detail::open_segment<typename std::add_pointer<Function>::type>(&function);
+}
+
+/**
+ * Creates a right-terminated *_output_segment
+ * which encapsulates `consumer`
+ */
+template <typename Callable, typename std::enable_if<
+! std::is_function<Callable>::value
+,int>::type = 0>
+detail::closed_segment<Callable>
+to(const Callable& consumer)
+{
+  return detail::closed_segment<Callable>{consumer};
+}
+
+/**
+ * Creates a right-terminated *_output_segment
+ * which encapsulates `consumer`.
+ *
+ * `consumer` is of a function type.
+ */
+template <typename Function, typename std::enable_if<
+  std::is_function<Function>::value
+,int>::type = 0>
+detail::closed_segment<typename std::add_pointer<Function>::type>
+to(const Function& consumer)
+{
+  return detail::closed_segment<typename std::add_pointer<Function>::type>{&consumer};
 }
 
 } // namespace pipeline

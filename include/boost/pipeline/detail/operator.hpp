@@ -18,6 +18,7 @@
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
+#include <boost/pipeline/detail/closed_segment.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -64,6 +65,18 @@ auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
   -> decltype(open_s.connect_to(segment))
 {
   return open_s.connect_to(segment);
+}
+
+// segment | closed_segment
+template <
+  typename Segment, typename Trafo,
+  enable_if_segment<Segment> = 0,
+  typename OpenResult = typename connector<Segment, Trafo>::type,
+  typename Result = typename to_sink_segment<OpenResult>::type
+>
+Result operator|(const Segment& segment, const closed_segment<Trafo>& closed)
+{
+  return Result(segment, closed.transformation);
 }
 
 } // namespace detail
