@@ -261,7 +261,7 @@ public:
   single_consume_output_task(
     const std::shared_ptr<std::promise<bool>>& promise_ptr,
     const queue_front<Input>& queue_front,
-    Consumer& consumer
+    const Consumer& consumer
   )
     :_promise_ptr(promise_ptr),
      _queue_front(queue_front),
@@ -294,7 +294,7 @@ public:
 private:
   std::shared_ptr<std::promise<bool>> _promise_ptr;
   queue_front<Input> _queue_front;
-  Consumer& _consumer;
+  Consumer _consumer;
 };
 
 template <typename Input, typename Consumer>
@@ -304,7 +304,7 @@ public:
   multi_consume_output_task(
     const std::shared_ptr<std::promise<bool>>& promise_ptr,
     const queue_front<Input>& queue_front,
-    Consumer& consumer
+    const Consumer& consumer
   )
     :_promise_ptr(promise_ptr),
      _queue_front(queue_front),
@@ -336,7 +336,7 @@ public:
 private:
   std::shared_ptr<std::promise<bool>> _promise_ptr;
   queue_front<Input> _queue_front;
-  Consumer& _consumer;
+  Consumer _consumer;
 };
 
 } // namespace detail
