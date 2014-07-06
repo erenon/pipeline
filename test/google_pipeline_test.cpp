@@ -58,9 +58,8 @@ User get_user(int uid) {
 }
 
 // Processes the User
-/*void*/int consume_user(User input) {
+void consume_user(User input) {
   printf("Consuming user %s\n", input.get_name().c_str());
-  return 1;
 }
 
 void consume_string(std::string input) {
@@ -81,7 +80,7 @@ void repeat(int i, queue_back<int> q) {
 }
 
 int sum_two(queue_front<int> q) {
-  if (q.empty())
+  if (q.is_empty())
   {
     return -1;
   }
@@ -89,7 +88,7 @@ int sum_two(queue_front<int> q) {
   int i = q.front();
   q.try_pop();
 
-  if (q.empty())
+  if (q.is_empty())
   {
     return i;
   }
@@ -119,7 +118,7 @@ BOOST_AUTO_TEST_CASE(ManualBuild)
   auto p2 = make(get_user);
   auto p3 = p1 | p6 | p7 | p2;
 
-  auto p4 = make(consume_user); // TODO ::to is missing
+  auto p4 = to(consume_user);
 
   auto p = p3 | p4;
 
@@ -132,11 +131,11 @@ BOOST_AUTO_TEST_CASE(ManualBuild)
 
 BOOST_AUTO_TEST_CASE(Example)
 {
-  std::deque<std::string> queue{"Foo", "Bar", "Baz", "Qux"};
+  std::deque<std::string> queue{"Foo", "BarA", "BazBB", "QuxCCC"};
 
   auto p1 = make(find_uid);
   auto p2 = p1 | repeat;
-  // auto p3 = queue | p2 | get_user; // TODO missing container | plan
+  // auto p3 = queue | p2 | get_user; // TODO missing queue | plan
   auto p3 = from(queue) | p2 | get_user;
 
   std::deque<User> out;
@@ -147,9 +146,13 @@ BOOST_AUTO_TEST_CASE(Example)
   auto pex  = p4.run(pool);
   auto pex2 = (from(out) | consume_user).run(pool);
 
+  // TODO queue.close
+
   pex.wait();
+  pex2.wait();
 
   BOOST_ASSERT(pex.is_done());
+  // BOOST_ASSERT(out.is_closed());
   BOOST_ASSERT(pex2.is_done());
 
   // TODO queue is closed
@@ -158,18 +161,12 @@ BOOST_AUTO_TEST_CASE(Example)
 // TODO SimpleParallel
 // TODO ParallelExample
 
-//BOOST_AUTO_TEST_CASE(ProduceExample)
-//{
-//  // TODO from(functor) not supported
-////  auto p5 = from(produce_strings) | find_uid | get_user | consume_user;
-//
-//  queue_back<std::string> queue;
-//  produce_strings(queue);
-//
-//  auto p5 = from(queue) | find_uid | get_user | consume_user;
-//
-//  thread_pool pool{1};
-//
-//  auto pex3 = p5.run(pool);
-//  pex3.wait();
-//}
+BOOST_AUTO_TEST_CASE(ProduceExample)
+{
+  auto p5 = from(produce_strings) | find_uid | get_user | consume_user;
+
+  thread_pool pool{1};
+
+  auto pex3 = p5.run(pool);
+  pex3.wait();
+}
