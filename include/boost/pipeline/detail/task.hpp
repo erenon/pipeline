@@ -149,7 +149,7 @@ public:
       }
 
       auto output = _transformation(_queue_front);
-      auto status = _queue_back.try_push(_buffer);
+      auto status = _queue_back.try_push(output);
       if (status == queue_op_status::FULL)
       {
         // downstream queue is full, buffer output
