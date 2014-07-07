@@ -31,14 +31,14 @@ using valid_connection = typename std::enable_if<
 
 
 template <typename Segment>
-using enable_if_segment = typename std::enable_if<
+using enable_if_connectable = typename std::enable_if<
   is_connectable_segment<Segment>::value
 ,int>::type;
 
 // segment | transformation
 template <
   typename Segment, typename Function,
-  enable_if_segment<Segment> = 0,
+  enable_if_connectable<Segment> = 0,
   typename Result = typename connector<Segment, Function>::type,
   valid_connection<Result> = 0
 >
@@ -50,7 +50,7 @@ Result operator|(const Segment& segment, const Function& f)
 // segment | container
 template <
   typename Segment, typename Container,
-  enable_if_segment<Segment> = 0,
+  enable_if_connectable<Segment> = 0,
   typename Result = typename connector<Segment, Container>::type,
   valid_connection<Result> = 0
 >
@@ -60,7 +60,7 @@ Result operator|(const Segment& segment, Container& c)
 }
 
 // segment | open_segment
-template <typename Segment, typename... Trafos, enable_if_segment<Segment> = 0>
+template <typename Segment, typename... Trafos, enable_if_connectable<Segment> = 0>
 auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
   -> decltype(open_s.connect_to(segment))
 {
@@ -70,7 +70,7 @@ auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
 // segment | closed_segment
 template <
   typename Segment, typename Trafo,
-  enable_if_segment<Segment> = 0,
+  enable_if_connectable<Segment> = 0,
   typename OpenResult = typename connector<Segment, Trafo>::type,
   typename Result = typename to_sink_segment<OpenResult>::type
 >
