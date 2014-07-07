@@ -11,6 +11,7 @@ alias pipeline
   : # no build requirements
   : # no default build
   : <include>../include
+    <include>$(BOOST_ROOT)
   ;
 
 project boost/pipeline/example
@@ -22,6 +23,7 @@ project boost/pipeline/example
     <warnings>all
     <toolset>gcc:<cxxflags>-Wextra
     <toolset>gcc:<cxxflags>-std=c++11
+    <toolset>gcc:<linkflags>-Wl,--no-as-needed
     <toolset>clang:<cxxflags>-Wextra
     <toolset>clang:<cxxflags>-std=c++11
   ;
