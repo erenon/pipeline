@@ -50,7 +50,7 @@ typedef one_one_segment<dummy_plan, int> seg_oo;
 typedef one_n_segment<dummy_plan, int, unspec> seg_on;
 typedef n_m_segment<dummy_plan, int, unspec> seg_nm;
 typedef n_one_segment<dummy_plan, int> seg_no;
-typedef range_output_segment<std::vector<long>, dummy_plan> seg_ro;
+typedef range_output_segment<dummy_plan, std::vector<long>> seg_ro;
 
 #if defined BOOST_PIPELINE_TEST_DEBUG
   #define TEST_CONNECTION(expr, expected) \

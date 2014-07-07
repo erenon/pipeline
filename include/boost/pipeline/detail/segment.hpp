@@ -447,7 +447,7 @@ private:
   function_type _generator;
 };
 
-template <typename Container, typename Parent> // TODO change Arg order
+template <typename Parent, typename Container>
 class range_output_segment : public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
