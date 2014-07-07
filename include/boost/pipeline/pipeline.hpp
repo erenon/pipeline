@@ -24,7 +24,7 @@ namespace boost {
 namespace pipeline {
 
 /**
- * Creates an input_segment operating on `container`.
+ * Creates a range_input_segment operating on `container`.
  */
 template <typename Container>
 detail::range_input_segment<typename Container::iterator>
@@ -36,7 +36,7 @@ from(Container& container)
 }
 
 /**
- * Creates an input_segment operating on a range.
+ * Creates a range_input_segment operating on a range.
  */
 template <typename Iterator>
 detail::range_input_segment<Iterator>
@@ -48,7 +48,7 @@ from(const Iterator& begin, const Iterator& end)
 }
 
 /**
- * Creates an input_segment operating on values
+ * Creates a generator_input_segment operating on values
  * produced by a generator, generator is an std::function
  */
 template <typename QueueBack, typename R>
@@ -67,7 +67,7 @@ from(const std::function<R(QueueBack)>& generator)
 }
 
 /**
- * Creates an input_segment operating on values
+ * Creates a generator_input_segment operating on values
  * produced by a generator, generator is a function pointer
  */
 template <typename QueueBack, typename R>
@@ -86,7 +86,17 @@ from(R(*generator)(QueueBack))
 }
 
 /**
- * Creates an input_segment operating on values
+ * Creates a queue_input_segment representing `queue`
+ */
+template <typename T>
+detail::queue_input_segment<T>
+from(queue<T>& queue)
+{
+  return detail::queue_input_segment<T>(queue);
+}
+
+/**
+ * Creates a generator_input_segment operating on values
  * produced by a generator, generator is callable:
  * generator(queue_back<T>);
  *

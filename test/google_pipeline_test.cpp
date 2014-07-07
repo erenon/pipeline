@@ -110,7 +110,12 @@ void produce_strings(queue_back<std::string>& queue) {
 
 BOOST_AUTO_TEST_CASE(ManualBuild)
 {
-  std::deque<int> queue{1, 2, 3, 4, 5};
+  queue<int> queue;
+  queue.try_push(1);
+  queue.try_push(2);
+  queue.try_push(3);
+  queue.try_push(4);
+
   auto p1 = from(queue);
 
   auto p6 = make(repeat);
@@ -126,36 +131,39 @@ BOOST_AUTO_TEST_CASE(ManualBuild)
 
   auto exec = p.run(pool);
 
-  // TODO queue.push and close
+  queue.try_push(5);
+  queue.close();
 }
 
 BOOST_AUTO_TEST_CASE(Example)
 {
-  std::deque<std::string> queue{"Foo", "BarA", "BazBB", "QuxCCC"};
+  queue<std::string> in;
+  in.try_push("Foo");
 
   auto p1 = make(find_uid);
   auto p2 = p1 | repeat;
-  // auto p3 = queue | p2 | get_user; // TODO missing queue | plan
-  auto p3 = from(queue) | p2 | get_user;
+  auto p3 = in | p2 | get_user;
 
-  std::deque<User> out;
+  queue<User> out;
   auto p4 = p3 | out;
 
   thread_pool pool{1};
 
   auto pex  = p4.run(pool);
+  in.try_push("BarA");
+  in.try_push("BazBB");
+  in.try_push("QuxCCC");
+
   auto pex2 = (from(out) | consume_user).run(pool);
 
-  // TODO queue.close
+  in.close();
 
   pex.wait();
   pex2.wait();
 
   BOOST_ASSERT(pex.is_done());
-  // BOOST_ASSERT(out.is_closed());
+  BOOST_ASSERT(out.is_closed());
   BOOST_ASSERT(pex2.is_done());
-
-  // TODO queue is closed
 }
 
 // TODO SimpleParallel

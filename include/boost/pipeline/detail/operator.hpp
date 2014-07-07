@@ -79,6 +79,14 @@ Result operator|(const Segment& segment, const closed_segment<Trafo>& closed)
   return Result(segment, closed.transformation);
 }
 
+// queue | transformation / segment / open_segment / closed_segment
+template <typename T, typename Connectable>
+auto operator|(queue<T>& queue, const Connectable& connectable)
+  -> decltype(queue_input_segment<T>(queue) | connectable)
+{
+  return queue_input_segment<T>(queue) | connectable;
+}
+
 } // namespace detail
 } // namespace pipeline
 } // namespace boost

@@ -25,6 +25,8 @@
 #include <boost/pipeline/threading.hpp>
 #include <boost/pipeline/detail/task.hpp>
 
+#include <boost/core/null_deleter.hpp>
+
 namespace boost {
 namespace pipeline {
 namespace detail {
@@ -84,6 +86,21 @@ public:
     return downstream_ptr;
   }
 
+  template <typename Task, typename Function>
+  queue_front<value_type> run(thread_pool& pool, Function& function, queue<value_type>& target)
+  {
+    auto qf = _parent.run(pool);
+    auto downstream_ptr = queuePtr<value_type>(&target, null_deleter());
+
+    queue_back<value_type> qb(downstream_ptr);
+
+    Task task(qf, qb, function);
+
+    pool.submit(task);
+
+    return queue_front<value_type>(downstream_ptr);
+  }
+
 protected:
   Parent _parent;          /**< parent segment, provider of input */
 };
@@ -113,6 +130,12 @@ public:
   queue_front<value_type> run(thread_pool& pool)
   {
     return base_segment::template run<task_type>(pool, _function);
+  }
+
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
+  {
+    return base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -186,6 +209,12 @@ public:
     return base_segment::template run<task_type>(pool, _function);
   }
 
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
+  {
+    return base_segment::template run<task_type>(pool, _function, target);
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
@@ -217,6 +246,12 @@ public:
   queue_front<value_type> run(thread_pool& pool)
   {
     return base_segment::template run<task_type>(pool, _function);
+  }
+
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
+  {
+    return base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -292,6 +327,12 @@ public:
     return base_segment::template run<task_type>(pool, _function);
   }
 
+  /** @copydoc basic_segment::run */
+  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
+  {
+    return base_segment::template run<task_type>(pool, _function, target);
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
@@ -339,9 +380,34 @@ public:
     return qf;
   }
 
+  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
+
 private:
   Iterator _current;
   const Iterator _end;
+};
+
+template <typename T>
+class queue_input_segment
+{
+public:
+  typedef T value_type;
+
+  queue_input_segment(queue<T>& queue)
+    :_queue(queue)
+  {}
+
+  queue_front<value_type> run(thread_pool&)
+  {
+    return queue_front<value_type>(
+      queuePtr<T>(&_queue, null_deleter())
+    );
+  }
+
+  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
+
+private:
+  queue<T>& _queue;
 };
 
 template <typename Callable, typename Output>
@@ -375,12 +441,14 @@ public:
     return qf;
   }
 
+  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
+
 private:
   function_type _generator;
 };
 
 template <typename Container, typename Parent> // TODO change Arg order
-class range_output_segment: public basic_segment<Parent, void>
+class range_output_segment : public basic_segment<Parent, void>
 {
   typedef basic_segment<Parent, void> base_segment;
 
@@ -410,6 +478,49 @@ public:
 
 private:
   Container& _container;
+};
+
+template <typename Parent>
+class queue_output_segment : public basic_segment<Parent, void>
+{
+  typedef basic_segment<Parent, void> base_segment;
+
+public:
+  typedef typename base_segment::input_type input_type;
+
+  queue_output_segment(
+    const Parent& parent,
+    queue<input_type>& queue
+  )
+    :base_segment(parent),
+     _queue(queue)
+  {}
+
+  execution run(thread_pool& pool)
+  {
+    auto queue_front = base_segment::_parent.run(pool, _queue);
+
+    auto promise_ptr = std::make_shared<std::promise<bool>>();
+    auto future = promise_ptr->get_future();
+
+    auto task = [queue_front, promise_ptr] () -> bool
+    {
+      if (queue_front.is_closed())
+      {
+        promise_ptr->set_value(true);
+        return true;
+      }
+      else
+      {
+        return false;
+      }
+    };
+
+    return execution(std::move(future));
+  }
+
+private:
+  queue<input_type>& _queue;
 };
 
 //
@@ -445,6 +556,9 @@ struct is_connectable_segment<n_m_segment<P, O, R>> : public std::true_type {};
 
 template <typename I>
 struct is_connectable_segment<range_input_segment<I>> : public std::true_type {};
+
+template <typename T>
+struct is_connectable_segment<queue_input_segment<T>> : public std::true_type {};
 
 template <typename C, typename O>
 struct is_connectable_segment<generator_input_segment<C, O>> : public std::true_type {};

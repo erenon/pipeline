@@ -151,6 +151,9 @@ class connector
   ,int>::type = 0>
   static range_output_segment<Container, Plan> connect(Container container);
 
+  template <typename T>
+  static queue_output_segment<Plan> connect(const queue<T>& queue);
+
   // If none of the above matches: invalid transformation
   static invalid_trafo connect(...);
 
