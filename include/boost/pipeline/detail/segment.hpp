@@ -90,7 +90,7 @@ public:
   queue_front<value_type> run(thread_pool& pool, Function& function, queue<value_type>& target)
   {
     auto qf = _parent.run(pool);
-    auto downstream_ptr = queuePtr<value_type>(&target, null_deleter());
+    auto downstream_ptr = queue_ptr<value_type>(&target, null_deleter());
 
     queue_back<value_type> qb(downstream_ptr);
 
@@ -350,12 +350,12 @@ public:
 
   queue_front<value_type> run(thread_pool& pool)
   {
-    auto queuePtr = std::make_shared<queue<value_type>>();
-    queue_front<value_type> qf(queuePtr);
+    auto queue_ptr = std::make_shared<queue<value_type>>();
+    queue_front<value_type> qf(queue_ptr);
 
-    auto task = [this, queuePtr] () -> bool
+    auto task = [this, queue_ptr] () -> bool
     {
-      auto& q(*queuePtr);
+      auto& q(*queue_ptr);
 
       while (_current != _end)
       {
@@ -400,7 +400,7 @@ public:
   queue_front<value_type> run(thread_pool&)
   {
     return queue_front<value_type>(
-      queuePtr<T>(&_queue, null_deleter())
+      queue_ptr<T>(&_queue, null_deleter())
     );
   }
 
@@ -423,9 +423,9 @@ public:
 
   queue_front<value_type> run(thread_pool& pool)
   {
-    auto queuePtr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(queuePtr);
-    queue_front<value_type> qf(queuePtr);
+    auto queue_ptr = std::make_shared<queue<value_type>>();
+    queue_back<value_type> qb(queue_ptr);
+    queue_front<value_type> qf(queue_ptr);
 
     auto task = [this, qb] () mutable -> bool
     {

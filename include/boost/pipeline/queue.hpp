@@ -101,7 +101,7 @@ private:
 };
 
 template <typename T>
-using queuePtr = std::shared_ptr<queue<T>>;
+using queue_ptr = std::shared_ptr<queue<T>>;
 
 template <typename T>
 class queue_back
@@ -109,29 +109,29 @@ class queue_back
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_back(const queuePtr<T>& queuePtr)
-    :_queuePtr(queuePtr)
+  queue_back(const queue_ptr<T>& queue_ptr)
+    :_queue_ptr(queue_ptr)
   {}
 
   queue_op_status try_push(const T& item)
   {
-    return _queuePtr->try_push(item);
+    return _queue_ptr->try_push(item);
   }
 
   bool is_full() const
   {
-    return _queuePtr->is_full();
+    return _queue_ptr->is_full();
   }
 
   size_t write_available() const
   {
-    return _queuePtr->write_available();
+    return _queue_ptr->write_available();
   }
 
-  void close() { _queuePtr->close(); }
+  void close() { _queue_ptr->close(); }
 
 private:
-  queuePtr<T> _queuePtr;
+  queue_ptr<T> _queue_ptr;
 };
 
 template <typename T>
@@ -140,39 +140,39 @@ class queue_front
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_front(const queuePtr<T>& queuePtr)
-    :_queuePtr(queuePtr)
+  queue_front(const queue_ptr<T>& queue_ptr)
+    :_queue_ptr(queue_ptr)
   {}
 
   queue_op_status try_pop(T& ret)
   {
-    return _queuePtr->try_pop(ret);
+    return _queue_ptr->try_pop(ret);
   }
 
   queue_op_status try_pop()
   {
-    return _queuePtr->try_pop();
+    return _queue_ptr->try_pop();
   }
 
   bool is_empty() const
   {
-    return _queuePtr->is_empty();
+    return _queue_ptr->is_empty();
   }
 
   size_t read_available() const
   {
-    return _queuePtr->read_available();
+    return _queue_ptr->read_available();
   }
 
   const T& front() const
   {
-    return _queuePtr->front();
+    return _queue_ptr->front();
   }
 
-  bool is_closed() const { return _queuePtr->is_closed(); }
+  bool is_closed() const { return _queue_ptr->is_closed(); }
 
 private:
-  queuePtr<T> _queuePtr;
+  queue_ptr<T> _queue_ptr;
 };
 
 } // namespace pipeline
