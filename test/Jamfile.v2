@@ -24,6 +24,7 @@ project boost/pipeline/test
     <warnings>all
     <link>shared:<define>BOOST_TEST_DYN_LINK
     <toolset>gcc:<cxxflags>-Wextra
+    #<toolset>gcc:<cxxflags>-Wextra
     <toolset>gcc:<cxxflags>-Werror
     <toolset>gcc:<cxxflags>-std=c++11
     <toolset>clang:<cxxflags>-Wextra
@@ -36,9 +37,12 @@ alias boost_unit_test_framework : /boost/test//boost_unit_test_framework ;
 # use-project /boost/thread : $(BOOST_ROOT)/libs/thread/build ;
 # alias boost_thread : /boost/thread//boost_thread ;
 
+use-project /boost/coroutine : $(BOOST_ROOT)/libs/coroutine/build ;
+alias boost_coroutine : /boost/coroutine//boost_coroutine ;
+
 rule pipeline-test ( name : includes * )
 {
-  unit-test $(name) : $(name).cpp boost_unit_test_framework ;
+  unit-test $(name) : $(name).cpp boost_unit_test_framework boost_coroutine ;
 }
 
 alias pipline-test-suite :
