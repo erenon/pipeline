@@ -54,6 +54,10 @@ public:
     typename std::remove_reference<Parent>::type::value_type
   >::type input_type;
 
+  typedef typename std::remove_reference<
+    typename std::remove_reference<Parent>::type::root_type
+  >::type root_type;
+
   typedef Output value_type;
 
   /**
@@ -111,6 +115,7 @@ class one_one_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
@@ -148,6 +153,7 @@ class one_one_segment<Parent, Output, true> : public basic_segment<Parent, void>
   typedef basic_segment<Parent, void> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef void value_type;
 
@@ -185,6 +191,7 @@ class one_n_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
@@ -225,6 +232,7 @@ class n_one_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
@@ -264,6 +272,7 @@ class n_one_segment<Parent, Output, true> : public basic_segment<Parent, void>
   typedef basic_segment<Parent, void> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef void value_type;
 
@@ -303,6 +312,7 @@ class n_m_segment : public basic_segment<Parent, Output>
   typedef basic_segment<Parent, Output> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
@@ -341,6 +351,7 @@ template <typename Iterator>
 class range_input_segment
 {
 public:
+  typedef void root_type;
   typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
 
   range_input_segment(const Iterator& begin, const Iterator& end)
@@ -391,6 +402,7 @@ template <typename T>
 class queue_input_segment
 {
 public:
+  typedef void root_type;
   typedef T value_type;
 
   queue_input_segment(queue<T>& queue)
@@ -414,6 +426,7 @@ template <typename Callable, typename Output>
 class generator_input_segment
 {
 public:
+  typedef void root_type;
   typedef Output value_type;
   typedef Callable function_type;
 
@@ -453,7 +466,9 @@ class range_output_segment : public basic_segment<Parent, void>
   typedef basic_segment<Parent, void> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   range_output_segment(
     const Parent& parent,
@@ -486,7 +501,9 @@ class queue_output_segment : public basic_segment<Parent, void>
   typedef basic_segment<Parent, void> base_segment;
 
 public:
+  typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
+  typedef typename base_segment::value_type value_type;
 
   queue_output_segment(
     const Parent& parent,
@@ -524,7 +541,7 @@ private:
 };
 
 //
-// is_segment predicate
+// is_connectable_segment predicate
 //
 
 template <typename NotSegment>
