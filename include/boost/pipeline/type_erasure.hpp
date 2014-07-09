@@ -23,9 +23,20 @@
 BOOST_TYPE_ERASURE_MEMBER((boost)(pipeline)(has_run), run)
 
 namespace boost {
+
 namespace pipeline {
 
-typedef void terminated;
+template<typename Root, typename T = typename type_erasure::_self>
+struct root_type_is_same_as
+{
+  static void apply(const T&)
+  {
+    static_assert(
+      std::is_same<typename T::root_type, Root>::value,
+      "Invalid segment type, root_type mismatch"
+    );
+  }
+};
 
 template<typename Value, typename T = typename type_erasure::_self>
 struct value_type_is_same_as
@@ -39,17 +50,27 @@ struct value_type_is_same_as
   }
 };
 
-template<typename Root, typename T = typename type_erasure::_self>
-struct root_type_is_same_as
+} // namespace pipeline
+
+namespace type_erasure {
+
+template<typename Concept, typename Value, typename Base>
+struct concept_interface<::boost::pipeline::root_type_is_same_as<Value>, Base, Concept> : Base
 {
-  static void apply(const T&)
-  {
-    static_assert(
-      std::is_same<typename T::root_type, Root>::value,
-      "Invalid segment type, root_type mismatch"
-    );
-  }
+  typedef Value root_type;
 };
+
+template<typename Concept, typename Value, typename Base>
+struct concept_interface<::boost::pipeline::value_type_is_same_as<Value>, Base, Concept> : Base
+{
+  typedef Value value_type;
+};
+
+} // namespace type_erasure
+
+namespace pipeline {
+
+typedef void terminated;
 
 template <typename Input, typename Output>
 using segment = typename type_erasure::any<
