@@ -13,14 +13,12 @@
 #ifndef BOOST_PIPELINE_THREADING_HPP
 #define BOOST_PIPELINE_THREADING_HPP
 
-#include <future>
-
-#include <boost/pipeline/detail/reentrant_thread_pool.hpp>
+#include <boost/thread/executors/basic_thread_pool.hpp>
 
 namespace boost {
 namespace pipeline {
 
-typedef detail::reentrant_thread_pool thread_pool;
+typedef executors::basic_thread_pool thread_pool;
 
 } // namespace pipeline
 } // namespace boost

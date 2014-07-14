@@ -15,90 +15,15 @@
 
 #include <memory>
 
-#include <boost/lockfree/spsc_queue.hpp>
+#include <boost/thread/sync_queue.hpp>
+
+#define BOOST_THREAD_QUEUE_DEPRECATE_OLD
 
 namespace boost {
 namespace pipeline {
 
-enum class queue_op_status { SUCCESS, FULL, EMPTY, CLOSED };
-
 template <typename T>
-class queue
-{
-  typedef boost::lockfree::spsc_queue<T, boost::lockfree::capacity<1 << 10>> buffer;
-
-public:
-  typedef T value_type;
-
-  queue() = default;
-  queue(const queue&) = delete;
-  queue& operator=(const queue&) = delete;
-
-  queue_op_status try_push(const T& item)
-  {
-    auto success = _buffer.push(item);
-    if (!success)
-    {
-      return queue_op_status::FULL;
-    }
-
-    return queue_op_status::SUCCESS;
-  }
-
-  queue_op_status try_pop(T& ret)
-  {
-    auto success = _buffer.pop(ret);
-    if (!success)
-    {
-      return (_closed) ? queue_op_status::CLOSED : queue_op_status::EMPTY;
-    }
-
-    return queue_op_status::SUCCESS;
-  }
-
-  queue_op_status try_pop()
-  {
-    auto success = _buffer.pop();
-    if (!success)
-    {
-      return (_closed) ? queue_op_status::CLOSED : queue_op_status::EMPTY;
-    }
-
-    return queue_op_status::SUCCESS;
-  }
-
-  bool is_empty() const
-  {
-    return _buffer.read_available() == 0;
-  }
-
-  bool is_full() const
-  {
-    return _buffer.write_available() == 0;
-  }
-
-  size_t read_available() const
-  {
-    return _buffer.read_available();
-  }
-
-  size_t write_available() const
-  {
-    return _buffer.write_available();
-  }
-
-  const T& front() const
-  {
-    return _buffer.front();
-  }
-
-  bool is_closed() const { return _closed; }
-  void close() { _closed = true; }
-
-private:
-  bool _closed = false;
-  buffer _buffer;
-};
+using queue = sync_queue<T>;
 
 template <typename T>
 using queue_ptr = std::shared_ptr<queue<T>>;
@@ -113,22 +38,20 @@ public:
     :_queue_ptr(queue_ptr)
   {}
 
-  queue_op_status try_push(const T& item)
+  void push(const T& item)
   {
-    return _queue_ptr->try_push(item);
+    return _queue_ptr->push_back(item);
   }
 
-  bool is_full() const
+  void push(T&& item)
   {
-    return _queue_ptr->is_full();
+    return _queue_ptr->push_back(std::move(item));
   }
 
-  size_t write_available() const
+  void close()
   {
-    return _queue_ptr->write_available();
+    _queue_ptr->close();
   }
-
-  void close() { _queue_ptr->close(); }
 
 private:
   queue_ptr<T> _queue_ptr;
@@ -144,32 +67,25 @@ public:
     :_queue_ptr(queue_ptr)
   {}
 
-  queue_op_status try_pop(T& ret)
+  T pull()
   {
-    return _queue_ptr->try_pop(ret);
+    return _queue_ptr->pull_front();
   }
 
-  queue_op_status try_pop()
+  void pull(T& ret)
   {
-    return _queue_ptr->try_pop();
+    return _queue_ptr->pull_front(ret);
   }
 
   bool is_empty() const
   {
-    return _queue_ptr->is_empty();
+    return _queue_ptr->empty();
   }
 
-  size_t read_available() const
+  bool is_closed() const
   {
-    return _queue_ptr->read_available();
+    return _queue_ptr->closed();
   }
-
-  const T& front() const
-  {
-    return _queue_ptr->front();
-  }
-
-  bool is_closed() const { return _queue_ptr->is_closed(); }
 
 private:
   queue_ptr<T> _queue_ptr;

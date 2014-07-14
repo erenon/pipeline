@@ -49,7 +49,7 @@ int not_equals_to(
 {
   if (item != filter)
   {
-    out.try_push(item);
+    out.push(item);
   }
 
   return item;
@@ -73,13 +73,14 @@ void if_multiple_of(
 {
   if (multiple % divisor == 0)
   {
-    out.try_push(multiple);
+    out.push(multiple);
   }
 }
 
 BOOST_AUTO_TEST_CASE(SegmentOpen)
 {
-  using namespace std::placeholders;
+  using std::placeholders::_1;
+  using std::placeholders::_2;
 
   auto plan1 = boost::pipeline::make(std::bind(not_equals_to, 7, _1, _2));
   auto plan2 = boost::pipeline::make(make_odd) | std::bind(if_multiple_of, _1, 3, _2);
