@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(Example)
   queue<User> out;
   auto p4 = p3 | out;
 
-  thread_pool pool{1};
+  thread_pool pool{2};
 
   auto pex  = p4.run(pool);
   in.try_push("BarA");
