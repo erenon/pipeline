@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE(InterfaceBasics)
 struct movable_only
 {
   movable_only(int v) : _value(v) {}
+  movable_only(movable_only&&) = default;
   movable_only(const movable_only&) = delete;
   void operator=(const movable_only&) = delete;
   movable_only& operator=(movable_only&&) = default;
@@ -55,21 +56,19 @@ struct movable_only
   int _value;
 };
 
-// TODO fix Queue.MovableT test
+BOOST_AUTO_TEST_CASE(MovableT)
+{
+  auto q_ptr = std::make_shared<queue<movable_only>>();
+  queue_front<movable_only> qf(q_ptr);
+  queue_back<movable_only>  qb(q_ptr);
 
-//BOOST_AUTO_TEST_CASE(MovableT)
-//{
-//  auto q_ptr = std::make_shared<queue<movable_only>>();
-//  queue_front<movable_only> qf(q_ptr);
-//  queue_back<movable_only>  qb(q_ptr);
-//
-//  movable_only item(1);
-//
-//  qb.push(std::move(item));
-//
-//  movable_only expected_ret(1);
-//  movable_only ret(0);
-//  qf.pull(ret);
-//
-//  BOOST_CHECK(ret == expected_ret);
-//}
+  movable_only item(1);
+
+  qb.push(std::move(item));
+
+  movable_only expected_ret(1);
+  movable_only ret(0);
+  qf.pull(ret);
+
+  BOOST_CHECK(ret == expected_ret);
+}

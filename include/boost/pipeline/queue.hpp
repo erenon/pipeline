@@ -45,7 +45,7 @@ public:
 
   void push(T&& item)
   {
-    return _queue_ptr->push_back(std::move(item));
+    return _queue_ptr->push_back(std::forward<T>(item));
   }
 
   void close()
