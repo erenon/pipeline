@@ -219,15 +219,12 @@ public:
 
   void operator()()
   {
-    while (true)
+    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
     {
-      while ( ! _upstream.is_closed() || ! _upstream.is_empty())
-      {
-        _consumer(_upstream);
-      }
-
-      _promise_ptr->set_value(true);
+      _consumer(_upstream);
     }
+
+    _promise_ptr->set_value(true);
   }
 
 private:
