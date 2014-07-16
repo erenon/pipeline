@@ -28,7 +28,6 @@ BOOST_AUTO_TEST_CASE(ClosedClosed)
   std::vector<std::size_t> output;
 
   segment<terminated, terminated> s = from(input) | func | output;
-//  auto s = from(input) | func | output;
 
   thread_pool pool{1};
   auto exec = s.run(pool);
@@ -57,26 +56,35 @@ BOOST_AUTO_TEST_CASE(ClosedOpen)
   BOOST_CHECK(output == expected_output);
 }
 
+// TODO type_erasure test incomplete because open_segment bug
 //BOOST_AUTO_TEST_CASE(OpenClosed)
 //{
+//  std::vector<std::string> input;
 //  std::vector<std::size_t> output;
 //
-////  segment<std::string, terminated> s = make(func) | output;
-//  auto s = make(func) | output;
+//  segment<terminated, std::string> s1 = from(input);
+//  segment<std::string, terminated> s2 = make(func) | output;
+//  segment<terminated, terminated>  s3 = s1 | s2;
 //
-//  (void)s;
+//  (void)s3;
 //}
 
+// TODO type_erasure test incomplete becasue segment<I,O>
+// does not model closed_segment
 //BOOST_AUTO_TEST_CASE(OpenClosedWithTo)
 //{
-//  segment<std::string, terminated> s = to(func);
+//  std::vector<std::string> input;
 //
-//  (void)s;
+//  segment<terminated, std::string> s1 = from(input);
+//  segment<std::string, terminated> s2 = to(func);
+//  segment<terminated, terminated>  s3 = s1 | s2;
+//
+//  (void)s3;
 //}
 
-//BOOST_AUTO_TEST_CASE(OpenOpen)
-//{
-//  segment<std::string, std::size_t> s = make(func);
-//
-//  (void)s;
-//}
+BOOST_AUTO_TEST_CASE(OpenOpen)
+{
+  segment<std::string, std::size_t> s = make(func);
+
+  (void)s;
+}

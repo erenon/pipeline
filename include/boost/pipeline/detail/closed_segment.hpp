@@ -13,6 +13,8 @@
 #ifndef BOOST_PIPELINE_DETAIL_CLOSED_SEGMENT_HPP
 #define BOOST_PIPELINE_DETAIL_CLOSED_SEGMENT_HPP
 
+#include <boost/pipeline/type_erasure.hpp> // unknown_type
+
 namespace boost {
 namespace pipeline {
 namespace detail {
@@ -20,6 +22,14 @@ namespace detail {
 template <typename Transformation>
 struct closed_segment
 {
+  typedef unknown_type root_type;
+  typedef void value_type;
+
+  template <typename Segment>
+  auto connect_to(const Segment& segment) const
+    -> decltype(segment | *this)
+  ; // intentionally unimplemented, used only in type erasure
+
   Transformation transformation;
 };
 

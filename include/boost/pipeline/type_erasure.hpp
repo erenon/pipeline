@@ -19,49 +19,73 @@
 #include <boost/pipeline/threading.hpp>
 #include <boost/pipeline/execution.hpp>
 #include <boost/pipeline/queue.hpp>
+#include <boost/pipeline/detail/segment.hpp>
 
-BOOST_TYPE_ERASURE_MEMBER((boost)(pipeline)(has_run), run)
+BOOST_TYPE_ERASURE_MEMBER((boost)(pipeline)(detail)(has_run), run)
 
 namespace boost {
 
 namespace pipeline {
 
-template<typename Root, typename T = typename type_erasure::_self>
+namespace detail {
+
+struct unknown_type {};
+
+template <typename Root, typename T = typename type_erasure::_self>
 struct root_type_is_same_as
 {
   static void apply(const T&)
   {
     static_assert(
-      std::is_same<typename T::root_type, Root>::value,
+       std::is_same<typename T::root_type, Root>::value
+    || std::is_same<typename T::root_type, detail::unknown_type>::value,
       "Invalid segment type, root_type mismatch"
     );
   }
 };
 
-template<typename Value, typename T = typename type_erasure::_self>
+template <typename Value, typename T = typename type_erasure::_self>
 struct value_type_is_same_as
 {
   static void apply(const T&)
   {
     static_assert(
-      std::is_same<typename T::value_type, Value>::value,
+       std::is_same<typename T::value_type, Value>::value
+    || std::is_same<typename T::value_type, detail::unknown_type>::value,
       "Invalid segment type, value_type mismatch"
     );
   }
 };
 
+template <typename Root, typename Value, typename T = typename type_erasure::_self>
+struct connectable_to
+{
+  static void apply(const T&)
+  {
+    typedef decltype(std::declval<T>().connect_to(
+      std::declval<detail::queue_input_segment<Root>>()
+    )) result;
+
+    static_assert(
+      std::is_same<typename result::value_type, Value>::value,
+      "Invalid open segment type, can't be represented as required"
+    );
+  }
+};
+
+} // namespace detail
 } // namespace pipeline
 
 namespace type_erasure {
 
-template<typename Concept, typename Value, typename Base>
-struct concept_interface<::boost::pipeline::root_type_is_same_as<Value>, Base, Concept> : Base
+template <typename Concept, typename Value, typename Base>
+struct concept_interface<::boost::pipeline::detail::root_type_is_same_as<Value>, Base, Concept> : Base
 {
   typedef Value root_type;
 };
 
-template<typename Concept, typename Value, typename Base>
-struct concept_interface<::boost::pipeline::value_type_is_same_as<Value>, Base, Concept> : Base
+template <typename Concept, typename Value, typename Base>
+struct concept_interface<::boost::pipeline::detail::value_type_is_same_as<Value>, Base, Concept> : Base
 {
   typedef Value value_type;
 };
@@ -76,12 +100,22 @@ template <typename Input, typename Output>
 using segment = typename type_erasure::any<
   mpl::vector<
     type_erasure::copy_constructible<>,
-    root_type_is_same_as<Input>,
-    value_type_is_same_as<Output>,
+
+    detail::root_type_is_same_as<Input>,   // or unknown
+    detail::value_type_is_same_as<Output>, // or unknown
+
+    // if left terminated
+    //   if right terminated: has_run<execution>
+    //   else has_run<queue_front>
+    // else open_segment
     typename std::conditional<
-      std::is_same<Output, terminated>::value,
-      has_run<execution(thread_pool&)>,
-      has_run<queue_front<Output>(thread_pool&)>
+      std::is_same<Input, terminated>::value,
+      typename std::conditional<
+        std::is_same<Output, terminated>::value,
+        detail::has_run<execution(thread_pool&)>,
+        detail::has_run<queue_front<Output>(thread_pool&)>
+      >::type,
+      detail::connectable_to<Input, Output>
     >::type,
     type_erasure::relaxed
   >

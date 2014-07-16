@@ -16,6 +16,8 @@
 #include <tuple>
 #include <type_traits>
 
+#include <boost/pipeline/type_erasure.hpp> // unknown_type
+
 namespace boost {
 namespace pipeline {
 namespace detail {
@@ -51,6 +53,9 @@ class open_segment
 {
 public:
   typedef std::tuple<Trafos...> Tuple;
+
+  typedef unknown_type root_type;
+  typedef unknown_type value_type;
 
 private:
   template <typename... Trafos2>
