@@ -33,7 +33,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       auto input = _upstream.pull();
       auto output = _transformation(input);
@@ -65,7 +65,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       auto input = _upstream.pull();
       _transformation(input, _downstream);
@@ -96,7 +96,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       auto output = _transformation(_upstream);
       _downstream.push(std::move(output));
@@ -128,7 +128,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       _transformation(_upstream, _downstream);
     }
@@ -158,7 +158,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       auto input = _upstream.pull();
       *_out_it = input;
@@ -189,7 +189,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       _consumer(_upstream.pull());
     }
@@ -219,7 +219,7 @@ public:
 
   void operator()()
   {
-    while ( ! _upstream.is_closed() || ! _upstream.is_empty())
+    while (! _upstream.is_empty() || ! _upstream.is_closed())
     {
       _consumer(_upstream);
     }
