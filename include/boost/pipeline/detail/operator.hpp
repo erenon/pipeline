@@ -15,6 +15,7 @@
 
 #include <type_traits>
 
+#include <boost/pipeline/type_erasure.hpp>
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
@@ -85,6 +86,19 @@ auto operator|(queue<T>& queue, const Connectable& connectable)
   -> decltype(queue_input_segment<T>(queue) | connectable)
 {
   return queue_input_segment<T>(queue) | connectable;
+}
+
+// segment | segment
+template <
+  typename LeftIn, typename Middle, typename RightOut,
+  typename std::enable_if<
+    ! std::is_same<Middle, terminated>::value
+  ,int>::type = 0
+>
+segment<LeftIn, RightOut>
+operator|(const segment<LeftIn, Middle>& lhs, const segment<Middle, RightOut>& rhs)
+{
+  return rhs.connect_to(lhs);
 }
 
 } // namespace detail
