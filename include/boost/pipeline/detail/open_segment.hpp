@@ -65,7 +65,13 @@ private:
 public:
   /** Create plan from a single transformation */
   template <typename Trafo>
-  open_segment(const Trafo trafo)
+  open_segment(const Trafo& trafo)
+    :_trafos(trafo)
+  {}
+
+  /** Create plan from a single transformation */
+  template <typename Trafo>
+  open_segment(Trafo& trafo)
     :_trafos(trafo)
   {}
 
@@ -81,10 +87,20 @@ public:
   template <typename Trafo, typename std::enable_if<
     ! std::is_function<Trafo>::value
   ,int>::type = 0>
-  open_segment<Trafos..., Trafo>
+  open_segment<Trafos..., const Trafo&>
   operator|(const Trafo& trafo) const
   {
-    return open_segment<Trafos..., Trafo>(_trafos, std::make_tuple(trafo));
+    return open_segment<Trafos..., const Trafo&>(_trafos, std::forward_as_tuple(trafo));
+  }
+
+  /** Append non-function pointer transformation */
+  template <typename Trafo, typename std::enable_if<
+    ! std::is_function<Trafo>::value
+  ,int>::type = 0>
+  open_segment<Trafos..., Trafo&>
+  operator|(Trafo& trafo) const
+  {
+    return open_segment<Trafos..., Trafo&>(_trafos, std::forward_as_tuple(trafo));
   }
 
   /** Append function pointer transformation */

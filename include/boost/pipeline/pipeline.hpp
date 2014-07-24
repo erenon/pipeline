@@ -124,10 +124,22 @@ from(const Callable& generator)
 template <typename Function, typename std::enable_if<
   ! std::is_function<Function>::value
 ,int>::type = 0>
-detail::open_segment<Function>
+detail::open_segment<const Function&>
 make(const Function& function)
 {
-  return detail::open_segment<Function>(function);
+  return detail::open_segment<const Function&>(function);
+}
+
+/**
+ * Creates on open_segment representing `function`
+ */
+template <typename Function, typename std::enable_if<
+  ! std::is_function<Function>::value
+,int>::type = 0>
+detail::open_segment<Function&>
+make(Function& function)
+{
+  return detail::open_segment<Function&>(function);
 }
 
 /**
