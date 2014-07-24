@@ -35,7 +35,7 @@ long lidentity(const long a)
 
 BOOST_AUTO_TEST_CASE(OpenSegmentCtor)
 {
-  auto os1 = boost::pipeline::make(iidentity);
+  auto os1 = make(iidentity);
   auto os2 = os1 | lidentity;
 
   (void) os2;
@@ -44,12 +44,12 @@ BOOST_AUTO_TEST_CASE(OpenSegmentCtor)
 int not_equals_to(
   const int filter,
   const int item,
-  boost::pipeline::queue_back<int>& out
+  queue_back<int>& out
 )
 {
   if (item != filter)
   {
-    out.try_push(item);
+    out.push(item);
   }
 
   return item;
@@ -68,28 +68,29 @@ int make_odd(const int item)
 void if_multiple_of(
   const int multiple,
   const int divisor,
-  boost::pipeline::queue_back<int>& out
+  queue_back<int>& out
 )
 {
   if (multiple % divisor == 0)
   {
-    out.try_push(multiple);
+    out.push(multiple);
   }
 }
 
 BOOST_AUTO_TEST_CASE(SegmentOpen)
 {
-  using namespace std::placeholders;
+  using std::placeholders::_1;
+  using std::placeholders::_2;
 
-  auto plan1 = boost::pipeline::make(std::bind(not_equals_to, 7, _1, _2));
-  auto plan2 = boost::pipeline::make(make_odd) | std::bind(if_multiple_of, _1, 3, _2);
+  auto plan1 = make(std::bind(not_equals_to, 7, _1, _2));
+  auto plan2 = make(make_odd) | std::bind(if_multiple_of, _1, 3, _2);
 
   auto plan3 = plan1 | plan2;
 
   std::vector<int> input{1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::vector<int> output;
 
-  auto segment = boost::pipeline::from(input);
+  auto segment = from(input);
 
   thread_pool pool{1};
 
@@ -99,5 +100,22 @@ BOOST_AUTO_TEST_CASE(SegmentOpen)
 
   std::vector<int> expected{3,3,9,9};
 
+  BOOST_CHECK(output == expected);
+}
+
+BOOST_AUTO_TEST_CASE(ConnectContainer)
+{
+  std::vector<int> input{1, 2, 3, 4, 5};
+  std::vector<int> output;
+
+  auto plan1 = make(iidentity);
+  auto plan2 = plan1 | output;
+  auto plan3 = from(input) | plan2;
+
+  thread_pool pool{1};
+  auto exec = plan3.run(pool);
+  exec.wait();
+
+  std::vector<int> expected = input;
   BOOST_CHECK(output == expected);
 }

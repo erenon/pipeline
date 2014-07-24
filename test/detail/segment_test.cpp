@@ -102,11 +102,8 @@ void keep_and_twice(
   const int& item,
   boost::pipeline::queue_back<int>& out
 ) {
-  while (out.write_available() < 2)
-    /* spin */;
-
-  out.try_push(item);
-  out.try_push(item * 2);
+  out.push(item);
+  out.push(item * 2);
 }
 
 BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
@@ -145,20 +142,12 @@ void sum_diff_prod(
   boost::pipeline::queue_back<int>& out
 )
 {
-  if (in.read_available() < 2 || out.write_available() < 3)
-  {
-    return; // yield
-  }
+  int a = in.pull();
+  int b = in.pull();
 
-  int a;
-  int b;
-
-  in.try_pop(a);
-  in.try_pop(b);
-
-  out.try_push(a+b);
-  out.try_push(a-b);
-  out.try_push(a*b);
+  out.push(a+b);
+  out.push(a-b);
+  out.push(a*b);
 }
 
 BOOST_AUTO_TEST_CASE(SegmentNToMTrafo)
@@ -189,7 +178,7 @@ void generate_ints(queue_back<int>& qb)
 {
   for (int i = 0; i < 5; ++i)
   {
-    qb.try_push(i);
+    qb.push(i);
   }
 }
 
@@ -197,7 +186,7 @@ void generate_ints_from(queue_back<int>& qb, const int start)
 {
   for (int i = start; i < 5; ++i)
   {
-    qb.try_push(i);
+    qb.push(i);
   }
 }
 
@@ -262,7 +251,7 @@ BOOST_AUTO_TEST_CASE(GeneratedSegmentLambda)
   {
     for (int i = 0; i < 5; ++i)
     {
-      qb.try_push(i);
+      qb.push(i);
     }
   };
 
@@ -301,19 +290,9 @@ BOOST_AUTO_TEST_CASE(SegmentProceduralSingleConsumer)
 
 void consume_n(boost::pipeline::queue_front<int>& qf)
 {
-  int input;
-  bool valid_input = true;
-  while (valid_input)
+  while ( ! qf.is_closed() || ! qf.is_empty())
   {
-    auto status = qf.try_pop(input);
-    if (status == queue_op_status::SUCCESS)
-    {
-      consume_sum += input;
-    }
-    else
-    {
-      valid_input = false;
-    }
+    consume_sum += qf.pull();
   }
 }
 

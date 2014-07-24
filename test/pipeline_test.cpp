@@ -30,9 +30,9 @@ BOOST_AUTO_TEST_CASE(Make)
 }
 
 void consume1(int) {}
-void consume2(queue_front<int>& qf) { int i; qf.try_pop(i); }
+void consume2(queue_front<int>& qf) { qf.pull(); }
 int  consume3(int) { return 0; }
-int  consume4(queue_front<int>& qf) { int i; qf.try_pop(i); return 0; }
+int  consume4(queue_front<int>& qf) { qf.pull(); return 0; }
 
 BOOST_AUTO_TEST_CASE(To)
 {

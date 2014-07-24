@@ -355,7 +355,7 @@ public:
   typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
 
   range_input_segment(const Iterator& begin, const Iterator& end)
-    :_current(begin),
+    :_begin(begin),
      _end(end)
   {}
 
@@ -364,26 +364,16 @@ public:
     auto queue_ptr = std::make_shared<queue<value_type>>();
     queue_front<value_type> qf(queue_ptr);
 
-    auto task = [this, queue_ptr] () -> bool
+    auto task = [this, queue_ptr] ()
     {
-      auto& q(*queue_ptr);
-
-      while (_current != _end)
+      auto current = _begin;
+      while (current != _end)
       {
-        auto status = q.try_push(*_current);
-        if (status == queue_op_status::SUCCESS)
-        {
-          ++_current;
-        }
-        else
-        {
-          return false; // not finished
-        }
+        queue_ptr->push(*current);
+        ++current;
       }
 
-      q.close();
-
-      return true;
+      queue_ptr->close();
     };
 
     pool.submit(task);
@@ -394,7 +384,7 @@ public:
   queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
 
 private:
-  Iterator _current;
+  Iterator _begin;
   const Iterator _end;
 };
 
@@ -440,13 +430,10 @@ public:
     queue_back<value_type> qb(queue_ptr);
     queue_front<value_type> qf(queue_ptr);
 
-    auto task = [this, qb] () mutable -> bool
+    auto task = [this, qb] () mutable
     {
       _generator(qb);
-
       qb.close();
-
-      return true;
     };
 
     pool.submit(task);
@@ -520,18 +507,18 @@ public:
     auto promise_ptr = std::make_shared<std::promise<bool>>();
     auto future = promise_ptr->get_future();
 
-    auto task = [queue_front, promise_ptr] () -> bool
+    auto task = [queue_front, promise_ptr] ()
     {
-      if (queue_front.is_closed())
+      // TODO queue_output_segment task is very inefficient
+      while ( ! queue_front.is_closed())
       {
-        promise_ptr->set_value(true);
-        return true;
+        std::this_thread::yield();
       }
-      else
-      {
-        return false;
-      }
+
+      promise_ptr->set_value(true);
     };
+
+    pool.submit(task);
 
     return execution(std::move(future));
   }

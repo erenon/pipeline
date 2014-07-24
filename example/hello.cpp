@@ -18,7 +18,7 @@ std::string grep(
 
   if (std::regex_match(item, regex))
   {
-    output.try_push(item);
+    output.push(item);
   }
 
   return item;
@@ -31,7 +31,8 @@ std::string trim(const std::string& item)
 
 int main()
 {
-  using namespace std::placeholders; // _1 and _2
+  using std::placeholders::_1;
+  using std::placeholders::_2;
 
   std::vector<std::string> input = {
     "Error: foobar",

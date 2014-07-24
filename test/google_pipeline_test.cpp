@@ -75,8 +75,8 @@ void print_string(std::string s) {
 }
 
 void repeat(int i, queue_back<int> q) {
-  q.try_push(i);
-  q.try_push(i);
+  q.push(i);
+  q.push(i);
 }
 
 int sum_two(queue_front<int> q) {
@@ -85,26 +85,24 @@ int sum_two(queue_front<int> q) {
     return -1;
   }
 
-  int i = q.front();
-  q.try_pop();
+  auto a = q.pull();
 
-  if (q.is_empty())
+  if (q.is_closed() && q.is_empty())
   {
-    return i;
+    return a;
   }
 
-  int j = q.front();
-  q.try_pop();
+  auto b = q.pull();
 
-  return i + j;
+  return a + b;
 }
 
 void produce_strings(queue_back<std::string>& queue) {
   printf("Producing strings\n");
-  queue.try_push("Produced String1");
-  queue.try_push("Produced String22");
-  queue.try_push("Produced String333");
-  queue.try_push("Produced String4444");
+  queue.push("Produced String1");
+  queue.push("Produced String22");
+  queue.push("Produced String333");
+  queue.push("Produced String4444");
 }
 // end verbatim copy
 
@@ -147,7 +145,7 @@ BOOST_AUTO_TEST_CASE(Example)
   queue<User> out;
   auto p4 = p3 | out;
 
-  thread_pool pool{1};
+  thread_pool pool{2};
 
   auto pex  = p4.run(pool);
   in.try_push("BarA");
@@ -162,7 +160,7 @@ BOOST_AUTO_TEST_CASE(Example)
   pex2.wait();
 
   BOOST_ASSERT(pex.is_done());
-  BOOST_ASSERT(out.is_closed());
+  BOOST_ASSERT(out.closed());
   BOOST_ASSERT(pex2.is_done());
 }
 

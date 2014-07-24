@@ -13,6 +13,7 @@
 #ifndef BOOST_PIPELINE_EXECUTION_HPP
 #define BOOST_PIPELINE_EXECUTION_HPP
 
+#include <future>
 #include <chrono>
 
 #include <boost/pipeline/queue.hpp>

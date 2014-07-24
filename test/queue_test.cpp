@@ -10,7 +10,7 @@
  * See $PIPELINE_WEBSITE$ for documentation
  */
 
-#include <ostream>
+#include <memory>
 
 #include <boost/pipeline/queue.hpp>
 
@@ -19,123 +19,56 @@
 
 using namespace boost::pipeline;
 
-namespace std {
-
-std::ostream& operator<<(std::ostream& out, const queue_op_status& st)
-{
-
-  switch (st)
-  {
-  case queue_op_status::SUCCESS:
-    out << "SUCCESS";
-    break;
-  case queue_op_status::FULL:
-      out << "FULL";
-      break;
-  case queue_op_status::EMPTY:
-      out << "EMPTY";
-      break;
-  case queue_op_status::CLOSED:
-      out << "CLOSED";
-      break;
-  }
-  return out;
-}
-
-} // namespace std
-
 BOOST_AUTO_TEST_CASE(InterfaceBasics)
 {
-  queue<int> q;
+  auto q_ptr = std::make_shared<queue<int>>();
+  queue_front<int> qf(q_ptr);
+  queue_back<int>  qb(q_ptr);
 
-  int v = 0;
+  BOOST_CHECK(qf.is_closed() == false);
 
-  queue_op_status empty = q.try_pop(v);
-  BOOST_CHECK_EQUAL(empty, queue_op_status::EMPTY);
+  qb.push(1);
+  qb.push(2);
+  qb.push(3);
 
-  queue_op_status succ = q.try_push(1);
-  BOOST_CHECK_EQUAL(succ, queue_op_status::SUCCESS);
+  BOOST_CHECK_EQUAL(qf.pull(), 1);
+  BOOST_CHECK_EQUAL(qf.pull(), 2);
 
-  succ = q.try_pop(v);
-  BOOST_CHECK_EQUAL(succ, queue_op_status::SUCCESS);
-  BOOST_CHECK_EQUAL(v, 1);
+  qb.close();
+
+  BOOST_CHECK_EQUAL(qf.pull(), 3);
+  BOOST_CHECK(qf.is_closed());
 }
 
-BOOST_AUTO_TEST_CASE(Close)
+struct movable_only
 {
-  queue<int> q;
-  BOOST_CHECK(q.is_closed() == false);
+  movable_only(int v) : _value(v) {}
+  movable_only(movable_only&&) = default;
+  movable_only(const movable_only&) = delete;
+  void operator=(const movable_only&) = delete;
+  movable_only& operator=(movable_only&&) = default;
 
-  q.close();
+  bool operator==(const movable_only& rhs)
+  {
+    return _value == rhs._value;
+  }
 
-  BOOST_CHECK(q.is_closed());
-}
+  int _value;
+};
 
-BOOST_AUTO_TEST_CASE(FrontPop)
+BOOST_AUTO_TEST_CASE(MovableT)
 {
-  queue<int> q;
+  auto q_ptr = std::make_shared<queue<movable_only>>();
+  queue_front<movable_only> qf(q_ptr);
+  queue_back<movable_only>  qb(q_ptr);
 
-  q.try_push(1);
-  int front = q.front();
-  BOOST_CHECK_EQUAL(front, 1);
+  movable_only item(1);
 
-  q.try_push(2);
-  front = q.front();
-  BOOST_CHECK_EQUAL(front, 1);
+  qb.push(std::move(item));
 
-  q.try_pop();
-  front = q.front();
-  BOOST_CHECK_EQUAL(front, 2);
-  q.try_pop();
+  movable_only expected_ret(1);
+  movable_only ret(0);
+  qf.pull(ret);
 
-  queue_op_status empty = q.try_pop();
-  BOOST_CHECK_EQUAL(empty, queue_op_status::EMPTY);
-}
-
-BOOST_AUTO_TEST_CASE(EmptyFull)
-{
-  queue<int> q;
-  BOOST_CHECK(q.is_empty());
-  BOOST_CHECK( ! q.is_full());
-
-  while(queue_op_status::SUCCESS == q.try_push(1))
-    /* nop */;
-
-  BOOST_CHECK( ! q.is_empty());
-  BOOST_CHECK(q.is_full());
-
-  while(queue_op_status::SUCCESS == q.try_pop())
-    /* nop */;
-
-  BOOST_CHECK(q.is_empty());
-  BOOST_CHECK( ! q.is_full());
-}
-
-BOOST_AUTO_TEST_CASE(ReadWriteAvailable)
-{
-  queue<int> q;
-  size_t r = 0;
-  size_t w = 0;
-
-  r = q.read_available();
-  w = q.write_available();
-
-  const size_t sum = r + w;
-
-  q.try_push(1);
-  q.try_push(1);
-  q.try_push(1);
-
-  r = q.read_available();
-  w = q.write_available();
-
-  BOOST_CHECK_EQUAL(sum, r + w);
-
-  q.try_pop();
-  q.try_pop();
-
-  r = q.read_available();
-  w = q.write_available();
-
-  BOOST_CHECK_EQUAL(sum, r + w);
+  BOOST_CHECK(ret == expected_ret);
 }

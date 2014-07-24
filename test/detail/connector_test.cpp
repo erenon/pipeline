@@ -148,7 +148,8 @@ void tt_nm_b(char, queue_front<long>&, queue_back<long>&) {} // N-M
 
 BOOST_AUTO_TEST_CASE(ConnectorBind)
 {
-  using namespace std::placeholders;
+  using std::placeholders::_1;
+  using std::placeholders::_2;
 
   typedef one_n_segment<dummy_plan, int, int> int_seg_on;
   typedef n_m_segment<dummy_plan, int, int> int_seg_nm;
