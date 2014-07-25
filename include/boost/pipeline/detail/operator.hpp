@@ -95,7 +95,8 @@ template <
     ! std::is_same<Middle, terminated>::value
   ,int>::type = 0
 >
-segment<LeftIn, RightOut>
+//segment<LeftIn, RightOut>
+int
 operator|(const segment<LeftIn, Middle>& lhs, const segment<Middle, RightOut>& rhs)
 {
   return rhs.connect_to(lhs);

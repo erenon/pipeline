@@ -60,14 +60,20 @@ struct value_type_is_same_as
   }
 };
 
-template <typename Segment, typename Parent>
+template <typename Parent, typename ExpectedOutput, typename Segment = typename type_erasure::_self>
 struct has_connect_to
 {
-  static auto apply(const Segment& segment, const Parent& parent)
-    -> decltype(segment.connect_to(std::declval<Parent>()))
+  static void apply(const Segment& /*segment*/)
   {
-    return segment.connect_to(parent);
-  }
+    typedef decltype(std::declval<Segment>().connect_to(
+     std::declval<Parent>()
+    )) result;
+
+    static_assert(
+     std::is_same<typename result::value_type, ExpectedOutput>::value,
+     "Invalid open segment type, can't be represented as required"
+    );
+  };
 };
 
 } // namespace detail
@@ -92,7 +98,7 @@ using segment_concept = typename mpl::vector<
       detail::has_run<execution(thread_pool&)>,
       detail::has_run<queue_front<Output>(thread_pool&)>
     >::type,
-    detail::has_connect_to<type_erasure::_self, type_erasure::_a>
+    detail::has_connect_to<detail::queue_input_segment<Input>, Output>
   >::type,
 
   type_erasure::relaxed
@@ -106,9 +112,6 @@ namespace detail {
 //
 // is_connectable_segment predicate specializations
 //
-
-template <typename>
-struct is_connectable_segment;
 
 template <typename T>
 struct is_connectable_segment<segment<terminated, T>> : public std::true_type {};
@@ -131,23 +134,17 @@ struct concept_interface<::boost::pipeline::detail::value_type_is_same_as<Value>
   typedef Value value_type;
 };
 
-template <typename Segment, typename Parent, typename Base>
-struct concept_interface<pipeline::detail::has_connect_to<Segment, Parent>, Base, Segment>
+template <typename Parent, typename Output, typename Segment, typename Base>
+struct concept_interface<pipeline::detail::has_connect_to<Parent, Output, Segment>, Base, Segment>
   : public Base
 {
-  typedef mpl::map<
-    mpl::pair<_self, Segment>,
-    mpl::pair<_a, Parent>
-  > binding_map;
-
-  typedef binding<typename concept_of<Base>::type> segment_binding;
-
-  auto connect_to(typename rebind_any<Base, _a>::type parent)
-    -> decltype(
-           call(segment_binding{binding_map{}}, pipeline::detail::has_connect_to<Segment, Parent>(), *this, parent)
-       )
+  template <typename NewRoot, typename Root>
+  int connect_to(const pipeline::segment<NewRoot, Root>& parent) const
   {
-    return call(segment_binding{binding_map{}}, pipeline::detail::has_connect_to<Segment, Parent>(), *this, parent);
+    call(pipeline::detail::has_connect_to<Parent, Output, Segment>(), *this);
+
+    (void)parent;
+    return 3;
   }
 };
 

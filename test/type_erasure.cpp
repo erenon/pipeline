@@ -64,7 +64,8 @@ BOOST_AUTO_TEST_CASE(OpenClosed)
 
   segment<terminated, std::string> s1 = from(input);
   segment<std::string, terminated> s2 = make(func) | output;
-  segment<terminated, terminated>  s3 = s1 | s2;
+//  segment<terminated, terminated>  s3 = s1 | s2;
+  auto s3 = s1 | s2;
 
   (void)s3;
 }
