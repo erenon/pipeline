@@ -21,9 +21,9 @@ using namespace boost::pipeline;
 
 BOOST_AUTO_TEST_CASE(InterfaceBasics)
 {
-  auto q_ptr = std::make_shared<queue<int>>();
-  queue_front<int> qf(q_ptr);
-  queue_back<int>  qb(q_ptr);
+  queue<int> q;
+  queue_front<int> qf(&q);
+  queue_back<int>  qb(&q);
 
   BOOST_CHECK(qf.is_closed() == false);
 
@@ -58,9 +58,9 @@ struct movable_only
 
 BOOST_AUTO_TEST_CASE(MovableT)
 {
-  auto q_ptr = std::make_shared<queue<movable_only>>();
-  queue_front<movable_only> qf(q_ptr);
-  queue_back<movable_only>  qb(q_ptr);
+  queue<movable_only> q;
+  queue_front<movable_only> qf(&q);
+  queue_back<movable_only>  qb(&q);
 
   movable_only item(1);
 

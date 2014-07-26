@@ -13,8 +13,6 @@
 #ifndef BOOST_PIPELINE_QUEUE_HPP
 #define BOOST_PIPELINE_QUEUE_HPP
 
-#include <memory>
-
 #include <boost/thread/sync_queue.hpp>
 
 #define BOOST_THREAD_QUEUE_DEPRECATE_OLD
@@ -26,26 +24,23 @@ template <typename T>
 using queue = sync_queue<T>;
 
 template <typename T>
-using queue_ptr = std::shared_ptr<queue<T>>;
-
-template <typename T>
 class queue_back
 {
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_back(const queue_ptr<T>& queue_ptr)
+  queue_back(queue<T>* queue_ptr)
     :_queue_ptr(queue_ptr)
   {}
 
   void push(const T& item)
   {
-    return _queue_ptr->push_back(item);
+    _queue_ptr->push_back(item);
   }
 
   void push(T&& item)
   {
-    return _queue_ptr->push_back(std::forward<T>(item));
+    _queue_ptr->push_back(std::forward<T>(item));
   }
 
   void close()
@@ -54,7 +49,7 @@ public:
   }
 
 private:
-  queue_ptr<T> _queue_ptr;
+  queue<T>* _queue_ptr;
 };
 
 template <typename T>
@@ -63,7 +58,7 @@ class queue_front
 public:
   typedef typename queue<T>::value_type value_type;
 
-  queue_front(const queue_ptr<T>& queue_ptr)
+  queue_front(queue<T>* queue_ptr)
     :_queue_ptr(queue_ptr)
   {}
 
@@ -74,7 +69,7 @@ public:
 
   void pull(T& ret)
   {
-    return _queue_ptr->pull_front(ret);
+    _queue_ptr->pull_front(ret);
   }
 
   bool is_empty() const
@@ -88,7 +83,7 @@ public:
   }
 
 private:
-  queue_ptr<T> _queue_ptr;
+  queue<T>* _queue_ptr;
 };
 
 } // namespace pipeline
