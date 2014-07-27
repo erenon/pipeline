@@ -24,7 +24,14 @@ namespace boost {
 namespace pipeline {
 
 /**
- * Creates a range_input_segment operating on `container`.
+ * Creates a segment operating on `container`.
+ *
+ * Join other transformations (segments) using the pipe operator
+ * to create a pipeline.
+ *
+ * @param container Container of items which form the input of the pipeline
+ *
+ * @returns `segment<terminated, T>`, `T` is the `value_type` of `Container`
  */
 template <typename Container>
 detail::range_input_segment<typename Container::iterator>
@@ -36,7 +43,15 @@ from(Container& container)
 }
 
 /**
- * Creates a range_input_segment operating on a range.
+ * Creates a segment operating on a range.
+ *
+ * Join other transformations (segments) using the pipe operator
+ * to create a pipeline.
+ *
+ * @param begin Beginning of the input range
+ * @param end End of the input range (exclusive)
+ *
+ * @returns `segment<terminated, T>`, `T` is the `value_type` of `Iterator`
  */
 template <typename Iterator>
 detail::range_input_segment<Iterator>
@@ -48,8 +63,15 @@ from(const Iterator& begin, const Iterator& end)
 }
 
 /**
- * Creates a generator_input_segment operating on values
- * produced by a generator, generator is an std::function
+ * Creates a segment operating on items
+ * produced by a generator function.
+ *
+ * The generator function receives a `queue_back<T>` argument
+ * and feeds it with the generated items. The underlying queue
+ * will be automatically closed upon return of the generator.
+ *
+ * @param generator An `std::function` receiving a single `queue_back<T>` argument.
+ * @returns `segment<terminated, T>`
  */
 template <typename QueueBack, typename R>
 detail::generator_input_segment<
@@ -67,8 +89,15 @@ from(const std::function<R(QueueBack)>& generator)
 }
 
 /**
- * Creates a generator_input_segment operating on values
- * produced by a generator, generator is a function pointer
+ * Creates a segment operating on items
+ * produced by a generator function.
+ *
+ * The generator function receives a `queue_back<T>` argument
+ * and feeds it with the generated items. The underlying queue
+ * will be automatically closed upon return of the generator.
+ *
+ * @param generator The pointed function is receiving a single `queue_back<T>` argument.
+ * @returns `segment<terminated, T>`
  */
 template <typename QueueBack, typename R>
 detail::generator_input_segment<
@@ -86,28 +115,26 @@ from(R(*generator)(QueueBack))
 }
 
 /**
- * Creates a queue_input_segment representing `queue`
- */
-template <typename T>
-detail::queue_input_segment<T>
-from(queue<T>& queue)
-{
-  return detail::queue_input_segment<T>(queue);
-}
-
-/**
- * Creates a generator_input_segment operating on values
- * produced by a generator, generator is callable:
- * generator(queue_back<T>);
+ * Creates a segment operating on items
+ * produced by a generator function.
  *
- * The purpose of this overload is to support lambdas,
+ * The generator function receives a `queue_back<T>` argument
+ * and feeds it with the generated items. The underlying queue
+ * will be automatically closed upon return of the generator.
+ *
+ * This overload accepts lambdas,
  * bind expressions and functors.
  *
- * Example:
- * from<int>([](queue_back<int>& qb) {...});
+ * To deduce the `value_type` of the generator, a hint might be required:
  *
- * TODO lambda and functor do not require a hint,
- * bind does.
+ * @code
+ * from<int>([](queue_back<int>& qb) {...});
+ * @endcode
+ *
+ * @param generator A callable which is receiving a single `queue_back<T>` argument.
+ * @returns `segment<terminated, T>`
+ *
+ * @b TODO lambda and functor should not require a hint.
  */
 template <typename T, typename Callable>
 detail::generator_input_segment<Callable, T>
@@ -119,7 +146,27 @@ from(const Callable& generator)
 }
 
 /**
- * Creates on open_segment representing `function`
+ * Creates a segment operating on items of the given `queue`.
+ *
+ * Elements to process might be added to the queue later
+ * until the queue is closed by the application.
+ *
+ * @param queue Queue containing the input of the pipeline
+ * @returns `segment<terminated, T>`, `T` is `value_type` of `queue`
+ */
+template <typename T>
+detail::queue_input_segment<T>
+from(queue<T>& queue)
+{
+  return detail::queue_input_segment<T>(queue);
+}
+
+/**
+ * Creates an open, non-terminated segment representing
+ * `function`.
+ *
+ * @param function Arbitrary transformation, but not a function pointer
+ * @returns `segment<unknown, T>`
  */
 template <typename Function, typename std::enable_if<
   ! std::is_function<Function>::value
@@ -131,7 +178,14 @@ make(const Function& function)
 }
 
 /**
- * Creates on open_segment representing `function`
+ * Creates an open, non-terminated segment representing
+ * `function`.
+ *
+ * Taking the transformation as a non-const reference
+ * makes it possible to chain containers as sinks.
+ *
+ * @param function Arbitrary transformation, but not a function pointer
+ * @returns `segment<unknown, T>`
  */
 template <typename Function, typename std::enable_if<
   ! std::is_function<Function>::value
@@ -143,8 +197,11 @@ make(Function& function)
 }
 
 /**
- * Creates on open_segment representing `function`,
- * when `function` is of a function type.
+ * Creates an open, non-terminated segment representing
+ * `function`.
+ *
+ * @param function A transformation pointed by a function pointer
+ * @returns `segment<unknown, T>`
  */
 template <typename Function, typename std::enable_if<
   std::is_function<Function>::value
@@ -156,8 +213,13 @@ make(const Function& function)
 }
 
 /**
- * Creates a right-terminated *_output_segment
- * which encapsulates `consumer`
+ * Creates a right-terminated segment representing `consumer`
+ *
+ * Wrap sink transformations returning non-void by this
+ * call to create a right-terminated segment.
+ *
+ * @param consumer Sink transformation, non-function pointer
+ * @returns `segment<unknown, terminated>`
  */
 template <typename Callable, typename std::enable_if<
 ! std::is_function<Callable>::value
@@ -169,10 +231,13 @@ to(const Callable& consumer)
 }
 
 /**
- * Creates a right-terminated *_output_segment
- * which encapsulates `consumer`.
+ * Creates a right-terminated segment representing `consumer`
  *
- * `consumer` is of a function type.
+ * Wrap sink transformations returning non-void by this
+ * call to create a right-terminated segment.
+ *
+ * @param consumer Sink transformation, function pointer
+ * @returns `segment<unknown, terminated>`
  */
 template <typename Function, typename std::enable_if<
   std::is_function<Function>::value

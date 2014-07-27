@@ -13,14 +13,15 @@ using boostbook ;
 
 doxygen apidoc
   : [ glob ../include/boost/pipeline/*.hpp ]
+    [ glob ../include/boost/pipeline/detail/*.hpp ]
   :
   <doxygen:param>"PREDEFINED= \\
     \"BOOST_DOXYGEN_INVOKED\" \\
     \"BOOST_DEDUCED_TYPENAME=typename\" \\
     \"BOOST_HAS_RVALUE_REFS\" \\
   "
-  <doxygen:param>HIDE_UNDOC_MEMBERS=YES
-  <doxygen:param>HIDE_UNDOC_CLASSES=YES
+  <doxygen:param>HIDE_UNDOC_MEMBERS=NO
+  <doxygen:param>HIDE_UNDOC_CLASSES=NO
   <doxygen:param>INLINE_INHERITED_MEMB=YES
   <doxygen:param>EXTRACT_PRIVATE=NO
   <doxygen:param>ENABLE_PREPROCESSING=YES

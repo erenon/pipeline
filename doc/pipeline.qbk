@@ -104,12 +104,29 @@ TODO
 
 [h1 Planned improvements of scheduling]
 
+TODO
+
 * coroutines/fibers
 * try_*/yield
 
 [endsect]
 
+[section Build and Test this library]
+
+TODO
+
+* compiler requirements
+* header only
+* dependencies
+* test/$ bjam
+* build/$ bjam
+
+[endsect]
+
 [section Acknowledgements]
+
+TODO
+
 [endsect]
     
 [xinclude apidoc.xml]    
