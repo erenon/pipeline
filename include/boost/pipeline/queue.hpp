@@ -62,14 +62,10 @@ public:
     :_queue_ptr(queue_ptr)
   {}
 
-  T pull()
+  bool wait_pull(T& ret)
   {
-    return _queue_ptr->pull_front();
-  }
-
-  void pull(T& ret)
-  {
-    _queue_ptr->pull_front(ret);
+    auto status = _queue_ptr->wait_pull_front(ret);
+    return (status == queue_op_status::success);
   }
 
   bool is_empty() const

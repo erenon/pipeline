@@ -31,12 +31,19 @@ BOOST_AUTO_TEST_CASE(InterfaceBasics)
   qb.push(2);
   qb.push(3);
 
-  BOOST_CHECK_EQUAL(qf.pull(), 1);
-  BOOST_CHECK_EQUAL(qf.pull(), 2);
+  int input = 0;
+
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 1);
+
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 2);
 
   qb.close();
 
-  BOOST_CHECK_EQUAL(qf.pull(), 3);
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 3);
+
   BOOST_CHECK(qf.is_closed());
 }
 
@@ -68,7 +75,7 @@ BOOST_AUTO_TEST_CASE(MovableT)
 
   movable_only expected_ret(1);
   movable_only ret(0);
-  qf.pull(ret);
+  qf.wait_pull(ret);
 
   BOOST_CHECK(ret == expected_ret);
 }

@@ -64,11 +64,11 @@ public:
   {
     queue_front<Input> upstream(base::_input.get());
 
-    while (! upstream.is_empty() || ! upstream.is_closed())
+    Input input;
+    while (upstream.wait_pull(input))
     {
-      auto input = upstream.pull();
-      auto output = base::_transformation(input);
-      base::_downstream.push(output);
+      auto output = base::_transformation(std::move(input));
+      base::_downstream.push(std::move(output));
     }
 
     base::_downstream.close();
@@ -95,10 +95,10 @@ public:
   {
     queue_front<Input> upstream(base::_input.get());
 
-    while (! upstream.is_empty() || ! upstream.is_closed())
+    Input input;
+    while (upstream.wait_pull(input))
     {
-      auto input = upstream.pull();
-      base::_transformation(input, base::_downstream);
+      base::_transformation(std::move(input), base::_downstream);
     }
 
     base::_downstream.close();
@@ -213,10 +213,9 @@ public:
   {
     queue_front<Output> upstream(&_queue);
 
-    while (! upstream.is_empty() || ! upstream.is_closed())
+    Output output;
+    while (upstream.wait_pull(output))
     {
-      Output output;
-      upstream.pull(output);
       _downstream.push(std::move(output));
     }
 
@@ -268,10 +267,10 @@ public:
   {
     queue_front<Input> upstream(_input.get());
 
-    while (! upstream.is_empty() || ! upstream.is_closed())
+    Input input;
+    while (upstream.wait_pull(input))
     {
-      auto input = upstream.pull();
-      *_out_it = input;
+      *_out_it = std::move(input);
     }
 
     _promise.set_value(true);
@@ -333,9 +332,10 @@ public:
   {
     queue_front<Input> upstream(_input.get());
 
-    while (! upstream.is_empty() || ! upstream.is_closed())
+    Input input;
+    while (upstream.wait_pull(input))
     {
-      _consumer(upstream.pull());
+      _consumer(std::move(input));
     }
 
     _promise.set_value(true);
