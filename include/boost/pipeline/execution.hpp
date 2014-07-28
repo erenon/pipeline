@@ -22,18 +22,44 @@
 namespace boost {
 namespace pipeline {
 
+/**
+ * Handle to an executing pipeline.
+ *
+ * An instance of this class returned every time
+ * `run()` is called on a complete pipeline.
+ *
+ * Holds a future which is set on pipeline completition,
+ * destructor blocks until pipeline is terminated.
+ * `std::move` it if it's not desired.
+ */
 class execution
 {
 public:
+  /**
+   * Creates an exectution holding `future`
+   *
+   * @param future Future promised by the terminating segment
+   * of the represented pipeline.
+   */
   execution(std::future<bool>&& future)
     :_future(std::move(future))
   {}
 
+  /**
+   * Checks if the pipeline has terminated
+   *
+   * @returns true, if the execution of the pipeline is done, false otherwise
+   */
   bool is_done()
   {
     return _future.wait_for(std::chrono::microseconds(1)) == std::future_status::ready;
   }
 
+  /**
+   * Waits until the execution of the pipeline is completed
+   *
+   * @post Blocks until the execution is done
+   */
   void wait()    { _future.wait(); }
 
 private:

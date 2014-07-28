@@ -80,19 +80,17 @@ void repeat(int i, queue_back<int> q) {
 }
 
 int sum_two(queue_front<int> q) {
-  if (q.is_empty())
+  int a;
+  if ( ! q.wait_pull(a))
   {
     return -1;
   }
 
-  auto a = q.pull();
-
-  if (q.is_closed() && q.is_empty())
+  int b;
+  if ( ! q.wait_pull(b))
   {
     return a;
   }
-
-  auto b = q.pull();
 
   return a + b;
 }

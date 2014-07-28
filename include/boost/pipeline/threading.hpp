@@ -18,6 +18,9 @@
 namespace boost {
 namespace pipeline {
 
+/**
+ * @see boost.executors.basic_thread_pool
+ */
 typedef executors::basic_thread_pool thread_pool;
 
 } // namespace pipeline

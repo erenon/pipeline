@@ -142,12 +142,15 @@ void sum_diff_prod(
   boost::pipeline::queue_back<int>& out
 )
 {
-  int a = in.pull();
-  int b = in.pull();
+  int a;
+  int b;
 
-  out.push(a+b);
-  out.push(a-b);
-  out.push(a*b);
+  if (in.wait_pull(a) && in.wait_pull(b))
+  {
+    out.push(a+b);
+    out.push(a-b);
+    out.push(a*b);
+  }
 }
 
 BOOST_AUTO_TEST_CASE(SegmentNToMTrafo)
@@ -290,9 +293,10 @@ BOOST_AUTO_TEST_CASE(SegmentProceduralSingleConsumer)
 
 void consume_n(boost::pipeline::queue_front<int>& qf)
 {
-  while ( ! qf.is_closed() || ! qf.is_empty())
+  int input;
+  while (qf.wait_pull(input))
   {
-    consume_sum += qf.pull();
+    consume_sum += input;
   }
 }
 
@@ -313,11 +317,38 @@ BOOST_AUTO_TEST_CASE(SegmentProceduralMultiConsumer)
   BOOST_CHECK_EQUAL(consume_sum, 6);
 }
 
-//int sum_two(boost::pipeline::queue_front<int>& in)
-//{
-//}
-//
-//BOOST_AUTO_TEST_CASE(SegmentNToOneTrafo)
-//{
-//
-//}
+int sum_two(boost::pipeline::queue_front<int> in) {
+  int a;
+  if ( ! in.wait_pull(a))
+  {
+    return -1;
+  }
+
+  int b;
+  if ( ! in.wait_pull(b))
+  {
+    return a;
+  }
+
+  return a + b;
+}
+
+BOOST_AUTO_TEST_CASE(SegmentNToOneTrafo)
+{
+  std::vector<int> nums = {0, 1, 2, 3, 4, 5};
+  std::vector<int> nums_out;
+
+  thread_pool pool{1};
+
+  auto exec =
+  (boost::pipeline::from(nums)
+    | sum_two
+    | nums_out
+  ).run(pool);
+
+  exec.wait();
+
+  std::vector<int> expected_out = {1, 5, 9};
+
+  BOOST_CHECK(expected_out == nums_out);
+}

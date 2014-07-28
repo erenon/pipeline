@@ -74,35 +74,15 @@ public:
    *
    * Gets the upstream queues front of the `_parent` segment,
    * transforms each item using `_function`
-   * and feeds them into the downstream queue.
+   * and feeds them into the downstream queue accessed through `target`.
    */
   template <typename Task, typename Function>
-  queue_front<value_type> run(thread_pool& pool, Function& function)
+  void run(thread_pool& pool, Function& function, const queue_back<value_type>& target)
   {
-    auto qf = _parent.run(pool);
-    auto downstream_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(downstream_ptr);
+    Task task(function, target);
+    _parent.run(pool, task.get_queue_back());
 
-    Task task(qf, qb, function);
-
-    pool.submit(task);
-
-    return downstream_ptr;
-  }
-
-  template <typename Task, typename Function>
-  queue_front<value_type> run(thread_pool& pool, Function& function, queue<value_type>& target)
-  {
-    auto qf = _parent.run(pool);
-    auto downstream_ptr = queue_ptr<value_type>(&target, null_deleter());
-
-    queue_back<value_type> qb(downstream_ptr);
-
-    Task task(qf, qb, function);
-
-    pool.submit(task);
-
-    return queue_front<value_type>(downstream_ptr);
+    pool.submit(std::move(task));
   }
 
 protected:
@@ -132,15 +112,9 @@ public:
   {}
 
   /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    return base_segment::template run<task_type>(pool, _function);
-  }
-
-  /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
-  {
-    return base_segment::template run<task_type>(pool, _function, target);
+    base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -171,12 +145,14 @@ public:
 
   execution run(thread_pool& pool)
   {
-    auto promise_ptr = std::make_shared<std::promise<bool>>();
-    auto future = promise_ptr->get_future();
-    auto queue_front = base_segment::_parent.run(pool);
+    std::promise<bool> promise;
+    auto future = promise.get_future();
 
-    task_type task(promise_ptr, queue_front, _function);
-    pool.submit(task);
+    task_type task(std::move(promise), _function);
+
+    base_segment::_parent.run(pool, task.get_queue_back());
+
+    pool.submit(std::move(task));
 
     return execution(std::move(future));
   }
@@ -211,15 +187,9 @@ public:
   {}
 
   /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    return base_segment::template run<task_type>(pool, _function);
-  }
-
-  /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
-  {
-    return base_segment::template run<task_type>(pool, _function, target);
+    base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -251,15 +221,9 @@ public:
   {}
 
   /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    return base_segment::template run<task_type>(pool, _function);
-  }
-
-  /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
-  {
-    return base_segment::template run<task_type>(pool, _function, target);
+    base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -292,12 +256,14 @@ public:
 
   execution run(thread_pool& pool)
   {
-    auto promise_ptr = std::make_shared<std::promise<bool>>();
-    auto future = promise_ptr->get_future();
-    auto queue_front = base_segment::_parent.run(pool);
+    std::promise<bool> promise;
+    auto future = promise.get_future();
 
-    task_type task(promise_ptr, queue_front, _function);
-    pool.submit(task);
+    task_type task(std::move(promise), _function);
+
+    base_segment::_parent.run(pool, task.get_queue_back());
+
+    pool.submit(std::move(task));
 
     return execution(std::move(future));
   }
@@ -332,15 +298,9 @@ public:
   {}
 
   /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    return base_segment::template run<task_type>(pool, _function);
-  }
-
-  /** @copydoc basic_segment::run */
-  queue_front<value_type> run(thread_pool& pool, queue<value_type>& target)
-  {
-    return base_segment::template run<task_type>(pool, _function, target);
+    base_segment::template run<task_type>(pool, _function, target);
   }
 
 private:
@@ -354,37 +314,21 @@ public:
   typedef void root_type;
   typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
 
+  typedef range_input_task<Iterator, value_type> task_type;
+
   range_input_segment(const Iterator& begin, const Iterator& end)
     :_begin(begin),
      _end(end)
   {}
 
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    auto queue_ptr = std::make_shared<queue<value_type>>();
-    queue_front<value_type> qf(queue_ptr);
-
-    auto task = [this, queue_ptr] ()
-    {
-      auto current = _begin;
-      while (current != _end)
-      {
-        queue_ptr->push(*current);
-        ++current;
-      }
-
-      queue_ptr->close();
-    };
-
-    pool.submit(task);
-
-    return qf;
+    task_type task(_begin, _end, target);
+    pool.submit(std::move(task));
   }
 
-  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
-
 private:
-  Iterator _begin;
+  const Iterator _begin;
   const Iterator _end;
 };
 
@@ -395,18 +339,17 @@ public:
   typedef void root_type;
   typedef T value_type;
 
+  typedef queue_input_task<T> task_type;
+
   queue_input_segment(queue<T>& queue)
     :_queue(queue)
   {}
 
-  queue_front<value_type> run(thread_pool&)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    return queue_front<value_type>(
-      queue_ptr<T>(&_queue, null_deleter())
-    );
+    task_type task(_queue, target);
+    pool.submit(std::move(task));
   }
-
-  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
 
 private:
   queue<T>& _queue;
@@ -420,28 +363,17 @@ public:
   typedef Output value_type;
   typedef Callable function_type;
 
+  typedef generator_input_task<Callable, Output> task_type;
+
   generator_input_segment(const function_type& generator)
     :_generator(generator)
   {}
 
-  queue_front<value_type> run(thread_pool& pool)
+  void run(thread_pool& pool, const queue_back<value_type>& target)
   {
-    auto queue_ptr = std::make_shared<queue<value_type>>();
-    queue_back<value_type> qb(queue_ptr);
-    queue_front<value_type> qf(queue_ptr);
-
-    auto task = [this, qb] () mutable
-    {
-      _generator(qb);
-      qb.close();
-    };
-
-    pool.submit(task);
-
-    return qf;
+    task_type task(_generator, target);
+    pool.submit(std::move(task));
   }
-
-  queue_front<value_type> run(thread_pool&, queue<value_type>&) = delete;
 
 private:
   function_type _generator;
@@ -457,6 +389,8 @@ public:
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
+  typedef range_output_task<input_type, Container> task_type;
+
   range_output_segment(
     const Parent& parent,
     Container& container
@@ -467,13 +401,16 @@ public:
 
   execution run(thread_pool& pool)
   {
-    auto promise_ptr = std::make_shared<std::promise<bool>>();
-    auto future = promise_ptr->get_future();
-    auto queue_front = base_segment::_parent.run(pool);
+    std::promise<bool> promise;
     auto out_it = std::back_inserter(_container);
 
-    range_output_task<input_type, Container> task(promise_ptr, queue_front, out_it);
-    pool.submit(task);
+    auto future = promise.get_future();
+
+    task_type task(std::move(promise), out_it);
+
+    base_segment::_parent.run(pool, task.get_queue_back());
+
+    pool.submit(std::move(task));
 
     return execution(std::move(future));
   }
@@ -492,6 +429,8 @@ public:
   typedef typename base_segment::input_type input_type;
   typedef typename base_segment::value_type value_type;
 
+  typedef queue_output_task<input_type> task_type;
+
   queue_output_segment(
     const Parent& parent,
     queue<input_type>& queue
@@ -502,23 +441,14 @@ public:
 
   execution run(thread_pool& pool)
   {
-    auto queue_front = base_segment::_parent.run(pool, _queue);
+    queue_back<input_type> parent_downstream(&_queue);
+    base_segment::_parent.run(pool, parent_downstream);
 
-    auto promise_ptr = std::make_shared<std::promise<bool>>();
-    auto future = promise_ptr->get_future();
+    std::promise<bool> promise;
+    auto future = promise.get_future();
 
-    auto task = [queue_front, promise_ptr] ()
-    {
-      // TODO queue_output_segment task is very inefficient
-      while ( ! queue_front.is_closed())
-      {
-        std::this_thread::yield();
-      }
-
-      promise_ptr->set_value(true);
-    };
-
-    pool.submit(task);
+    task_type task(std::move(promise), _queue);
+    pool.submit(std::move(task));
 
     return execution(std::move(future));
   }

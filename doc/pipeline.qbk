@@ -25,26 +25,108 @@
   ]
 ]
 
+[template fileref[path] '''<ulink url="https://github.com/erenon/pipeline/blob/master/'''[path]'''">'''[path]'''</ulink>''']
+
 [section Introduction]
 
 The goal of this library is to allow parallel execution of operations on batch data.
+The design is based on the [@http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html N3534] paper.
+This work is founded by Google through the Google Summer of Code 2014 programme.
+
+[h1 Motivation]
+TODO Unix pipeline example, simple and complex use cases.
+
+[important This is not an official Boost library and is under development. ]
 
 [endsect]
 
 [section Example]
 
-The following example shows a simple way to utilize the pipeline using [funcref boost::pipeline::from from()]:
+The following (incomplete) example shows a simple way to utilize the pipeline using [funcref boost::pipeline::from from()]:
 
+    std::vector<std::string> input{...};
     auto grep_error = std::bind(grep, "Error.*", std::placeholders::_1);
+    boost::pipeline::thread_pool pool;
 
     (boost::pipeline::from(input)
       | trim
       | grep_error
       | [] (const std::string& item) { return "->" + item; }
-    ).run(out_it);
+    ).run(pool);
     
-Please find the whole program in the `example/hello.cpp` file.
+Please find the whole program in the [fileref example/hello.cpp] file. This snippet is intented to give a
+quick glimpse of the interface. The [link pipeline.tutorial Tutorial] section walks through building a pipeline.
     
-[endsect]     
+[endsect]
+
+[section Tutorial]
+
+TODO
+
+* from: container, range, generator
+* connect transformations: | operator
+* transformation arities
+* to: container, consumer
+* execution
+
+[endsect]
+
+[section Glossary]
+
+TODO
+
+* transformation
+* segment
+* plan
+* pipeline
+* execution
+
+[endsect]
+
+[section Transformations]
+
+TODO
+
+* arities
+* callables: function pointer, std::function, functor, lambda, bind
+* bind restrictions
+
+[endsect]
+
+[section Scheduling]
+
+TODO
+
+* thread pool
+* top-down execution
+* blocking segments
+* drawbacks
+
+[h1 Planned improvements of scheduling]
+
+TODO
+
+* coroutines/fibers
+* try_*/yield
+
+[endsect]
+
+[section Build and Test this library]
+
+TODO
+
+* compiler requirements
+* header only
+* dependencies
+* test/$ bjam
+* build/$ bjam
+
+[endsect]
+
+[section Acknowledgements]
+
+TODO
+
+[endsect]
     
 [xinclude apidoc.xml]    

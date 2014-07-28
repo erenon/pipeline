@@ -21,9 +21,9 @@ using namespace boost::pipeline;
 
 BOOST_AUTO_TEST_CASE(InterfaceBasics)
 {
-  auto q_ptr = std::make_shared<queue<int>>();
-  queue_front<int> qf(q_ptr);
-  queue_back<int>  qb(q_ptr);
+  queue<int> q;
+  queue_front<int> qf(&q);
+  queue_back<int>  qb(&q);
 
   BOOST_CHECK(qf.is_closed() == false);
 
@@ -31,12 +31,19 @@ BOOST_AUTO_TEST_CASE(InterfaceBasics)
   qb.push(2);
   qb.push(3);
 
-  BOOST_CHECK_EQUAL(qf.pull(), 1);
-  BOOST_CHECK_EQUAL(qf.pull(), 2);
+  int input = 0;
+
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 1);
+
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 2);
 
   qb.close();
 
-  BOOST_CHECK_EQUAL(qf.pull(), 3);
+  qf.wait_pull(input);
+  BOOST_CHECK_EQUAL(input, 3);
+
   BOOST_CHECK(qf.is_closed());
 }
 
@@ -58,9 +65,9 @@ struct movable_only
 
 BOOST_AUTO_TEST_CASE(MovableT)
 {
-  auto q_ptr = std::make_shared<queue<movable_only>>();
-  queue_front<movable_only> qf(q_ptr);
-  queue_back<movable_only>  qb(q_ptr);
+  queue<movable_only> q;
+  queue_front<movable_only> qf(&q);
+  queue_back<movable_only>  qb(&q);
 
   movable_only item(1);
 
@@ -68,7 +75,7 @@ BOOST_AUTO_TEST_CASE(MovableT)
 
   movable_only expected_ret(1);
   movable_only ret(0);
-  qf.pull(ret);
+  qf.wait_pull(ret);
 
   BOOST_CHECK(ret == expected_ret);
 }
