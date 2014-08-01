@@ -32,5 +32,7 @@ project boost/pipeline/example
     <toolset>clang:<cxxflags>-std=c++11
   ;
 
-exe hello-example : hello.cpp
-  ;
+exe hello-example : hello.cpp ;
+exe tutorial-example : tutorial.cpp ;
+exe transformations-example : transformations.cpp ;
+exe open_segment-example : open_segment.cpp ;

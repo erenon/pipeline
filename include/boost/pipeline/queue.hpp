@@ -40,6 +40,7 @@ template <typename T>
 class queue_back
 {
 public:
+  /** Value type of the underlying queue */
   typedef typename queue<T>::value_type value_type;
 
   /**
@@ -104,6 +105,7 @@ template <typename T>
 class queue_front
 {
 public:
+  /** Value type of the underlying queue */
   typedef typename queue<T>::value_type value_type;
 
   /**

@@ -13,7 +13,6 @@ using boostbook ;
 
 doxygen apidoc
   : [ glob ../include/boost/pipeline/*.hpp ]
-    [ glob ../include/boost/pipeline/detail/*.hpp ]
   :
   <doxygen:param>"PREDEFINED= \\
     \"BOOST_DOXYGEN_INVOKED\" \\
