@@ -1,0 +1,178 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Class template queue_front</title>
+<link rel="stylesheet" href="http://www.boost.org/doc/libs/1_55_0/doc/src/boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="up" href="../../pipeline/reference.html#header.boost.pipeline.queue_hpp" title="Header &lt;boost/pipeline/queue.hpp&gt;">
+<link rel="prev" href="queue_back.html" title="Class template queue_back">
+<link rel="next" href="thread_pool.html" title="Type definition thread_pool">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="spirit-nav">
+<a accesskey="p" href="queue_back.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.queue_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="thread_pool.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+<div class="refentry">
+<a name="boost.pipeline.queue_front"></a><div class="titlepage"></div>
+<div class="refnamediv">
+<h2><span class="refentrytitle">Class template queue_front</span></h2>
+<p>boost::pipeline::queue_front</p>
+</div>
+<h2 xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" class="refsynopsisdiv-title">Synopsis</h2>
+<div xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" class="refsynopsisdiv"><pre class="synopsis"><span class="comment">// In header: &lt;<a class="link" href="../../pipeline/reference.html#header.boost.pipeline.queue_hpp" title="Header &lt;boost/pipeline/queue.hpp&gt;">boost/pipeline/queue.hpp</a>&gt;
+
+</span><span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> T<span class="special">&gt;</span> 
+<span class="keyword">class</span> <a class="link" href="queue_front.html" title="Class template queue_front">queue_front</a> <span class="special">{</span>
+<span class="keyword">public</span><span class="special">:</span>
+  <span class="comment">// <a class="link" href="queue_front.html#boost.pipeline.queue_fronttypes">types</a></span>
+  <span class="keyword">typedef</span> <span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span><span class="special">::</span><span class="identifier">value_type</span> <a class="link" href="queue_front.html#boost.pipeline.queue_front.value_type"><span class="identifier">value_type</span></a><span class="special">;</span>
+
+  <span class="comment">// <a class="link" href="queue_front.html#boost.pipeline.queue_frontconstruct-copy-destruct">construct/copy/destruct</a></span>
+  <a class="link" href="queue_front.html#idp16635248-bb"><span class="identifier">queue_front</span></a><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">*</span><span class="special">)</span><span class="special">;</span>
+
+  <span class="comment">// <a class="link" href="queue_front.html#idp16627120-bb">public member functions</a></span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp16627616-bb"><span class="identifier">wait_pull</span></a><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp16630832-bb"><span class="identifier">is_empty</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp16633104-bb"><span class="identifier">is_closed</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+<span class="special">}</span><span class="special">;</span></pre></div>
+<div class="refsect1">
+<a name="idp90459104"></a><h2>Description</h2>
+<p>Consumer handle to a buffer queue between segments.</p>
+<p>Each transformation consuming multiple items on each call receive a <code class="computeroutput"><a class="link" href="queue_front.html" title="Class template queue_front">queue_front</a></code> instance which is used to access to the upstream queue.</p>
+<p>A handle is valid until the segment which owns the input queue terminates.</p>
+<p><span class="bold"><strong>Template arguments</strong></span>:</p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; "><li class="listitem"><p><span class="bold"><strong>T</strong></span> Value type of the underlying queue </p></li></ul></div>
+<p>
+</p>
+<div class="refsect2">
+<a name="idp90463440"></a><h3>
+<a name="boost.pipeline.queue_fronttypes"></a><code class="computeroutput">queue_front</code> 
+        public
+       types</h3>
+<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+<p>
+<span class="keyword">typedef</span> <span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span><span class="special">::</span><span class="identifier">value_type</span> <a name="boost.pipeline.queue_front.value_type"></a><span class="identifier">value_type</span><span class="special">;</span></p>
+<p>Value type of the underlying queue </p>
+</li></ol></div>
+</div>
+<div class="refsect2">
+<a name="idp90471280"></a><h3>
+<a name="boost.pipeline.queue_frontconstruct-copy-destruct"></a><code class="computeroutput">queue_front</code> 
+        public
+       construct/copy/destruct</h3>
+<div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
+<pre class="literallayout"><a name="idp16635248-bb"></a><span class="identifier">queue_front</span><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">*</span> queue_ptr<span class="special">)</span><span class="special">;</span></pre>
+<p>Creates a handle to the given queue.</p>
+<p>The constructed object does <span class="emphasis"><em>not</em></span> take ownership of the give queue.</p>
+<p>
+</p>
+<div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term">Parameters:</span></p></td>
+<td><div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term"><code class="computeroutput">queue_ptr</code></span></p></td>
+<td><p>Queue to be accessed </p></td>
+</tr></tbody>
+</table></div></td>
+</tr></tbody>
+</table></div>
+</li></ol></div>
+</div>
+<div class="refsect2">
+<a name="idp90483136"></a><h3>
+<a name="idp16627120-bb"></a><code class="computeroutput">queue_front</code> public member functions</h3>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp16627616-bb"></a><span class="identifier">wait_pull</span><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span> ret<span class="special">)</span><span class="special">;</span></pre>
+<p>Pulls the front item of the queue.</p>
+<p>Blocks until an item becomes available or the underlying queue gets closed.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody>
+<tr>
+<td><p><span class="term">Parameters:</span></p></td>
+<td><div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term"><code class="computeroutput">ret</code></span></p></td>
+<td><p>Pulled item, if any </p></td>
+</tr></tbody>
+</table></div></td>
+</tr>
+<tr>
+<td><p><span class="term">Returns:</span></p></td>
+<td><p>true, if pulled successfully, false otherwise (queue is closed) </p></td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li class="listitem">
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp16630832-bb"></a><span class="identifier">is_empty</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
+<p>Checks the underlying queue for emptiness.</p>
+<p>This call is subject to race.</p>
+<p>
+</p>
+<div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term">Returns:</span></p></td>
+<td><p>true, if the queue was empty, false otherwise </p></td>
+</tr></tbody>
+</table></div>
+</li>
+<li class="listitem">
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp16633104-bb"></a><span class="identifier">is_closed</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
+<p>Checks whether the underlying queue is closed.</p>
+<p>
+</p>
+<div class="variablelist"><table border="0" class="variablelist compact">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term">Returns:</span></p></td>
+<td><p>true, if the queue is closed, false otherwise </p></td>
+</tr></tbody>
+</table></div>
+</li>
+</ol></div>
+</div>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Benedek Thaler<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="queue_back.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.queue_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="thread_pool.html"><img src="../../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>

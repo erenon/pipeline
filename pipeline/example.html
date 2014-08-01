@@ -7,29 +7,41 @@
 <link rel="home" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="up" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="prev" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
-<link rel="next" href="reference.html" title="Reference">
+<link rel="next" href="tutorial.html" title="Tutorial">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="spirit-nav">
-<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="reference.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="tutorial.html"><img src="../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="pipeline.example"></a><a class="link" href="example.html" title="Example">Example</a>
 </h2></div></div></div>
 <p>
-      The following example shows a simple way to utilize the pipeline using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp34681280.html" title="Function template from">from()</a></code>:
+      The following (incomplete) example shows a simple way to utilize the pipeline
+      using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp10699808.html" title="Function template from">from()</a></code>:
     </p>
-<pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">grep_error</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span><span class="identifier">grep</span><span class="special">,</span> <span class="string">"Error.*"</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">placeholders</span><span class="special">::</span><span class="identifier">_1</span><span class="special">);</span>
+<pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">grep_error</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span><span class="identifier">grep</span><span class="special">,</span> <span class="string">"Error.*"</span><span class="special">,</span> <span class="identifier">_1</span><span class="special">,</span> <span class="identifier">_2</span><span class="special">);</span>
 
+<span class="identifier">boost</span><span class="special">::</span><span class="identifier">pipeline</span><span class="special">::</span><span class="identifier">thread_pool</span> <span class="identifier">pool</span><span class="special">;</span>
+<span class="identifier">std</span><span class="special">::</span><span class="identifier">vector</span><span class="special">&lt;</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&gt;</span> <span class="identifier">output</span><span class="special">;</span>
+
+<span class="keyword">auto</span> <span class="identifier">execution</span> <span class="special">=</span>
 <span class="special">(</span><span class="identifier">boost</span><span class="special">::</span><span class="identifier">pipeline</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">input</span><span class="special">)</span>
   <span class="special">|</span> <span class="identifier">trim</span>
   <span class="special">|</span> <span class="identifier">grep_error</span>
-  <span class="special">|</span> <span class="special">[]</span> <span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&amp;</span> <span class="identifier">item</span><span class="special">)</span> <span class="special">{</span> <span class="keyword">return</span> <span class="string">"-&gt;"</span> <span class="special">+</span> <span class="identifier">item</span><span class="special">;</span> <span class="special">}</span>
-<span class="special">).</span><span class="identifier">run</span><span class="special">(</span><span class="identifier">out_it</span><span class="special">);</span>
+  <span class="special">|</span> <span class="special">[]</span> <span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">string</span><span class="special">&amp;</span> <span class="identifier">input</span><span class="special">)</span> <span class="special">{</span> <span class="keyword">return</span> <span class="string">"-&gt; "</span> <span class="special">+</span> <span class="identifier">input</span><span class="special">;</span> <span class="special">}</span>
+  <span class="special">|</span> <span class="identifier">output</span>
+<span class="special">).</span><span class="identifier">run</span><span class="special">(</span><span class="identifier">pool</span><span class="special">);</span>
 </pre>
 <p>
-      Please find the whole program in the <code class="computeroutput"><span class="identifier">example</span><span class="special">/</span><span class="identifier">hello</span><span class="special">.</span><span class="identifier">cpp</span></code> file.
+      This will feed the contents of <code class="computeroutput"><span class="identifier">input</span></code>
+      to the pipeline which trims whitespaces from each items, selects those which
+      starts with "Error", prepends them by an arrow mark them puts them
+      into <code class="computeroutput"><span class="identifier">output</span></code>. Please find the
+      whole program in the <a href="https://github.com/erenon/pipeline/blob/master/example/hello.cpp" target="_top">example/hello.cpp</a> file. This snippet is
+      intended to give a quick glimpse of the interface. The <a class="link" href="tutorial.html" title="Tutorial">Tutorial</a>
+      section walks through building a pipeline.
     </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
@@ -42,7 +54,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="reference.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="tutorial.html"><img src="../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

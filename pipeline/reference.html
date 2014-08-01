@@ -6,37 +6,80 @@
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="up" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
-<link rel="prev" href="example.html" title="Example">
-<link rel="next" href="../boost/pipeline/from_idp34681280.html" title="Function template from">
+<link rel="prev" href="acknowledgements.html" title="Acknowledgements">
+<link rel="next" href="../boost/pipeline/execution.html" title="Class execution">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="spirit-nav">
-<a accesskey="p" href="example.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="../boost/pipeline/from_idp34681280.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="acknowledgements.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="../boost/pipeline/execution.html"><img src="../images/next.png" alt="Next"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="pipeline.reference"></a>Reference</h2></div></div></div>
 <div class="toc"><dl class="toc">
+<dt><span class="section"><a href="reference.html#header.boost.pipeline.execution_hpp">Header &lt;boost/pipeline/execution.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="reference.html#header.boost.pipeline.pipeline_hpp">Header &lt;boost/pipeline/pipeline.hpp&gt;</a></span></dt>
-<dt><span class="section"><a href="reference.html#header.boost.pipeline.segment_hpp">Header &lt;boost/pipeline/segment.hpp&gt;</a></span></dt>
+<dt><span class="section"><a href="reference.html#header.boost.pipeline.queue_hpp">Header &lt;boost/pipeline/queue.hpp&gt;</a></span></dt>
+<dt><span class="section"><a href="reference.html#header.boost.pipeline.threading_hpp">Header &lt;boost/pipeline/threading.hpp&gt;</a></span></dt>
 </dl></div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="header.boost.pipeline.pipeline_hpp"></a>Header &lt;<a href="..//boost/pipeline/pipeline.hpp" target="_top">boost/pipeline/pipeline.hpp</a>&gt;</h3></div></div></div>
+<a name="header.boost.pipeline.execution_hpp"></a>Header &lt;<a href="../../include/boost/pipeline/execution.hpp" target="_top">boost/pipeline/execution.hpp</a>&gt;</h3></div></div></div>
 <pre class="synopsis"><span class="keyword">namespace</span> <span class="identifier">boost</span> <span class="special">{</span>
   <span class="keyword">namespace</span> <span class="identifier">pipeline</span> <span class="special">{</span>
-    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Container<span class="special">&gt;</span> <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp34681280.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="identifier">Container</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
-    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Iterator<span class="special">&gt;</span> 
-      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp34721456.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Iterator</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Iterator</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">class</span> <a class="link" href="../boost/pipeline/execution.html" title="Class execution">execution</a><span class="special">;</span>
   <span class="special">}</span>
 <span class="special">}</span></pre>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="header.boost.pipeline.segment_hpp"></a>Header &lt;<a href="..//boost/pipeline/segment.hpp" target="_top">boost/pipeline/segment.hpp</a>&gt;</h3></div></div></div>
+<a name="header.boost.pipeline.pipeline_hpp"></a>Header &lt;<a href="../../include/boost/pipeline/pipeline.hpp" target="_top">boost/pipeline/pipeline.hpp</a>&gt;</h3></div></div></div>
 <pre class="synopsis"><span class="keyword">namespace</span> <span class="identifier">boost</span> <span class="special">{</span>
   <span class="keyword">namespace</span> <span class="identifier">pipeline</span> <span class="special">{</span>
-    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Parent<span class="special">,</span> <span class="keyword">typename</span> Output<span class="special">&gt;</span> <span class="keyword">class</span> <a class="link" href="../boost/pipeline/segment.html" title="Class template segment">segment</a><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Container<span class="special">&gt;</span> <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp10699808.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="identifier">Container</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Iterator<span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp10706176.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Iterator</span> <span class="special">&amp;</span><span class="special">,</span> <span class="keyword">const</span> <span class="identifier">Iterator</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> QueueBack<span class="special">,</span> <span class="keyword">typename</span> R<span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp10713264.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">function</span><span class="special">&lt;</span> <span class="identifier">R</span><span class="special">(</span><span class="identifier">QueueBack</span><span class="special">)</span><span class="special">&gt;</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> QueueBack<span class="special">,</span> <span class="keyword">typename</span> R<span class="special">&gt;</span> <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp10721056.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="identifier">R</span><span class="special">(</span><span class="special">*</span><span class="special">)</span><span class="special">(</span><span class="identifier">QueueBack</span><span class="special">)</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> T<span class="special">,</span> <span class="keyword">typename</span> Callable<span class="special">&gt;</span> <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp10728352.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Callable</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> T<span class="special">&gt;</span> <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/from_idp16569248.html" title="Function template from"><span class="identifier">from</span></a><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Function<span class="special">,</span> 
+             <span class="keyword">typename</span> std::enable_if&lt; !std::is_function&lt; Function &gt;::value, int &gt;::type <span class="special">=</span> <span class="number">0</span><span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/make_idp16575072.html" title="Function template make"><span class="identifier">make</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Function</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Function<span class="special">,</span> 
+             <span class="keyword">typename</span> std::enable_if&lt; !std::is_function&lt; Function &gt;::value, int &gt;::type <span class="special">=</span> <span class="number">0</span><span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/make_idp16580208.html" title="Function template make"><span class="identifier">make</span></a><span class="special">(</span><span class="identifier">Function</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Function<span class="special">,</span> 
+             <span class="keyword">typename</span> std::enable_if&lt; std::is_function&lt; Function &gt;::value, int &gt;::type <span class="special">=</span> <span class="number">0</span><span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/make_idp16585712.html" title="Function template make"><span class="identifier">make</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Function</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Callable<span class="special">,</span> 
+             <span class="keyword">typename</span> std::enable_if&lt;!std::is_function&lt; Callable &gt;::value, int &gt;::type <span class="special">=</span> <span class="number">0</span><span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/to_idp16590848.html" title="Function template to"><span class="identifier">to</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Callable</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> Function<span class="special">,</span> 
+             <span class="keyword">typename</span> std::enable_if&lt; std::is_function&lt; Function &gt;::value, int &gt;::type <span class="special">=</span> <span class="number">0</span><span class="special">&gt;</span> 
+      <span class="emphasis"><em><span class="identifier">unspecified</span></em></span> <a class="link" href="../boost/pipeline/to_idp16596224.html" title="Function template to"><span class="identifier">to</span></a><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Function</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+  <span class="special">}</span>
+<span class="special">}</span></pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="header.boost.pipeline.queue_hpp"></a>Header &lt;<a href="../../include/boost/pipeline/queue.hpp" target="_top">boost/pipeline/queue.hpp</a>&gt;</h3></div></div></div>
+<pre class="synopsis"><span class="keyword">namespace</span> <span class="identifier">boost</span> <span class="special">{</span>
+  <span class="keyword">namespace</span> <span class="identifier">pipeline</span> <span class="special">{</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> T<span class="special">&gt;</span> <span class="keyword">class</span> <a class="link" href="../boost/pipeline/queue_back.html" title="Class template queue_back">queue_back</a><span class="special">;</span>
+    <span class="keyword">template</span><span class="special">&lt;</span><span class="keyword">typename</span> T<span class="special">&gt;</span> <span class="keyword">class</span> <a class="link" href="../boost/pipeline/queue_front.html" title="Class template queue_front">queue_front</a><span class="special">;</span>
+
+    <span class="keyword">typedef</span> <span class="identifier">sync_queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <a name="boost.pipeline.queue"></a><span class="identifier">queue</span><span class="special">;</span>
+  <span class="special">}</span>
+<span class="special">}</span></pre>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="header.boost.pipeline.threading_hpp"></a>Header &lt;<a href="../../include/boost/pipeline/threading.hpp" target="_top">boost/pipeline/threading.hpp</a>&gt;</h3></div></div></div>
+<pre class="synopsis"><span class="keyword">namespace</span> <span class="identifier">boost</span> <span class="special">{</span>
+  <span class="keyword">namespace</span> <span class="identifier">pipeline</span> <span class="special">{</span>
+    <span class="keyword">typedef</span> <span class="identifier">executors</span><span class="special">::</span><span class="identifier">basic_thread_pool</span> <a class="link" href="../boost/pipeline/thread_pool.html" title="Type definition thread_pool"><span class="identifier">thread_pool</span></a><span class="special">;</span>
   <span class="special">}</span>
 <span class="special">}</span></pre>
 </div>
@@ -51,7 +94,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="example.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="../boost/pipeline/from_idp34681280.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="acknowledgements.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="../boost/pipeline/execution.html"><img src="../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

@@ -1,0 +1,153 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Tutorial</title>
+<link rel="stylesheet" href="http://www.boost.org/doc/libs/1_55_0/doc/src/boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="up" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="prev" href="example.html" title="Example">
+<link rel="next" href="glossary.html" title="Glossary">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="spirit-nav">
+<a accesskey="p" href="example.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="glossary.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="pipeline.tutorial"></a><a class="link" href="tutorial.html" title="Tutorial">Tutorial</a>
+</h2></div></div></div>
+<p>
+      This section explains various parts of a pipeline and shows ways how to build
+      them. The example snippets below assume the following include and namespace
+      alias:
+    </p>
+<pre class="programlisting"><span class="preprocessor">#include</span> <span class="special">&lt;</span><span class="identifier">boost</span><span class="special">/</span><span class="identifier">pipeline</span><span class="special">.</span><span class="identifier">hpp</span><span class="special">&gt;</span>
+<span class="keyword">namespace</span> <span class="identifier">ppl</span> <span class="special">=</span> <span class="identifier">boost</span><span class="special">::</span><span class="identifier">pipeline</span><span class="special">;</span>
+</pre>
+<h2>
+<a name="pipeline.tutorial.h0"></a>
+      <span class="phrase"><a name="pipeline.tutorial.input"></a></span><a class="link" href="tutorial.html#pipeline.tutorial.input">Input</a>
+    </h2>
+<p>
+      Every complete pipeline requires a source of input. Such source can be a container,
+      a range, a <a href="http://www.boost.org/doc/libs/1_56_0_b1/doc/html/thread/sds.html#thread.sds.synchronized_queues" target="_top"><code class="computeroutput"><span class="identifier">queue</span></code></a> or a generator. A container
+      or a range is an input of a fixed size: once it's assigned, it cannot (or shouldn't)
+      be changed later. The <a href="http://www.boost.org/doc/libs/1_56_0_b1/doc/html/thread/sds.html#thread.sds.synchronized_queues" target="_top"><code class="computeroutput"><span class="identifier">queue</span></code></a> is specific to this library;
+      it provides concurrent read and write, therefore items can be added to it even
+      after the pipeline is launched. The generator is a function (1) or a callable
+      object with (2):
+    </p>
+<pre class="programlisting"><span class="identifier">R</span> <span class="identifier">generator</span><span class="special">(</span><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">T</span><span class="special">&gt;</span> <span class="identifier">downstream</span><span class="special">);</span> <span class="comment">// (1)</span>
+<span class="identifier">R</span> <span class="keyword">operator</span><span class="special">()(</span><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">T</span><span class="special">&gt;</span> <span class="identifier">downstream</span><span class="special">);</span> <span class="comment">// (2)</span>
+</pre>
+<p>
+      The generator function feeds the underlying queue through <code class="computeroutput"><span class="identifier">queue_back</span></code>
+      and returns when there are no more items to be processed. All three types of
+      input can be turned into the beginning of a pipeline using <code class="computeroutput"><span class="identifier">from</span><span class="special">()</span></code>:
+    </p>
+<pre class="programlisting"><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">container</span><span class="special">)</span> <span class="comment">// takes begin and end</span>
+<span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">container</span><span class="special">.</span><span class="identifier">begin</span><span class="special">(),</span> <span class="identifier">container</span><span class="special">.</span><span class="identifier">end</span><span class="special">())</span> <span class="comment">// same as above</span>
+<span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">queue</span><span class="special">)</span> <span class="comment">// reference is taken</span>
+<span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">generator</span><span class="special">)</span> <span class="comment">// generator gets copied</span>
+</pre>
+<p>
+      Please refer to the <a class="link" href="reference.html#header.boost.pipeline.pipeline_hpp" title="Header &lt;boost/pipeline/pipeline.hpp&gt;">API
+      documentation</a> to learn more about using <code class="computeroutput"><span class="identifier">from</span><span class="special">()</span></code>. Transformations can be connected later to
+      the returned <span class="emphasis"><em>segment</em></span> to form a pipeline:
+    </p>
+<h2>
+<a name="pipeline.tutorial.h1"></a>
+      <span class="phrase"><a name="pipeline.tutorial.connecting_transformations"></a></span><a class="link" href="tutorial.html#pipeline.tutorial.connecting_transformations">Connecting
+      transformations</a>
+    </h2>
+<p>
+      Transformations are the meat of a pipeline. Input segments created by <code class="computeroutput"><span class="identifier">from</span><span class="special">()</span></code> are
+      not much use by themselves. A transformation is a callable (a function pointer,
+      a <code class="computeroutput"><span class="identifier">function</span></code> object, a bind expression,
+      a functor or a lambda) which receives one or more input items on each call
+      and creates one or more output items in turn. The signature of such transformations
+      include:
+    </p>
+<pre class="programlisting"><span class="identifier">Output</span> <span class="identifier">one_to_one</span><span class="special">(</span><span class="keyword">const</span> <span class="identifier">Input</span><span class="special">&amp;</span> <span class="identifier">input</span><span class="special">);</span>
+<span class="identifier">R</span>      <span class="identifier">one_to_n</span>  <span class="special">(</span><span class="keyword">const</span> <span class="identifier">Input</span><span class="special">&amp;</span> <span class="identifier">input</span><span class="special">,</span>           <span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">Output</span><span class="special">&gt;&amp;</span> <span class="identifier">downstream</span><span class="special">);</span>
+<span class="identifier">Output</span> <span class="identifier">n_to_one</span>  <span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="identifier">Input</span><span class="special">&gt;&amp;</span> <span class="identifier">upstream</span><span class="special">);</span>
+<span class="identifier">R</span>      <span class="identifier">n_to_m</span>    <span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="identifier">Input</span><span class="special">&gt;&amp;</span> <span class="identifier">upstream</span><span class="special">,</span> <span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">Output</span><span class="special">&gt;&amp;</span> <span class="identifier">downstream</span><span class="special">);</span>
+</pre>
+<p>
+      Neither of the above cases can <code class="computeroutput"><span class="identifier">Output</span></code>
+      be <code class="computeroutput"><span class="keyword">void</span></code>. Please refer to the
+      <a class="link" href="transformations.html" title="Transformations">Transformations</a> section to
+      read more about them.
+    </p>
+<p>
+      Applying transformations on the input is done by the <code class="computeroutput"><span class="special">|</span></code>
+      operator. Each use of the operator creates a new segment and therefore it's
+      chainable:
+    </p>
+<pre class="programlisting"><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">input</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">mod_seven</span> <span class="special">|</span> <span class="identifier">even_only</span> <span class="special">|</span> <span class="identifier">add_two</span><span class="special">;</span>
+</pre>
+<p>
+      See <a href="https://github.com/erenon/pipeline/blob/master/example/tutorial.cpp" target="_top">example/tutorial.cpp</a> for more. After all the required
+      transformations are connected, to output must be described:
+    </p>
+<h2>
+<a name="pipeline.tutorial.h2"></a>
+      <span class="phrase"><a name="pipeline.tutorial.specifying_pipeline_output"></a></span><a class="link" href="tutorial.html#pipeline.tutorial.specifying_pipeline_output">Specifying
+      pipeline output</a>
+    </h2>
+<p>
+      The pipeline is incomplete until the output is specified. The output can be
+      a container, a <a href="http://www.boost.org/doc/libs/1_56_0_b1/doc/html/thread/sds.html#thread.sds.synchronized_queues" target="_top"><code class="computeroutput"><span class="identifier">queue</span></code></a>, or a consumer. A consumer
+      is a callable receiving a <code class="computeroutput"><span class="identifier">queue_front</span></code>
+      which can be pulled for items until there is no more. Usually, the library
+      can recognize when an output segment is specified, however, there is no difference
+      between consumers and n-to-one transformations. For such cases, use <code class="computeroutput"><a class="link" href="../boost/pipeline/to_idp16590848.html" title="Function template to">to()</a></code>:
+    </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">consumer_a</span><span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">upstream</span><span class="special">);</span> <span class="comment">// returns void</span>
+<span class="keyword">int</span>  <span class="identifier">consumer_b</span><span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">upstream</span><span class="special">);</span> <span class="comment">// returns int, might be mistaken for an n-to-one transformation</span>
+
+<span class="identifier">segment</span> <span class="special">|</span> <span class="identifier">container</span><span class="special">;</span> <span class="comment">// container is recognized as output, taken by reference</span>
+<span class="identifier">segment</span> <span class="special">|</span> <span class="identifier">queue</span><span class="special">;</span>     <span class="comment">// same as above</span>
+<span class="identifier">segment</span> <span class="special">|</span> <span class="identifier">consumer_a</span> <span class="comment">// definitely a consumer, gets copied</span>
+<span class="identifier">segment</span> <span class="special">|</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">to</span><span class="special">(</span><span class="identifier">consumer_b</span><span class="special">)</span> <span class="comment">// `to()` must be used to be recognized as consumer</span>
+</pre>
+<p>
+      Now our pipeline is assembled and ready to run:
+    </p>
+<h2>
+<a name="pipeline.tutorial.h3"></a>
+      <span class="phrase"><a name="pipeline.tutorial.running_the_pipeline"></a></span><a class="link" href="tutorial.html#pipeline.tutorial.running_the_pipeline">Running
+      the pipeline</a>
+    </h2>
+<p>
+      Until now we only have our pipeline assembled but not ran. To run a pipeline,
+      its associated <code class="computeroutput"><span class="identifier">run</span><span class="special">()</span></code>
+      method must be called with a <code class="computeroutput"><a class="link" href="../boost/pipeline/thread_pool.html" title="Type definition thread_pool">thread
+      pool</a></code>. This method schedules the transformations on the pool and
+      returns an <code class="computeroutput"><a class="link" href="../boost/pipeline/execution.html" title="Class execution">execution</a></code>
+      object. This handle can be queried or waited on:
+    </p>
+<pre class="programlisting"><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">thread_pool</span> <span class="identifier">pool</span><span class="special">{</span><span class="number">4</span><span class="special">};</span> <span class="comment">// add 4 threads to the pool</span>
+<span class="keyword">auto</span> <span class="identifier">exec</span> <span class="special">=</span> <span class="special">(</span><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">input</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">mod_seven</span> <span class="special">|</span> <span class="identifier">even_only</span> <span class="special">|</span> <span class="identifier">add_two</span> <span class="special">|</span> <span class="identifier">output</span><span class="special">).</span><span class="identifier">run</span><span class="special">(</span><span class="identifier">pool</span><span class="special">);</span>
+<span class="identifier">exec</span><span class="special">.</span><span class="identifier">wait</span><span class="special">();</span> <span class="comment">// blocks until the pipeline is finished</span>
+</pre>
+<p>
+      Please take a look at the <a class="link" href="scheduling.html" title="Scheduling">Scheduling</a>
+      section to learn how to size a thread pool to avoid deadlocks.
+    </p>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Benedek Thaler<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="example.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="glossary.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>
