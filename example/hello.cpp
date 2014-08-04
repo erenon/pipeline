@@ -20,20 +20,22 @@
 
 #include <boost/pipeline.hpp>
 
-std::string grep(
+void grep(
   const std::string& re,
-  const std::string& input,
+  boost::pipeline::queue_front<std::string>& upstream,
   boost::pipeline::queue_back<std::string>& downstream
 )
 {
   std::regex regex(re);
 
-  if (std::regex_match(input, regex))
+  std::string input;
+  while (upstream.wait_pull(input))
   {
-    downstream.push(input);
+    if (std::regex_match(input, regex))
+    {
+      downstream.push(input);
+    }
   }
-
-  return input;
 }
 
 std::string trim(const std::string& input)
