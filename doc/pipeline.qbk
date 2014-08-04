@@ -182,7 +182,7 @@ or library code:
 * *task*: A running segment. Tasks are scheduled on the thread pool.
 * *upstream*: Generally, the segment connected to the left of a segment.
       Specifically, it's the input queue of a task.
-* *upstream*: Generally, the segment connected to the right of a segment.
+* *downstream*: Generally, the segment connected to the right of a segment.
       Specifically, it's the output queue of a task.
 
 [endsect]
