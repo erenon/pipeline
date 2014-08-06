@@ -30,7 +30,6 @@ using valid_connection = typename std::enable_if<
   ! std::is_same<Connection, invalid_trafo>::value
 ,int>::type;
 
-
 template <typename Segment>
 using enable_if_connectable = typename std::enable_if<
   is_connectable_segment<Segment>::value
@@ -86,20 +85,6 @@ auto operator|(queue<T>& queue, const Connectable& connectable)
   -> decltype(queue_input_segment<T>(queue) | connectable)
 {
   return queue_input_segment<T>(queue) | connectable;
-}
-
-// segment | segment
-template <
-  typename LeftIn, typename Middle, typename RightOut,
-  typename std::enable_if<
-    ! std::is_same<Middle, terminated>::value
-  ,int>::type = 0
->
-//segment<LeftIn, RightOut>
-int
-operator|(const segment<LeftIn, Middle>& lhs, const segment<Middle, RightOut>& rhs)
-{
-  return rhs.connect_to(lhs);
 }
 
 } // namespace detail

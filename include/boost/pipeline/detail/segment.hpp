@@ -23,9 +23,9 @@
 #include <boost/pipeline/queue.hpp>
 #include <boost/pipeline/execution.hpp>
 #include <boost/pipeline/threading.hpp>
+#include <boost/pipeline/type_erasure.hpp>
 #include <boost/pipeline/detail/task.hpp>
 
-#include <boost/core/null_deleter.hpp>
 
 namespace boost {
 namespace pipeline {
@@ -47,7 +47,13 @@ namespace detail {
  *  - Output: type of emitted entries
  */
 template <typename Parent, typename Output>
-class basic_segment
+class basic_segment :
+  public segment_concept<
+    typename std::remove_reference<
+      typename std::remove_reference<Parent>::type::root_type
+    >::type,
+    Output
+  >
 {
 public:
   typedef typename std::remove_reference<
@@ -85,6 +91,11 @@ public:
     pool.submit(std::move(task));
   }
 
+  void connect_to(runnable_concept<root_type>& parent)
+  {
+    _parent.connect_to(parent);
+  }
+
 protected:
   Parent _parent;          /**< parent segment, provider of input */
 };
@@ -117,19 +128,26 @@ public:
     base_segment::template run<task_type>(pool, _function, target);
   }
 
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new one_one_segment<Parent, Output, IsSink>(*this)
+    ));
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
 
 template <typename Parent, typename Output>
-class one_one_segment<Parent, Output, true> : public basic_segment<Parent, void>
+class one_one_segment<Parent, Output, true> : public basic_segment<Parent, terminated>
 {
-  typedef basic_segment<Parent, void> base_segment;
+  typedef basic_segment<Parent, terminated> base_segment;
 
 public:
   typedef typename base_segment::root_type  root_type;
   typedef typename base_segment::input_type input_type;
-  typedef void value_type;
+  typedef terminated value_type;
 
   typedef std::function<Output(const input_type&)> function_type;
 
@@ -155,6 +173,13 @@ public:
     pool.submit(std::move(task));
 
     return execution(std::move(future));
+  }
+
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new one_one_segment<Parent, Output, true>(*this)
+    ));
   }
 
 private:
@@ -192,6 +217,13 @@ public:
     base_segment::template run<task_type>(pool, _function, target);
   }
 
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new one_n_segment<Parent, Output, R>(*this)
+    ));
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
@@ -224,6 +256,13 @@ public:
   void run(thread_pool& pool, const queue_back<value_type>& target)
   {
     base_segment::template run<task_type>(pool, _function, target);
+  }
+
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new n_one_segment<Parent, Output, IsSink>(*this)
+    ));
   }
 
 private:
@@ -268,6 +307,13 @@ public:
     return execution(std::move(future));
   }
 
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new n_one_segment<Parent, Output, true>(*this)
+    ));
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
@@ -303,12 +349,20 @@ public:
     base_segment::template run<task_type>(pool, _function, target);
   }
 
+  std::unique_ptr<segment_concept<root_type, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+      new n_m_segment<Parent, Output, R>(*this)
+    ));
+  }
+
 private:
   function_type _function; /**< transformation function of input */
 };
 
 template <typename Iterator>
 class range_input_segment
+  : public segment_concept<terminated, typename std::remove_reference<decltype(*std::declval<Iterator>())>::type>
 {
 public:
   typedef void root_type;
@@ -327,21 +381,28 @@ public:
     pool.submit(std::move(task));
   }
 
+  std::unique_ptr<segment_concept<terminated, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+      new range_input_segment<Iterator>(*this)
+    ));
+  }
+
 private:
   const Iterator _begin;
   const Iterator _end;
 };
 
-template <typename T>
-class queue_input_segment
+template <typename Output>
+class queue_input_segment : public segment_concept<terminated, Output>
 {
 public:
   typedef void root_type;
-  typedef T value_type;
+  typedef Output value_type;
 
-  typedef queue_input_task<T> task_type;
+  typedef queue_input_task<Output> task_type;
 
-  queue_input_segment(queue<T>& queue)
+  queue_input_segment(queue<Output>& queue)
     :_queue(queue)
   {}
 
@@ -351,12 +412,19 @@ public:
     pool.submit(std::move(task));
   }
 
+  std::unique_ptr<segment_concept<terminated, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+      new queue_input_segment<Output>(*this)
+    ));
+  }
+
 private:
-  queue<T>& _queue;
+  queue<Output>& _queue;
 };
 
 template <typename Callable, typename Output>
-class generator_input_segment
+class generator_input_segment : public segment_concept<terminated, Output>
 {
 public:
   typedef void root_type;
@@ -375,14 +443,21 @@ public:
     pool.submit(std::move(task));
   }
 
+  std::unique_ptr<segment_concept<terminated, value_type>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+      new generator_input_segment<Callable, Output>(*this)
+    ));
+  }
+
 private:
   function_type _generator;
 };
 
 template <typename Parent, typename Container>
-class range_output_segment : public basic_segment<Parent, void>
+class range_output_segment : public basic_segment<Parent, terminated>
 {
-  typedef basic_segment<Parent, void> base_segment;
+  typedef basic_segment<Parent, terminated> base_segment;
 
 public:
   typedef typename base_segment::root_type  root_type;
@@ -415,14 +490,21 @@ public:
     return execution(std::move(future));
   }
 
+  std::unique_ptr<segment_concept<root_type, terminated>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, terminated>>(
+      new range_output_segment<Parent, Container>(*this)
+    ));
+  }
+
 private:
   Container& _container;
 };
 
 template <typename Parent>
-class queue_output_segment : public basic_segment<Parent, void>
+class queue_output_segment : public basic_segment<Parent, terminated>
 {
-  typedef basic_segment<Parent, void> base_segment;
+  typedef basic_segment<Parent, terminated> base_segment;
 
 public:
   typedef typename base_segment::root_type  root_type;
@@ -451,6 +533,13 @@ public:
     pool.submit(std::move(task));
 
     return execution(std::move(future));
+  }
+
+  std::unique_ptr<segment_concept<root_type, terminated>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<root_type, terminated>>(
+      new queue_output_segment<Parent>(*this)
+    ));
   }
 
 private:

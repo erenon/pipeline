@@ -13,143 +13,348 @@
 #ifndef BOOST_PIPELINE_TYPE_ERASURE_HPP
 #define BOOST_PIPELINE_TYPE_ERASURE_HPP
 
-#include <boost/type_erasure/any.hpp>
-#include <boost/type_erasure/member.hpp>
-#include <boost/type_erasure/call.hpp>
-#include <boost/type_erasure/binding.hpp>
-#include <boost/type_erasure/rebind_any.hpp>
+#include <memory>
 
 #include <boost/pipeline/threading.hpp>
 #include <boost/pipeline/execution.hpp>
 #include <boost/pipeline/queue.hpp>
-#include <boost/pipeline/detail/segment.hpp>
-
-BOOST_TYPE_ERASURE_MEMBER((boost)(pipeline)(detail)(has_run), run)
+#include <boost/pipeline/detail/open_segment.hpp>
+#include <boost/pipeline/detail/closed_segment.hpp>
 
 namespace boost {
-
 namespace pipeline {
-
-namespace detail {
-
-struct unknown_type {};
-
-template <typename Root, typename T = typename type_erasure::_self>
-struct root_type_is_same_as
-{
-  static void apply(const T&)
-  {
-    static_assert(
-       std::is_same<typename T::root_type, Root>::value
-    || std::is_same<typename T::root_type, detail::unknown_type>::value,
-      "Invalid segment type, root_type mismatch"
-    );
-  }
-};
-
-template <typename Value, typename T = typename type_erasure::_self>
-struct value_type_is_same_as
-{
-  static void apply(const T&)
-  {
-    static_assert(
-       std::is_same<typename T::value_type, Value>::value
-    || std::is_same<typename T::value_type, detail::unknown_type>::value,
-      "Invalid segment type, value_type mismatch"
-    );
-  }
-};
-
-template <typename Parent, typename ExpectedOutput, typename Segment = typename type_erasure::_self>
-struct has_connect_to
-{
-  static void apply(const Segment& /*segment*/)
-  {
-    typedef decltype(std::declval<Segment>().connect_to(
-     std::declval<Parent>()
-    )) result;
-
-    static_assert(
-     std::is_same<typename result::value_type, ExpectedOutput>::value,
-     "Invalid open segment type, can't be represented as required"
-    );
-  };
-};
-
-} // namespace detail
 
 typedef void terminated;
 
-template <typename Input, typename Output>
-using segment_concept = typename mpl::vector<
-  type_erasure::copy_constructible<>,
-
-  detail::root_type_is_same_as<Input>,   // or unknown
-  detail::value_type_is_same_as<Output>, // or unknown
-
-  // if left terminated
-  //   if right terminated: has_run<execution>
-  //   else has_run<queue_front>
-  // else open_segment
-  typename std::conditional<
-    std::is_same<Input, terminated>::value,
-    typename std::conditional<
-      std::is_same<Output, terminated>::value,
-      detail::has_run<execution(thread_pool&)>,
-      detail::has_run<queue_front<Output>(thread_pool&)>
-    >::type,
-    detail::has_connect_to<detail::queue_input_segment<Input>, Output>
-  >::type,
-
-  type_erasure::relaxed
->;
-
-template <typename Input, typename Output>
-using segment = typename type_erasure::any<segment_concept<Input, Output>>;
-
 namespace detail {
+
+template <typename Input, typename Output>
+class segment;
+
+template <typename Output>
+class runnable_concept
+{
+public:
+  virtual ~runnable_concept() {}
+  virtual void run(thread_pool&, const queue_back<Output>&) = 0;
+};
+
+template <>
+class runnable_concept<terminated>
+{
+public:
+  virtual ~runnable_concept() {}
+  virtual execution run(thread_pool&) = 0;
+};
+
+template <typename Input, typename Output>
+class segment_concept
+  : public runnable_concept<Output>
+{
+public:
+  typedef Input root_type;
+  typedef Output value_type;
+
+  virtual ~segment_concept() {}
+  virtual std::unique_ptr<segment_concept<Input, Output>> clone() const = 0;
+  virtual void connect_to(runnable_concept<Input>&) = 0;
+};
+
+template <typename Output>
+class segment_concept<terminated, Output>
+  : public runnable_concept<Output>
+{
+public:
+  typedef terminated root_type;
+  typedef Output value_type;
+
+  virtual ~segment_concept() {}
+  virtual std::unique_ptr<segment_concept<terminated, Output>> clone() const = 0;
+};
+
+template <>
+class segment_concept<terminated, terminated>
+  : public runnable_concept<terminated>
+{
+public:
+  typedef terminated root_type;
+  typedef terminated value_type;
+
+  virtual ~segment_concept() {}
+  virtual std::unique_ptr<segment_concept<terminated, terminated>> clone() const = 0;
+};
+
+struct unknown_type {};
+
+template <typename Input>
+class upstream_proxy
+{
+public:
+  typedef Input root_type;
+  typedef Input value_type;
+
+  void connect_to(runnable_concept<Input>& parent)
+  {
+    _parent = &parent;
+  }
+
+  template <typename... Args>
+  void run(Args&&... args)
+  {
+    _parent->run(std::forward<Args>(args)...);
+  }
+
+private:
+  runnable_concept<Input>* _parent = nullptr;
+};
+
+template <typename Input, typename Middle, typename Output>
+class connected_segment
+  : public segment_concept<Input, Output>
+{
+  connected_segment(const connected_segment<Input, Middle, Output>& rhs)
+    :_parent(rhs._parent->clone()),
+     _impl(rhs._impl->clone())
+  {
+    _impl->connect_to(*_parent);
+  }
+
+public:
+  typedef Input  root_type;
+  typedef Output value_type;
+
+  connected_segment(
+    const segment_concept<Input, Middle>& parent,
+    const segment_concept<Middle, Output>& impl
+  )
+    :_parent(parent.clone()),
+     _impl(impl.clone())
+  {
+    _impl->connect_to(*_parent);
+  }
+
+  std::unique_ptr<segment_concept<Input, Output>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<Input, Output>>(
+      new connected_segment<Input, Middle, Output>(*this)
+    ));
+  }
+
+private:
+  std::unique_ptr<segment_concept<Input, Middle>> _parent;
+  std::unique_ptr<segment_concept<Middle, Output>> _impl;
+};
+
+template <typename Input, typename Middle>
+class connected_segment<Input, Middle, terminated>
+  : public segment_concept<Input, terminated>
+{
+  connected_segment(const connected_segment<Input, Middle, terminated>& rhs)
+    :_parent(rhs._parent->clone()),
+     _impl(rhs._impl->clone())
+  {
+    _impl->connect_to(*_parent);
+  }
+
+public:
+  typedef Input      root_type;
+  typedef terminated value_type;
+
+  connected_segment(
+    const segment_concept<Input, Middle>& parent,
+    const segment_concept<Middle, terminated>& impl
+  )
+    :_parent(parent.clone()),
+     _impl(impl.clone())
+  {
+    _impl->connect_to(*_parent);
+  }
+
+  std::unique_ptr<segment_concept<Input, terminated>> clone() const
+  {
+    return std::move(std::unique_ptr<segment_concept<Input, terminated>>(
+      new connected_segment<Input, Middle, terminated>(*this)
+    ));
+  }
+
+  execution run(thread_pool& pool)
+  {
+    return std::move(_impl->run(pool));
+  }
+
+private:
+  std::unique_ptr<segment_concept<Input, Middle>> _parent;
+  std::unique_ptr<segment_concept<Middle, terminated>> _impl;
+};
+
+template <typename Input, typename Output>
+class segment
+{
+  template <typename, typename>
+  friend class segment;
+
+  typedef upstream_proxy<Input> proxy;
+
+public:
+  typedef Input  root_type;
+  typedef Output value_type;
+
+  segment(const segment<Input, Output>& rhs)
+    :_impl(rhs._impl->clone())
+  {}
+
+  segment(const segment_concept<Input, Output>& impl)
+    :_impl(impl.clone())
+  {}
+
+  template <typename... Trafos>
+  segment(const open_segment<Trafos...>& impl)
+    :_impl(impl.connect_to(proxy()).clone())
+  {}
+
+  template <typename NewOutput>
+  segment<Input, NewOutput>
+  operator|(const segment<Output, NewOutput>& rhs) const
+  {
+    return std::move(connected_segment<Input, Output, NewOutput>(
+      *_impl, *rhs._impl
+    ));
+  }
+
+  void connect_to(runnable_concept<Input>& parent)
+  {
+    _impl->connect_to(parent);
+  }
+
+  void run(thread_pool& pool, const queue_back<Output>& target)
+  {
+    _impl->run(pool, target);
+  }
+
+private:
+  std::unique_ptr<segment_concept<Input, Output>> _impl;
+};
+
+template <typename Output>
+class segment<terminated, Output>
+{
+  template <typename, typename>
+  friend class segment;
+
+public:
+  typedef terminated root_type;
+  typedef Output     value_type;
+
+  segment(const segment<terminated, Output>& rhs)
+    :_impl(rhs._impl->clone())
+  {}
+
+  segment(const segment_concept<terminated, Output>& impl)
+    :_impl(impl.clone())
+  {}
+
+  template <typename NewOutput>
+  segment<terminated, NewOutput>
+  operator|(const segment<Output, NewOutput>& rhs) const
+  {
+    return std::move(connected_segment<terminated, Output, NewOutput>(
+      *_impl, *rhs._impl
+    ));
+  }
+
+  void run(thread_pool& pool, const queue_back<Output>& target)
+  {
+    _impl->run(pool, target);
+  }
+
+private:
+  std::unique_ptr<segment_concept<terminated, Output>> _impl;
+};
+
+template <typename Input>
+class segment<Input, terminated>
+{
+  template <typename, typename>
+  friend class segment;
+
+  typedef detail::upstream_proxy<Input> proxy;
+
+public:
+  segment(const segment<Input, terminated>& rhs)
+    :_impl(rhs._impl->clone())
+  {}
+
+  segment(const segment_concept<Input, terminated>& impl)
+    :_impl(impl.clone())
+  {}
+
+  template <typename... Trafos>
+  segment(const open_segment<Trafos...>& impl)
+    :_impl(impl.connect_to(proxy()).clone())
+  {}
+
+  template <typename Trafo>
+  segment(const closed_segment<Trafo>& impl)
+    :_impl((proxy() | impl).clone())
+  {}
+
+
+  execution run(thread_pool& pool)
+  {
+    return std::move(_impl->run(pool));
+  }
+
+private:
+  std::unique_ptr<segment_concept<Input, terminated>> _impl;
+};
+
+template <>
+class segment<terminated, terminated>
+{
+  template <typename, typename>
+  friend class segment;
+
+public:
+  segment(const segment<terminated, terminated>& rhs)
+    :_impl(rhs._impl->clone())
+  {}
+
+  segment(const segment_concept<terminated, terminated>& impl)
+    :_impl(impl.clone())
+  {}
+
+  execution run(thread_pool& pool)
+  {
+    return std::move(_impl->run(pool));
+  }
+
+private:
+  std::unique_ptr<segment_concept<terminated, terminated>> _impl;
+};
 
 //
 // is_connectable_segment predicate specializations
 //
 
-template <typename T>
-struct is_connectable_segment<segment<terminated, T>> : public std::true_type {};
+template <typename>
+struct is_connectable_segment;
+
+template <typename O>
+struct is_connectable_segment<segment<terminated, O>> : public std::true_type {};
+
+template <typename I, typename O>
+struct is_connectable_segment<segment<I, O>> : public std::true_type {};
+
+template <typename I>
+struct is_connectable_segment<upstream_proxy<I>> : public std::true_type {};
 
 } // namespace detail
 
+using detail::segment;
+
+using plan = detail::segment<terminated, terminated>;
+
 } // namespace pipeline
-
-namespace type_erasure {
-
-template <typename Concept, typename Value, typename Base>
-struct concept_interface<::boost::pipeline::detail::root_type_is_same_as<Value>, Base, Concept> : Base
-{
-  typedef Value root_type;
-};
-
-template <typename Concept, typename Value, typename Base>
-struct concept_interface<::boost::pipeline::detail::value_type_is_same_as<Value>, Base, Concept> : Base
-{
-  typedef Value value_type;
-};
-
-template <typename Parent, typename Output, typename Segment, typename Base>
-struct concept_interface<pipeline::detail::has_connect_to<Parent, Output, Segment>, Base, Segment>
-  : public Base
-{
-  template <typename NewRoot, typename Root>
-  int connect_to(const pipeline::segment<NewRoot, Root>& parent) const
-  {
-    call(pipeline::detail::has_connect_to<Parent, Output, Segment>(), *this);
-
-    (void)parent;
-    return 3;
-  }
-};
-
-} // namespace type_erasure
-
 } // namespace boost
 
 #endif // BOOST_PIPELINE_TYPE_ERASURE_HPP
