@@ -15,6 +15,7 @@
 
 #include <type_traits>
 
+#include <boost/pipeline/type_erasure.hpp>
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
@@ -28,7 +29,6 @@ template <typename Connection>
 using valid_connection = typename std::enable_if<
   ! std::is_same<Connection, invalid_trafo>::value
 ,int>::type;
-
 
 template <typename Segment>
 using enable_if_connectable = typename std::enable_if<

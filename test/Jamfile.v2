@@ -48,5 +48,6 @@ alias pipline-test-suite :
   [ pipeline-test google_pipeline_test ]
   [ pipeline-test queue_test ]
   [ pipeline-test pipeline_test ]
+  [ pipeline-test type_erasure ]
   # [ pipeline-test sandbox ]
   ; 

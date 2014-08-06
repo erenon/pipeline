@@ -16,5 +16,6 @@
 #include <boost/pipeline/pipeline.hpp>
 #include <boost/pipeline/queue.hpp>
 #include <boost/pipeline/threading.hpp>
+#include <boost/pipeline/type_erasure.hpp>
 
 #endif // BOOST_PIPELINE_HPP
