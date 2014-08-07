@@ -75,9 +75,12 @@ void running()
 
   //[example_tutorial_run
   ppl::thread_pool pool{4}; // add 4 threads to the pool
-  auto exec = (ppl::from(input) | mod_seven | even_only | add_two | output).run(pool);
+  ppl::execution exec = (ppl::from(input) | mod_seven | even_only | add_two | output).run(pool);
   exec.wait(); // blocks until the pipeline is finished
+  bool done = exec.is_done(); // done == true
   //]
+
+  assert(done == true && "is_done() returned false after wait");
 
   std::vector<int> expected_output = {4, 6, 8, 2, 4};
   assert(output == expected_output && "Incorrect output produced");
