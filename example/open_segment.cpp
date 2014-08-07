@@ -43,8 +43,6 @@ void use_auto()
   (void)s;
 }
 
-// TODO example open_segment type erasure disabled
-/*
 void use_type_erasure()
 {
   std::vector<std::string> lines;
@@ -52,13 +50,44 @@ void use_type_erasure()
 
   //[example_open_segment_type_erasure
   ppl::segment<std::string, std::size_t> s2 = ppl::make(length);
-  ppl::segment<std::string, std::string> s1 = ppl::from(lines) | trim;
-  ppl::segment<ppl::teminated, ppl::teminated> s = s1 | s2 | output;
+  ppl::segment<ppl::terminated, std::string> s1 = ppl::from(lines) | trim;
+  ppl::segment<ppl::terminated, ppl::terminated> s = s1 | s2 | output;
   //]
+
+  (void)s;
 }
-*/
+
+//[example_open_segment_type_erasure_interface
+void execute_plan(ppl::plan& p)
+{
+  ppl::thread_pool pool{1};
+  auto exec = p.run(pool);
+  exec.wait();
+}
+
+ppl::segment<ppl::terminated, std::size_t> append_length(const ppl::segment<ppl::terminated, std::string>& s1)
+{
+  return s1 | length;
+}
+//]
+
+void interface_of_type_erasured_handles()
+{
+  std::vector<std::string> input{"foo", "barA", "bazBB"};
+  std::vector<std::size_t> output;
+
+  auto s1 = ppl::from(input);
+  auto s2 = append_length(s1);
+  ppl::plan s3 = s2 | output;
+
+  execute_plan(s3);
+}
 
 int main()
 {
   use_auto();
+  use_type_erasure();
+  interface_of_type_erasured_handles();
+
+  return 0;
 }

@@ -269,6 +269,11 @@ refer to any segment or plan which takes `Input`s as input and produces `Output`
 
 [example_open_segment_type_erasure]
 
+Thanks to the type erased handles, it's easy to create interfaces expecting
+segments or plans:
+
+[example_open_segment_type_erasure_interface]
+
 However, using these aliases does not come for free: it involves allocation of dynamic memory
 and indirection. It's recommended to use the `auto` keyword instead wherever it's possible.
 
