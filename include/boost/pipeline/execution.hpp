@@ -41,7 +41,7 @@ public:
    * @param future Future promised by the terminating segment
    * of the represented pipeline.
    */
-  execution(std::future<bool>&& future)
+  execution(std::future<void>&& future)
     :_future(std::move(future))
   {}
 
@@ -63,7 +63,7 @@ public:
   void wait()    { _future.wait(); }
 
 private:
-  std::future<bool> _future;
+  std::future<void> _future;
 };
 
 } // namespace pipeline

@@ -163,7 +163,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    std::promise<bool> promise;
+    std::promise<void> promise;
     auto future = promise.get_future();
 
     task_type task(std::move(promise), _function);
@@ -295,7 +295,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    std::promise<bool> promise;
+    std::promise<void> promise;
     auto future = promise.get_future();
 
     task_type task(std::move(promise), _function);
@@ -476,7 +476,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    std::promise<bool> promise;
+    std::promise<void> promise;
     auto out_it = std::back_inserter(_container);
 
     auto future = promise.get_future();
@@ -526,7 +526,7 @@ public:
     queue_back<input_type> parent_downstream(&_queue);
     base_segment::_parent.run(pool, parent_downstream);
 
-    std::promise<bool> promise;
+    std::promise<void> promise;
     auto future = promise.get_future();
 
     task_type task(std::move(promise), _queue);

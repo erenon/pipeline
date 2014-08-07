@@ -255,7 +255,7 @@ class range_output_task
 {
 public:
   range_output_task(
-    std::promise<bool>&& promise,
+    std::promise<void>&& promise,
     const std::back_insert_iterator<Container>& out_it
   )
     :_promise(std::move(promise)),
@@ -273,7 +273,7 @@ public:
       *_out_it = std::move(input);
     }
 
-    _promise.set_value(true);
+    _promise.set_value();
   }
 
   queue_back<Input> get_queue_back()
@@ -282,7 +282,7 @@ public:
   }
 
 private:
-  std::promise<bool> _promise;
+  std::promise<void> _promise;
   std::unique_ptr<queue<Input>> _input;
   std::back_insert_iterator<Container> _out_it;
 };
@@ -292,7 +292,7 @@ class queue_output_task
 {
 public:
   queue_output_task(
-    std::promise<bool>&& promise,
+    std::promise<void>&& promise,
     queue<Input>& queue
   )
     :_promise(std::move(promise)),
@@ -307,11 +307,11 @@ public:
       std::this_thread::yield();
     }
 
-    _promise.set_value(true);
+    _promise.set_value();
   }
 
 private:
-  std::promise<bool> _promise;
+  std::promise<void> _promise;
   queue_front<Input> _upstream;
 };
 
@@ -320,7 +320,7 @@ class single_consume_output_task
 {
 public:
   single_consume_output_task(
-    std::promise<bool>&& promise,
+    std::promise<void>&& promise,
     const Consumer& consumer
   )
     :_promise(std::move(promise)),
@@ -338,7 +338,7 @@ public:
       _consumer(std::move(input));
     }
 
-    _promise.set_value(true);
+    _promise.set_value();
   }
 
   queue_back<Input> get_queue_back()
@@ -347,7 +347,7 @@ public:
   }
 
 private:
-  std::promise<bool> _promise;
+  std::promise<void> _promise;
   std::unique_ptr<queue<Input>> _input;
   Consumer _consumer;
 };
@@ -357,7 +357,7 @@ class multi_consume_output_task
 {
 public:
   multi_consume_output_task(
-    std::promise<bool>&& promise,
+    std::promise<void>&& promise,
     const Consumer& consumer
   )
     :_promise(std::move(promise)),
@@ -374,7 +374,7 @@ public:
       _consumer(upstream);
     }
 
-    _promise.set_value(true);
+    _promise.set_value();
   }
 
   queue_back<Input> get_queue_back()
@@ -383,7 +383,7 @@ public:
   }
 
 private:
-  std::promise<bool> _promise;
+  std::promise<void> _promise;
   std::unique_ptr<queue<Input>> _input;
   Consumer _consumer;
 };
