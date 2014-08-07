@@ -161,3 +161,17 @@ BOOST_AUTO_TEST_CASE(PassSegmentAround)
 
   BOOST_CHECK(output == expected_output);
 }
+
+BOOST_AUTO_TEST_CASE(ClosedOpenTrafo)
+{
+  std::vector<std::string> input{"foo", "barA", "bazBB"};
+  std::vector<std::size_t> output;
+
+  segment<std::string, std::size_t> s2 = make(len);
+  segment<terminated, std::string> s1 = from(input);
+  segment<terminated, terminated> s = s1 | s2 | output;
+
+  execute_plan(s);
+  std::vector<std::size_t> expected_output{3, 4, 5};
+  BOOST_CHECK(output == expected_output);
+}

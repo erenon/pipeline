@@ -140,6 +140,11 @@ public:
     ));
   }
 
+  void run(thread_pool& pool, const queue_back<Output>& target)
+  {
+    _impl->run(pool, target);
+  }
+
 private:
   std::unique_ptr<segment_concept<Input, Middle>> _parent;
   std::unique_ptr<segment_concept<Middle, Output>> _impl;
