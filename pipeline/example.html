@@ -19,7 +19,7 @@
 </h2></div></div></div>
 <p>
       The following (incomplete) example shows a simple way to utilize the pipeline
-      using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp10699808.html" title="Function template from">from()</a></code>:
+      using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp10761280.html" title="Function template from">from()</a></code>:
     </p>
 <pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">grep_error</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span><span class="identifier">grep</span><span class="special">,</span> <span class="string">"Error.*"</span><span class="special">,</span> <span class="identifier">_1</span><span class="special">,</span> <span class="identifier">_2</span><span class="special">);</span>
 
@@ -36,7 +36,7 @@
 </pre>
 <p>
       This will feed the contents of <code class="computeroutput"><span class="identifier">input</span></code>
-      to the pipeline which trims whitespaces from each items, selects those which
+      to the pipeline which trims whitespace from each items, selects those which
       starts with "Error", prepends them by an arrow mark them puts them
       into <code class="computeroutput"><span class="identifier">output</span></code>. Please find the
       whole program in the <a href="https://github.com/erenon/pipeline/blob/master/example/hello.cpp" target="_top">example/hello.cpp</a> file. This snippet is

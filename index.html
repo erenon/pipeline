@@ -31,15 +31,18 @@
 <dt><span class="section"><a href="pipeline/transformations.html">Transformations</a></span></dt>
 <dt><span class="section"><a href="pipeline/open_segments.html">Open Segments</a></span></dt>
 <dt><span class="section"><a href="pipeline/scheduling.html">Scheduling</a></span></dt>
+<dt><span class="section"><a href="pipeline/cookbook.html">Cookbook</a></span></dt>
 <dt><span class="section"><a href="pipeline/build_and_test_this_library.html">Build and Test this
     library</a></span></dt>
-<dt><span class="section"><a href="pipeline/acknowledgements.html">Acknowledgements</a></span></dt>
+<dt><span class="section"><a href="pipeline/acknowledgments.html">Acknowledgments</a></span></dt>
+<dt><span class="section"><a href="pipeline/what_s_next.html">What's next</a></span></dt>
 <dt><span class="section"><a href="pipeline/reference.html">Reference</a></span></dt>
 <dd><dl>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.execution_hpp">Header &lt;boost/pipeline/execution.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.pipeline_hpp">Header &lt;boost/pipeline/pipeline.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.queue_hpp">Header &lt;boost/pipeline/queue.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.threading_hpp">Header &lt;boost/pipeline/threading.hpp&gt;</a></span></dt>
+<dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.type_erasure_hpp">Header &lt;boost/pipeline/type_erasure.hpp&gt;</a></span></dt>
 </dl></dd>
 </dl>
 </div>
@@ -58,10 +61,10 @@
       <span class="phrase"><a name="pipeline.introduction.motivation"></a></span><a class="link" href="index.html#pipeline.introduction.motivation">Motivation</a>
     </h2>
 <p>
-      The UNIX pipeline allows programrs to build a multi threaded chain of transformations
-      in an easy a relaiable way. The pipeline described by the following snippet
-      is distributable accross processors, free of deadlocks, data races and undefined
-      behaviour:
+      The UNIX pipeline allows programs to build a multi threaded chain of transformations
+      in an easy a reliable way. The pipeline described by the following snippet
+      is distributable across processors, free of deadlocks, data races and undefined
+      behavior:
     </p>
 <pre class="programlisting"><span class="error">$</span> <span class="identifier">grep</span> <span class="char">'Error:'</span> <span class="identifier">error</span><span class="special">.</span><span class="identifier">log</span> <span class="special">|</span> <span class="identifier">grep</span> <span class="special">-</span><span class="identifier">v</span> <span class="char">'test-user@example.com'</span> <span class="special">|</span> <span class="identifier">sed</span> <span class="char">'s/^User:.*Error: //'</span> <span class="special">&gt;</span> <span class="identifier">output</span><span class="special">.</span><span class="identifier">txt</span>
 </pre>
@@ -97,7 +100,7 @@
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: August 01, 2014 at 12:25:43 GMT</small></p></td>
+<td align="left"><p><small>Last revised: August 13, 2014 at 19:24:47 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 <hr>
