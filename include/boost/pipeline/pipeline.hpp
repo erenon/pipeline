@@ -34,12 +34,12 @@ namespace pipeline {
  * @returns `segment<terminated, T>`, `T` is the `value_type` of `Container`
  */
 template <typename Container>
-detail::range_input_segment<typename Container::iterator>
-from(Container& container)
+detail::range_input_segment<typename Container::const_iterator>
+from(const Container& container)
 {
-  typedef detail::range_input_segment<typename Container::iterator> c_input_segment;
+  typedef detail::range_input_segment<typename Container::const_iterator> c_input_segment;
 
-  return c_input_segment(container.begin(), container.end());
+  return c_input_segment(container.cbegin(), container.cend());
 }
 
 /**

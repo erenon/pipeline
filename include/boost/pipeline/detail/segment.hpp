@@ -362,11 +362,11 @@ private:
 
 template <typename Iterator>
 class range_input_segment
-  : public segment_concept<terminated, typename std::remove_reference<decltype(*std::declval<Iterator>())>::type>
+  : public segment_concept<terminated, typename std::decay<decltype(*std::declval<Iterator>())>::type>
 {
 public:
   typedef void root_type;
-  typedef typename std::remove_reference<decltype(*std::declval<Iterator>())>::type value_type;
+  typedef typename std::decay<decltype(*std::declval<Iterator>())>::type value_type;
 
   typedef range_input_task<Iterator, value_type> task_type;
 

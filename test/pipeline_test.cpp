@@ -21,7 +21,11 @@ using namespace boost::pipeline;
 
 BOOST_AUTO_TEST_CASE(From)
 {
+  std::vector<int> in;
+  auto s1 = from(in);
 
+  const std::vector<int> const_in;
+  auto s2 = from(const_in);
 }
 
 BOOST_AUTO_TEST_CASE(Make)
