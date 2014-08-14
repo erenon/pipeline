@@ -277,9 +277,9 @@ class bind_connector
 
   // operator() template, 1-1
   template <typename Bind1, typename std::enable_if<
-    is_one_one_trafo<Bind1, output>::value
+    is_one_one_trafo<Bind1, R>::value
   ,int>::type = 0>
-  static one_one_segment<Plan, output> connectCallOpTemplate(int);
+  static one_one_segment<Plan, R> connectCallOpTemplate(int);
 
   // operator() template, 1-N
   template <typename Bind1, typename std::enable_if<
@@ -290,15 +290,15 @@ class bind_connector
         std::declval<boost::pipeline::queue_back<output>&>()
       ))
     >::value
-  && ! is_one_one_trafo<Bind1, output>::value
+  && ! is_one_one_trafo<Bind1, R>::value
   ,int>::type = 0>
   static one_n_segment<Plan, output, R> connectCallOpTemplate(int);
 
   // operator() template, N-1
   template <typename Bind1, typename std::enable_if<
-    is_n_one_trafo<Bind1, output>::value
+    is_n_one_trafo<Bind1, R>::value
   ,int>::type = 0>
-  static n_one_segment<Plan, output> connectCallOpTemplate(int);
+  static n_one_segment<Plan, R> connectCallOpTemplate(int);
 
   // operator() template, N-M
   template <typename Bind1, typename std::enable_if<
@@ -309,7 +309,7 @@ class bind_connector
         std::declval<boost::pipeline::queue_back<output>&>()
       ))
     >::value
-  && ! is_n_one_trafo<Bind1, output>::value
+  && ! is_n_one_trafo<Bind1, R>::value
   ,int>::type = 0>
   static n_m_segment<Plan, output, R> connectCallOpTemplate(int);
 
