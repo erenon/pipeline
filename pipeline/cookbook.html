@@ -23,11 +23,47 @@
     </p>
 <h2>
 <a name="pipeline.cookbook.h0"></a>
-      <span class="phrase"><a name="pipeline.cookbook.t_operation_split"></a></span><a class="link" href="cookbook.html#pipeline.cookbook.t_operation_split">T
-      operation (split)</a>
+      <span class="phrase"><a name="pipeline.cookbook.split_operation"></a></span><a class="link" href="cookbook.html#pipeline.cookbook.split_operation">Split
+      operation</a>
     </h2>
 <p>
-      TODO add example code
+      It's a common task to dispatch an upstream queue to different downstream queues.
+      The following example provides an example of how to decrease latency of priority
+      requests by processing them in a separate pipeline:
+    </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">split_by_priority</span><span class="special">(</span>
+  <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">request</span><span class="special">&gt;</span> <span class="identifier">priority</span><span class="special">,</span>
+  <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">request</span><span class="special">&gt;</span> <span class="identifier">non_priority</span><span class="special">,</span>
+  <span class="keyword">const</span> <span class="identifier">request</span><span class="special">&amp;</span> <span class="identifier">input</span>
+<span class="special">)</span>
+<span class="special">{</span>
+  <span class="keyword">if</span> <span class="special">(</span><span class="identifier">input</span><span class="special">.</span><span class="identifier">is_priority</span><span class="special">)</span>
+  <span class="special">{</span>
+    <span class="identifier">priority</span><span class="special">.</span><span class="identifier">push</span><span class="special">(</span><span class="identifier">input</span><span class="special">);</span>
+  <span class="special">}</span>
+  <span class="keyword">else</span>
+  <span class="special">{</span>
+    <span class="identifier">non_priority</span><span class="special">.</span><span class="identifier">push</span><span class="special">(</span><span class="identifier">input</span><span class="special">);</span>
+  <span class="special">}</span>
+<span class="special">}</span>
+</pre>
+<pre class="programlisting"><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue</span><span class="special">&lt;</span><span class="identifier">request</span><span class="special">&gt;</span> <span class="identifier">priority_queue</span><span class="special">;</span>
+<span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue</span><span class="special">&lt;</span><span class="identifier">request</span><span class="special">&gt;</span> <span class="identifier">non_priority_queue</span><span class="special">;</span>
+
+<span class="keyword">auto</span> <span class="identifier">split</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span>
+  <span class="identifier">split_by_priority</span><span class="special">,</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">ref</span><span class="special">(</span><span class="identifier">priority_queue</span><span class="special">),</span>
+  <span class="identifier">std</span><span class="special">::</span><span class="identifier">ref</span><span class="special">(</span><span class="identifier">non_priority_queue</span><span class="special">),</span>
+  <span class="identifier">_1</span>
+<span class="special">);</span>
+
+<span class="keyword">auto</span> <span class="identifier">reader</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">generate_requests</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">split</span><span class="special">;</span>
+
+<span class="keyword">auto</span> <span class="identifier">priority_processor</span> <span class="special">=</span> <span class="identifier">priority_queue</span> <span class="special">|</span> <span class="identifier">parse_request</span> <span class="special">|</span> <span class="identifier">request_id</span> <span class="special">|</span> <span class="identifier">to_stdout</span><span class="special">;</span>
+<span class="keyword">auto</span> <span class="identifier">processor</span>      <span class="special">=</span> <span class="identifier">non_priority_queue</span> <span class="special">|</span> <span class="identifier">parse_request</span> <span class="special">|</span> <span class="identifier">request_id</span> <span class="special">|</span> <span class="identifier">process_later</span><span class="special">;</span>
+</pre>
+<p>
+      Please refer to <a href="https://github.com/erenon/pipeline/blob/master/example/split.cpp" target="_top">example/split.cpp</a> for the full source code.
     </p>
 <h2>
 <a name="pipeline.cookbook.h1"></a>
@@ -35,7 +71,47 @@
       operation</a>
     </h2>
 <p>
-      TODO add example code
+      One might want to combine two different upstream queues into a single one,
+      like the unix <code class="computeroutput"><span class="identifier">join</span></code> command
+      does. The following example matches persons to associated departments:
+    </p>
+<pre class="programlisting"><span class="keyword">void</span> <span class="identifier">join</span><span class="special">(</span>
+  <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="identifier">department</span><span class="special">&gt;</span> <span class="identifier">deps</span><span class="special">,</span>
+  <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="identifier">person</span><span class="special">&gt;</span> <span class="identifier">perss</span><span class="special">,</span>
+  <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">queue_back</span><span class="special">&lt;</span><span class="identifier">relation</span><span class="special">&gt;</span> <span class="identifier">downstream</span>
+<span class="special">)</span>
+<span class="special">{</span>
+  <span class="identifier">department</span> <span class="identifier">dep</span><span class="special">;</span>
+  <span class="identifier">person</span> <span class="identifier">pers</span><span class="special">{</span><span class="string">""</span><span class="special">,</span> <span class="special">-</span><span class="number">1</span><span class="special">};</span>
+
+  <span class="keyword">while</span> <span class="special">(</span><span class="identifier">deps</span><span class="special">.</span><span class="identifier">wait_pull</span><span class="special">(</span><span class="identifier">dep</span><span class="special">))</span>
+  <span class="special">{</span>
+    <span class="keyword">if</span> <span class="special">(</span><span class="identifier">dep</span><span class="special">.</span><span class="identifier">id</span> <span class="special">==</span> <span class="identifier">pers</span><span class="special">.</span><span class="identifier">department_id</span><span class="special">)</span>
+    <span class="special">{</span>
+      <span class="identifier">relation</span> <span class="identifier">rel</span><span class="special">{</span><span class="identifier">dep</span><span class="special">.</span><span class="identifier">name</span><span class="special">,</span> <span class="identifier">pers</span><span class="special">.</span><span class="identifier">name</span><span class="special">};</span>
+      <span class="identifier">downstream</span><span class="special">.</span><span class="identifier">push</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">move</span><span class="special">(</span><span class="identifier">rel</span><span class="special">));</span>
+    <span class="special">}</span>
+
+    <span class="keyword">while</span> <span class="special">(</span><span class="identifier">perss</span><span class="special">.</span><span class="identifier">wait_pull</span><span class="special">(</span><span class="identifier">pers</span><span class="special">))</span>
+    <span class="special">{</span>
+      <span class="keyword">if</span> <span class="special">(</span><span class="identifier">dep</span><span class="special">.</span><span class="identifier">id</span> <span class="special">==</span> <span class="identifier">pers</span><span class="special">.</span><span class="identifier">department_id</span><span class="special">)</span>
+      <span class="special">{</span>
+        <span class="identifier">relation</span> <span class="identifier">rel</span><span class="special">{</span><span class="identifier">dep</span><span class="special">.</span><span class="identifier">name</span><span class="special">,</span> <span class="identifier">pers</span><span class="special">.</span><span class="identifier">name</span><span class="special">};</span>
+        <span class="identifier">downstream</span><span class="special">.</span><span class="identifier">push</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">move</span><span class="special">(</span><span class="identifier">rel</span><span class="special">));</span>
+      <span class="special">}</span>
+      <span class="keyword">else</span>
+      <span class="special">{</span>
+        <span class="keyword">break</span><span class="special">;</span>
+      <span class="special">}</span>
+    <span class="special">}</span>
+  <span class="special">}</span>
+<span class="special">}</span>
+</pre>
+<pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">relations</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span><span class="identifier">join</span><span class="special">,</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">ref</span><span class="special">(</span><span class="identifier">departments</span><span class="special">),</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">ref</span><span class="special">(</span><span class="identifier">persons</span><span class="special">),</span> <span class="identifier">_1</span><span class="special">);</span>
+<span class="keyword">auto</span> <span class="identifier">plan</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">&lt;</span><span class="identifier">relation</span><span class="special">&gt;(</span><span class="identifier">relations</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">to_stdout</span><span class="special">;</span>
+</pre>
+<p>
+      Please refer to <a href="https://github.com/erenon/pipeline/blob/master/example/split.cpp" target="_top">example/split.cpp</a> for the full source code.
     </p>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
