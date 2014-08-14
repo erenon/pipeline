@@ -36,3 +36,4 @@ exe hello-example : hello.cpp ;
 exe tutorial-example : tutorial.cpp ;
 exe transformations-example : transformations.cpp ;
 exe open_segment-example : open_segment.cpp ;
+exe split-example : split.cpp ;

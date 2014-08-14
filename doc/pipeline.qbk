@@ -325,6 +325,30 @@ slides for more information.
 
 [endsect]
 
+[section Cookbook]
+
+Although the library is in a preview state and the interface is expected to change, here are some
+constructs which implements common operations.
+
+[h1 Split operation]
+
+[import ../example/split.cpp]
+
+It's a common task to dispatch an upstream queue to different downstream queues.
+The following example provides an example of how to decrease latency of priority
+requests by processing them in a separate pipeline:
+
+[example_split_splitter]
+[example_split_invocation]
+
+Please refer to [fileref example/split.cpp] for more information.
+
+[h1 Join operation]
+
+TODO add example code
+
+[endsect]
+
 [section Build and Test this library]
 
 This library requires a compliant C++11 compiler. It's tested using GCC 4.8.1
@@ -353,6 +377,21 @@ This work is founded by Google through the Google Summer of Code 2014 program.
 I'd like to thank my GSoC'14 mentor, Vicente J. Botet Escriba for providing guidance
 and regular reviews. Also thanks for the Boost members participating in the discussion
 regarding the scheduling on the Boost mailing list.
+
+[endsect]
+
+[section What's next]
+
+TODO describe each task, affected module, severity and difficulty
+
+* thread pool type erasure and documentation
+* queue_back/queue_front type erasure
+* parallel()
+* inefficient queue_output_task
+* test all combination of segments
+* remove invalid methods from segment<I,O> interface
+* make from(const container) work
+* use coroutine/fibers
 
 [endsect]
 
