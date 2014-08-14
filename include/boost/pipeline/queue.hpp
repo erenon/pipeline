@@ -51,8 +51,8 @@ public:
    *
    * @param queue_ptr Queue to be accessed
    */
-  queue_back(queue<T>* queue_ptr)
-    :_queue_ptr(queue_ptr)
+  queue_back(queue<T>& queue)
+    :_queue(queue)
   {}
 
   /**
@@ -64,13 +64,13 @@ public:
    */
   void push(const T& item)
   {
-    _queue_ptr->push_back(item);
+    _queue.push_back(item);
   }
 
   /** @copydoc push */
   void push(T&& item)
   {
-    _queue_ptr->push_back(std::forward<T>(item));
+    _queue.push_back(std::forward<T>(item));
   }
 
   /**
@@ -80,11 +80,11 @@ public:
    */
   void close()
   {
-    _queue_ptr->close();
+    _queue.close();
   }
 
 private:
-  queue<T>* _queue_ptr;
+  queue<T>& _queue;
 };
 
 /**
@@ -116,8 +116,8 @@ public:
    *
    * @param queue_ptr Queue to be accessed
    */
-  queue_front(queue<T>* queue_ptr)
-    :_queue_ptr(queue_ptr)
+  queue_front(queue<T>& queue)
+    :_queue(queue)
   {}
 
   /**
@@ -131,7 +131,7 @@ public:
    */
   bool wait_pull(T& ret)
   {
-    auto status = _queue_ptr->wait_pull_front(ret);
+    auto status = _queue.wait_pull_front(ret);
     return (status == queue_op_status::success);
   }
 
@@ -144,7 +144,7 @@ public:
    */
   bool is_empty() const
   {
-    return _queue_ptr->empty();
+    return _queue.empty();
   }
 
   /**
@@ -154,11 +154,11 @@ public:
    */
   bool is_closed() const
   {
-    return _queue_ptr->closed();
+    return _queue.closed();
   }
 
 private:
-  queue<T>* _queue_ptr;
+  queue<T>& _queue;
 };
 
 } // namespace pipeline

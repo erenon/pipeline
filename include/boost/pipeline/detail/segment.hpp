@@ -523,7 +523,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    queue_back<input_type> parent_downstream(&_queue);
+    queue_back<input_type> parent_downstream(_queue);
     base_segment::_parent.run(pool, parent_downstream);
 
     std::promise<void> promise;

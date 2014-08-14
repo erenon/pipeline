@@ -29,7 +29,7 @@ class basic_task
 public:
   queue_back<Input> get_queue_back()
   {
-    return queue_back<Input>(_input.get());
+    return queue_back<Input>(*_input);
   }
 
 protected:
@@ -62,7 +62,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(base::_input.get());
+    queue_front<Input> upstream(*base::_input);
 
     Input input;
     while (upstream.wait_pull(input))
@@ -93,7 +93,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(base::_input.get());
+    queue_front<Input> upstream(*base::_input);
 
     Input input;
     while (upstream.wait_pull(input))
@@ -123,7 +123,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(base::_input.get());
+    queue_front<Input> upstream(*base::_input);
 
     while (! upstream.is_empty() || ! upstream.is_closed())
     {
@@ -153,7 +153,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(base::_input.get());
+    queue_front<Input> upstream(*base::_input);
 
     while (! upstream.is_empty() || ! upstream.is_closed())
     {
@@ -211,7 +211,7 @@ public:
 
   void operator()()
   {
-    queue_front<Output> upstream(&_queue);
+    queue_front<Output> upstream(_queue);
 
     Output output;
     while (upstream.wait_pull(output))
@@ -265,7 +265,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(_input.get());
+    queue_front<Input> upstream(*_input);
 
     Input input;
     while (upstream.wait_pull(input))
@@ -278,7 +278,7 @@ public:
 
   queue_back<Input> get_queue_back()
   {
-    return queue_back<Input>(_input.get());
+    return queue_back<Input>(*_input);
   }
 
 private:
@@ -296,7 +296,7 @@ public:
     queue<Input>& queue
   )
     :_promise(std::move(promise)),
-     _upstream(&queue)
+     _upstream(queue)
   {}
 
   void operator()()
@@ -330,7 +330,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(_input.get());
+    queue_front<Input> upstream(*_input);
 
     Input input;
     while (upstream.wait_pull(input))
@@ -343,7 +343,7 @@ public:
 
   queue_back<Input> get_queue_back()
   {
-    return queue_back<Input>(_input.get());
+    return queue_back<Input>(*_input);
   }
 
 private:
@@ -367,7 +367,7 @@ public:
 
   void operator()()
   {
-    queue_front<Input> upstream(_input.get());
+    queue_front<Input> upstream(*_input);
 
     while (! upstream.is_empty() || ! upstream.is_closed())
     {
@@ -379,7 +379,7 @@ public:
 
   queue_back<Input> get_queue_back()
   {
-    return queue_back<Input>(_input.get());
+    return queue_back<Input>(*_input);
   }
 
 private:
