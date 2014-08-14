@@ -328,7 +328,7 @@ slides for more information.
 [section Cookbook]
 
 Although the library is in a preview state and the interface is expected to change, here are some
-constructs which implements common operations.
+constructs which implement common operations.
 
 [h1 Split operation]
 
@@ -341,11 +341,20 @@ requests by processing them in a separate pipeline:
 [example_split_splitter]
 [example_split_invocation]
 
-Please refer to [fileref example/split.cpp] for more information.
+Please refer to [fileref example/split.cpp] for the full source code.
 
 [h1 Join operation]
 
-TODO add example code
+[import ../example/join.cpp]
+
+One might want to combine two different upstream queues into a single one,
+like the unix `join` command does. The following example matches persons
+to associated departments:
+
+[example_join_joiner]
+[example_join_invocation]
+
+Please refer to [fileref example/split.cpp] for the full source code.
 
 [endsect]
 
