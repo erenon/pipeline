@@ -45,9 +45,12 @@ alias pipline-test-suite :
   [ pipeline-test detail/segment_test ]
   [ pipeline-test detail/connector_test ]
   [ pipeline-test detail/open_segment_test ]
+  [ pipeline-test detail/operator_test ]
   [ pipeline-test google_pipeline_test ]
   [ pipeline-test queue_test ]
   [ pipeline-test pipeline_test ]
   [ pipeline-test type_erasure ]
   # [ pipeline-test sandbox ]
   ; 
+
+# unit-test operator_test_generator : detail/operator_test_generator.cpp ;

@@ -89,6 +89,14 @@ auto operator|(queue<T>& queue, const Connectable& connectable)
   return detail::queue_input_segment<T>(queue) | connectable;
 }
 
+// queue | container
+template <typename T, typename Container>
+auto operator|(queue<T>& queue, Container& container)
+  -> decltype(detail::queue_input_segment<T>(queue) | container)
+{
+  return detail::queue_input_segment<T>(queue) | container;
+}
+
 } // namespace pipeline
 } // namespace boost
 
