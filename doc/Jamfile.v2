@@ -19,19 +19,11 @@ doxygen apidoc
     \"BOOST_DEDUCED_TYPENAME=typename\" \\
     \"BOOST_HAS_RVALUE_REFS\" \\
   "
-  <doxygen:param>HIDE_UNDOC_MEMBERS=NO
-  <doxygen:param>HIDE_UNDOC_CLASSES=NO
   <doxygen:param>INLINE_INHERITED_MEMB=YES
-  <doxygen:param>EXTRACT_PRIVATE=NO
-  <doxygen:param>ENABLE_PREPROCESSING=YES
   <doxygen:param>MACRO_EXPANSION=YES
-  <doxygen:param>EXPAND_ONLY_PREDEF=YES
-  <doxygen:param>SEARCH_INCLUDES=YES
   <doxygen:param>INCLUDE_PATH=$(BOOST_ROOT)
-  <doxygen:param>EXAMPLE_PATH=$(BOOST_ROOT)../example
-  <doxygen:param>BRIEF_MEMBER_DESC=YES
-  <doxygen:param>REPEAT_BRIEF=YES
-  <doxygen:param>MULTILINE_CPP_IS_BRIEF=YES
+  <doxygen:param>EXAMPLE_PATH=../example
+  <doxygen:param>SUBGROUPING=NO
   ;
 
 xml pipeline : pipeline.qbk ;
