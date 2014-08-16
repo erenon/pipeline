@@ -155,7 +155,7 @@
 <p>
         Sometimes it's not feasible to assemble a pipeline in one go. One might want
         to build up smaller chunks and connect them dynamically. It's possible to
-        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp41671024.html" title="Function template make">make()</a></code>:
+        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp41611200.html" title="Function template make">make()</a></code>:
       </p>
 <pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">s2</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">make</span><span class="special">(</span><span class="identifier">length</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">output</span><span class="special">;</span>
 <span class="keyword">auto</span> <span class="identifier">s1</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">lines</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">trim</span><span class="special">;</span>
