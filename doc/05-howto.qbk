@@ -56,7 +56,7 @@ The tests, examples and documentation can be compiled using the following comman
     test/$ BOOST_ROOT=/path/to/boost/ bjam toolset=gcc # or clang
 
     # build examples
-    build/$ BOOST_ROOT=/path/to/boost/ bjam toolset=gcc # or clang
+    example/$ BOOST_ROOT=/path/to/boost/ bjam toolset=gcc # or clang
 
     # build documentation: requires docbook-xsl
     doc/$ BOOST_ROOT=/path/to/boost/ bjam

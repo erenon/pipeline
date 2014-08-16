@@ -1,4 +1,4 @@
-# Boost.Pipeline main Jamfile
+# Boost.Pipeline example/ Jamfile
 # 
 # Copyright 2014 Benedek Thaler
 # 
@@ -15,10 +15,9 @@ alias pipeline
   ;
   
 use-project /boost/thread : $(BOOST_ROOT)/libs/thread/build ;
-alias boost_thread : /boost/thread//boost_thread ;  
+alias boost_thread : /boost/thread//boost_thread ;
 
 project boost/pipeline/example
-  : source-location ../example
   : build-dir /var/tmp/pipeline/build/example
   : requirements
     <library>pipeline
