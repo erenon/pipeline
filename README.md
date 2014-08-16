@@ -1,9 +1,9 @@
 Boost.Pipeline
 ==============
 
-C++ Pipeline implementation based on [n3534][0]. 
-Development of this library is founded by Google in the GSoC 2014 programme.
-The project also have an [example documentation][1], generated using quickbook.
+C++ Pipeline implementation based on [N3534][0].
+Development of this library is founded by Google through the GSoC 2014 program.
+Please refer to the [**documentation**][1] for more information.
 
 Example
 -------
@@ -17,25 +17,15 @@ The following example uses this library preview and its full version can be foun
     (boost::pipeline::from(input)
       | trim
       | grep_error
-      | [] (const std::string& item) { return "->" + item; }
+      | [] (const std::string& item) { return "-> " + item; }
       | output
     ).run(pool);
   
   
-How to Build
-------------
+Feedback
+--------
 
-This library is header only, there is no need to build anything specific to use it.
-However, there are examples and tests to be build:
-
-    git clone https://github.com/erenon/pipeline.git ./pipeline/
-    # build examples
-    # artifacts will be in: /var/tmp/pipeline/
-    cd pipeline/build
-    BOOST_ROOT=/path/to/boost bjam toolset=gcc # or clang
-    # build and run tests
-    cd ../test
-    BOOST_ROOT=/path/to/boost bjam toolset=gcc # or clang
+Altough the library is not stable and under development, feedback is welcome.
 
 [0]: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html
 [1]: http://erenon.hu/pipeline/
