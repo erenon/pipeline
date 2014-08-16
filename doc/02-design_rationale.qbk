@@ -1,0 +1,44 @@
+[/
+ / Boost.Pipeline documentation
+ /
+ / Copyright 2014 Benedek Thaler
+ /
+ / Distributed under the Boost Software License, Version 1.0. (See accompanying
+ / file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ /]
+
+[section Design Rationale]
+
+The interface of Pipeline is based on the [@http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html N3534]
+proposal which offers a way to emulate [@http://en.wikipedia.org/wiki/Pipeline_%28Unix%29 UNIX pipelines].
+The point of pipelines is to describe the processing of the input as a series of /transformations/.
+Transformations are connected and can operate parallel.
+
+Using such pipelines is beneficial also in the C++ programming
+environment. Advantages of a pipeline based solution include:
+
+# Stand alone transformations are easier to design, test and reason about because of decoupling.
+# It's trivial to run independent transformations parallel and thus leverage multiple execution agent.
+# Because of separation, race conditions and deadlocks are less likely to happen.
+# By fine tuning scheduling parameters it's possible to achieve desirable throughput/latency balance.
+
+This library implements all of the abstractions and operations of the N3534 proposal except the `parallel()` function.
+The `parallel()` function is yet missing but soon to be implemented. The next step is to provide a coroutine/fiber
+based execution scheme to improve on the classic thread-based scheduling.
+
+There is a [@https://code.google.com/p/google-concurrency-library/source/browse/include/pipeline.h reference implementation]
+of the original proposal. The Boost.Pipeline is different in some ways. The most important points are:
+
+# Boost.Pipeline is C++11 only, because it makes the code cleaner and easier to understand. Probably when the library is
+  stable, C++11 will be a default, at least for new projects, if it's not already.
+
+# Thanks to C++11 features, Boost.Pipeline supports a wide variety of transformations: 
+  function pointers, functors, function objects, lambdas and bind expressions.
+  The reference implementation does not seem to accept the last three.
+  [footnote Because of broken tests, it's hard to tell.]
+
+# Boost.Pipeline takes advantage of value semantics wherever it's possible and avoids use of dynamic memory.
+  E.g: Connecting two segments results in a new segment type, the type of a plan encodes all the contained segments.
+  The reference implementation, on the other hand, uses dynamic memory and type erasure excessively.
+
+[endsect]

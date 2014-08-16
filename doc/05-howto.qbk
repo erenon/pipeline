@@ -1,0 +1,66 @@
+[/
+ / Boost.Pipeline documentation 
+ /
+ / Copyright 2014 Benedek Thaler
+ /
+ / Distributed under the Boost Software License, Version 1.0. (See accompanying
+ / file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ /]
+
+[section How To]
+
+[section Cookbook]
+
+Although the library is in a preview state and the interface is expected to change, here are some
+constructs which implement common operations.
+
+[h2 Split operation]
+
+[import ../example/split.cpp]
+
+It's a common task to dispatch an upstream queue to different downstream queues.
+The following example provides an example of how to decrease latency of priority
+requests by processing them in a separate pipeline:
+
+[example_split_splitter]
+[example_split_invocation]
+
+Please refer to [fileref example/split.cpp] for the full source code.
+
+[h2 Join operation]
+
+[import ../example/join.cpp]
+
+One might want to combine two different upstream queues into a single one,
+like the unix `join` command does. The following example matches persons
+to associated departments:
+
+[example_join_joiner]
+[example_join_invocation]
+
+Please refer to [fileref example/split.cpp] for the full source code.
+
+[endsect]
+
+[section Build and Test this library]
+
+This library requires a compliant C++11 compiler. It's tested using GCC 4.8.1
+and clang 3.4. The msvc shipped with Visual Studio 2013 fails to compile the tests.
+
+The library is header only, nothing specific has to be compiled to use it, however,
+it depends on Boost.Thread, which has some libraries to link.
+
+The tests, examples and documentation can be compiled using the following commands:
+
+    # build and run tests
+    test/$ BOOST_ROOT=/path/to/boost/ bjam toolset=gcc # or clang
+
+    # build examples
+    build/$ BOOST_ROOT=/path/to/boost/ bjam toolset=gcc # or clang
+
+    # build documentation: requires docbook-xsl
+    doc/$ BOOST_ROOT=/path/to/boost/ bjam
+
+[endsect]
+
+[endsect]

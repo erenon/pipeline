@@ -1,0 +1,51 @@
+[section Acknowledgments]
+
+This work is founded by Google through the Google Summer of Code 2014 program.
+
+I'd like to thank my GSoC'14 mentor, Vicente J. Botet Escriba for providing guidance
+and regular reviews. Also thanks for the Boost members participating in the discussion
+regarding the scheduling on the Boost mailing list.
+
+[endsect]
+
+[section What's next]
+
+Below are the planned major improvements in order of importance.
+
+* *Coroutine/fiber based execution*
+
+  The current scheduling does not scale. Replacing it with
+  a superior solution is a must to improve throughput and lower latency.
+
+  /Difficulty/: hard
+
+* *queue_back/queue_front type erasure*
+
+  Currently the underlying queue is hard coded and it's not possible
+  to use different backends in the same application. Type erasure should be used instead, because bounded
+  queue size affects latency and parallel segments require different synchronization than serial ones.
+
+  /Difficulty/: medium
+
+* *parallel()*
+
+  The last missing piece of the N3534 proposal. A `parallel_segment_wrapper` which instantiates
+  and schedules several `task`s will do.
+
+  /Difficulty/: medium
+
+* *Thread pool type erasure*
+
+  Currently it's not possible to use a different thread pool than the one provided.
+  Application writer should be able to use a custom executor which implements documented requirements.
+
+  /Difficulty/: medium
+
+* *Scheduling configuration*
+
+  An optional `configuration` object might be passed to the `run()` method
+  to change default queue size, spin lock duration or opt-in pass-through processing.
+
+  /Difficulty/: hard
+
+[endsect]
