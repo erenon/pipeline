@@ -50,6 +50,7 @@ alias pipline-test-suite :
   [ pipeline-test queue_test ]
   [ pipeline-test pipeline_test ]
   [ pipeline-test type_erasure ]
+  [ pipeline-test item_type_requirements_test ]
   # [ pipeline-test sandbox ]
   ; 
 

@@ -123,6 +123,21 @@ and indirection. It's recommended to use the `auto` keyword instead wherever it'
 
 [endsect]
 
+[section Item type requirements]
+
+Items pushed through the pipeline must be transferred from one transformation
+to the other and stored in queues. This imposes the following constraints on
+the `T` type of such items:
+
+* `T` must be *default constructible*
+* `T` must be *movable*
+* `T` must be *move assignable*
+
+Example of such a type and verification of these requirements can be found in
+[fileref example/item_type_requirements_test.cpp]
+
+[endsect]
+
 [section Scheduling]
 
 The point of creating pipelines is to turn concurrency into parallelism
