@@ -93,7 +93,6 @@ public:
 
   void connect_to(runnable_concept<root_type>& parent)
   {
-//    _parent.connect_to(parent);
     ::boost::pipeline::detail::connect_to(_parent, parent);
   }
 
@@ -131,9 +130,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new one_one_segment<Parent, Output, IsSink>(*this)
-    ));
+    );
   }
 
 private:
@@ -178,9 +177,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new one_one_segment<Parent, Output, true>(*this)
-    ));
+    );
   }
 
 private:
@@ -220,9 +219,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new one_n_segment<Parent, Output, R>(*this)
-    ));
+    );
   }
 
 private:
@@ -261,9 +260,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new n_one_segment<Parent, Output, IsSink>(*this)
-    ));
+    );
   }
 
 private:
@@ -310,9 +309,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new n_one_segment<Parent, Output, true>(*this)
-    ));
+    );
   }
 
 private:
@@ -352,9 +351,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, value_type>>(
+    return std::unique_ptr<segment_concept<root_type, value_type>>(
       new n_m_segment<Parent, Output, R>(*this)
-    ));
+    );
   }
 
 private:
@@ -384,9 +383,9 @@ public:
 
   std::unique_ptr<segment_concept<terminated, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+    return std::unique_ptr<segment_concept<terminated, value_type>>(
       new range_input_segment<Iterator>(*this)
-    ));
+    );
   }
 
 private:
@@ -415,9 +414,9 @@ public:
 
   std::unique_ptr<segment_concept<terminated, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+    return std::unique_ptr<segment_concept<terminated, value_type>>(
       new queue_input_segment<Output>(*this)
-    ));
+    );
   }
 
 private:
@@ -446,9 +445,9 @@ public:
 
   std::unique_ptr<segment_concept<terminated, value_type>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<terminated, value_type>>(
+    return std::unique_ptr<segment_concept<terminated, value_type>>(
       new generator_input_segment<Callable, Output>(*this)
-    ));
+    );
   }
 
 private:
@@ -493,9 +492,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, terminated>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, terminated>>(
+    return std::unique_ptr<segment_concept<root_type, terminated>>(
       new range_output_segment<Parent, Container>(*this)
-    ));
+    );
   }
 
 private:
@@ -538,9 +537,9 @@ public:
 
   std::unique_ptr<segment_concept<root_type, terminated>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<root_type, terminated>>(
+    return std::unique_ptr<segment_concept<root_type, terminated>>(
       new queue_output_segment<Parent>(*this)
-    ));
+    );
   }
 
 private:

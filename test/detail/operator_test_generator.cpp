@@ -44,7 +44,7 @@ combination create_combination(
     {a.footer, b.footer}
   };
 
-  return std::move(comb);
+  return comb;
 }
 
 combination create_combination(
@@ -58,13 +58,13 @@ combination create_combination(
     {a.footer, b.footer, c.footer, d.footer}
   };
 
-  return std::move(comb);
+  return comb;
 }
 
 std::string join(const std::vector<std::string>& fields, const std::string& sep)
 {
-  return std::move(
-    boost::algorithm::join_if(fields, sep, [] (const std::string& s) { return !s.empty(); })
+  return boost::algorithm::join_if(
+    fields, sep, [] (const std::string& s) { return !s.empty(); }
   );
 }
 

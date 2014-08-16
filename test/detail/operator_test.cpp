@@ -94,7 +94,7 @@ void generator(queue_back<Argon>& downstream)
 
 Barium ab_oo(const Argon& input)
 {
-  return std::move(Barium{input.value});
+  return Barium{input.value};
 }
 
 void ab_on(const Argon& input, queue_back<Barium>& downstream)
@@ -116,15 +116,15 @@ Barium ab_no(queue_front<Argon>& upstream)
   Argon input;
   if (upstream.wait_pull(input))
   {
-    return std::move(Barium{input.value});
+    return Barium{input.value};
   }
 
-  return std::move(Barium{-1});
+  return Barium{-1};
 }
 
 Argon ba_oo(const Barium& input)
 {
-  return std::move(Argon{input.value});
+  return Argon{input.value};
 }
 
 void ba_on(const Barium& input, queue_back<Argon>& downstream)
@@ -146,10 +146,10 @@ Argon ba_no(queue_front<Barium>& upstream)
   Barium input;
   if (upstream.wait_pull(input))
   {
-    return std::move(Argon{input.value});
+    return Argon{input.value};
   }
 
-  return std::move(Argon{-1});
+  return Argon{-1};
 }
 
 // Consumers

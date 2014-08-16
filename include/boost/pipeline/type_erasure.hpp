@@ -159,9 +159,9 @@ public:
 
   std::unique_ptr<segment_concept<Input, Output>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<Input, Output>>(
+    return std::unique_ptr<segment_concept<Input, Output>>(
       new connected_segment<Input, Middle, Output>(*this)
-    ));
+    );
   }
 
   void run(thread_pool& pool, const queue_back<Output>& target)
@@ -201,14 +201,14 @@ public:
 
   std::unique_ptr<segment_concept<Input, terminated>> clone() const
   {
-    return std::move(std::unique_ptr<segment_concept<Input, terminated>>(
+    return std::unique_ptr<segment_concept<Input, terminated>>(
       new connected_segment<Input, Middle, terminated>(*this)
-    ));
+    );
   }
 
   execution run(thread_pool& pool)
   {
-    return std::move(_impl->run(pool));
+    return _impl->run(pool);
   }
 
 private:
@@ -249,9 +249,9 @@ public:
   segment<Input, NewOutput>
   operator|(const segment<Output, NewOutput>& rhs) const
   {
-    return std::move(connected_segment<Input, Output, NewOutput>(
+    return connected_segment<Input, Output, NewOutput>(
       *_impl, *rhs._impl
-    ));
+    );
   }
 
   void run(thread_pool& pool, const queue_back<Output>& target)
@@ -290,9 +290,9 @@ public:
   segment<terminated, NewOutput>
   operator|(const segment<Output, NewOutput>& rhs) const
   {
-    return std::move(connected_segment<terminated, Output, NewOutput>(
+    return connected_segment<terminated, Output, NewOutput>(
       *_impl, *rhs._impl
-    ));
+    );
   }
 
   void run(thread_pool& pool, const queue_back<Output>& target)
@@ -334,7 +334,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    return std::move(_impl->run(pool));
+    return _impl->run(pool);
   }
 
 private:
@@ -358,7 +358,7 @@ public:
 
   execution run(thread_pool& pool)
   {
-    return std::move(_impl->run(pool));
+    return _impl->run(pool);
   }
 
 private:
