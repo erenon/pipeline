@@ -5,10 +5,10 @@
 <link rel="stylesheet" href="http://www.boost.org/doc/libs/1_55_0/doc/src/boostbook.css" type="text/css">
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
-<link rel="next" href="pipeline/example.html" title="Example">
+<link rel="next" href="pipeline/design_rationale.html" title="Design Rationale">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<div class="spirit-nav"><a accesskey="n" href="pipeline/example.html"><img src="images/next.png" alt="Next"></a></div>
+<div class="spirit-nav"><a accesskey="n" href="pipeline/design_rationale.html"><img src="images/next.png" alt="Next"></a></div>
 <div class="chapter">
 <div class="titlepage"><div>
 <div><h2 class="title">
@@ -25,17 +25,26 @@
 <p><b>Table of Contents</b></p>
 <dl class="toc">
 <dt><span class="section"><a href="index.html#pipeline.introduction">Introduction</a></span></dt>
-<dt><span class="section"><a href="pipeline/example.html">Example</a></span></dt>
-<dt><span class="section"><a href="pipeline/tutorial.html">Tutorial</a></span></dt>
-<dt><span class="section"><a href="pipeline/glossary.html">Glossary</a></span></dt>
-<dt><span class="section"><a href="pipeline/transformations.html">Transformations</a></span></dt>
-<dt><span class="section"><a href="pipeline/open_segments.html">Open Segments</a></span></dt>
-<dt><span class="section"><a href="pipeline/scheduling.html">Scheduling</a></span></dt>
-<dt><span class="section"><a href="pipeline/cookbook.html">Cookbook</a></span></dt>
-<dt><span class="section"><a href="pipeline/build_and_test_this_library.html">Build and Test this
-    library</a></span></dt>
-<dt><span class="section"><a href="pipeline/acknowledgments.html">Acknowledgments</a></span></dt>
-<dt><span class="section"><a href="pipeline/what_s_next.html">What's next</a></span></dt>
+<dt><span class="section"><a href="pipeline/design_rationale.html">Design Rationale</a></span></dt>
+<dt><span class="section"><a href="pipeline/quick_start.html">Quick Start</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="pipeline/quick_start.html#pipeline.quick_start.example">Example</a></span></dt>
+<dt><span class="section"><a href="pipeline/quick_start.html#pipeline.quick_start.tutorial">Tutorial</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="pipeline/components.html">Components</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="pipeline/components.html#pipeline.components.glossary">Glossary</a></span></dt>
+<dt><span class="section"><a href="pipeline/components.html#pipeline.components.transformations">Transformations</a></span></dt>
+<dt><span class="section"><a href="pipeline/components.html#pipeline.components.open_segments">Open Segments</a></span></dt>
+<dt><span class="section"><a href="pipeline/components.html#pipeline.components.type_erasure">Type erasure</a></span></dt>
+<dt><span class="section"><a href="pipeline/components.html#pipeline.components.scheduling">Scheduling</a></span></dt>
+</dl></dd>
+<dt><span class="section"><a href="pipeline/how_to.html">How To</a></span></dt>
+<dd><dl>
+<dt><span class="section"><a href="pipeline/how_to.html#pipeline.how_to.cookbook">Cookbook</a></span></dt>
+<dt><span class="section"><a href="pipeline/how_to.html#pipeline.how_to.build_and_test_this_library">Build and
+      Test this library</a></span></dt>
+</dl></dd>
 <dt><span class="section"><a href="pipeline/reference.html">Reference</a></span></dt>
 <dd><dl>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.execution_hpp">Header &lt;boost/pipeline/execution.hpp&gt;</a></span></dt>
@@ -44,6 +53,8 @@
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.threading_hpp">Header &lt;boost/pipeline/threading.hpp&gt;</a></span></dt>
 <dt><span class="section"><a href="pipeline/reference.html#header.boost.pipeline.type_erasure_hpp">Header &lt;boost/pipeline/type_erasure.hpp&gt;</a></span></dt>
 </dl></dd>
+<dt><span class="section"><a href="pipeline/acknowledgments.html">Acknowledgments</a></span></dt>
+<dt><span class="section"><a href="pipeline/what_s_next.html">What's next</a></span></dt>
 </dl>
 </div>
 <div class="section">
@@ -82,9 +93,9 @@
       them, again others send them.
     </p>
 <p>
-      The current <a class="link" href="pipeline/scheduling.html" title="Scheduling">scheduling</a> schemes used
-      in the library do not support low latency applications very well but it's planned
-      to be changed to prevail on this area as well.
+      The current <a class="link" href="pipeline/components.html#pipeline.components.scheduling" title="Scheduling">scheduling</a>
+      schemes used in the library do not support low latency applications very well
+      but it's planned to be changed to prevail on this area as well.
     </p>
 <div class="important"><table border="0" summary="Important">
 <tr>
@@ -100,10 +111,10 @@
 </div>
 </div>
 <table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
-<td align="left"><p><small>Last revised: August 14, 2014 at 14:18:23 GMT</small></p></td>
+<td align="left"><p><small>Last revised: August 16, 2014 at 11:24:12 GMT</small></p></td>
 <td align="right"><div class="copyright-footer"></div></td>
 </tr></table>
 <hr>
-<div class="spirit-nav"><a accesskey="n" href="pipeline/example.html"><img src="images/next.png" alt="Next"></a></div>
+<div class="spirit-nav"><a accesskey="n" href="pipeline/design_rationale.html"><img src="images/next.png" alt="Next"></a></div>
 </body>
 </html>

@@ -7,43 +7,73 @@
 <link rel="home" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="up" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="prev" href="acknowledgments.html" title="Acknowledgments">
-<link rel="next" href="reference.html" title="Reference">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="spirit-nav">
-<a accesskey="p" href="acknowledgments.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="reference.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="acknowledgments.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a>
 </div>
 <div class="section">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
 <a name="pipeline.what_s_next"></a><a class="link" href="what_s_next.html" title="What's next">What's next</a>
 </h2></div></div></div>
 <p>
-      TODO describe each task, affected module, severity and difficulty
+      Below are the planned major improvements in order of importance.
     </p>
 <div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
 <li class="listitem">
-          thread pool type erasure and documentation
+          <span class="bold"><strong>Coroutine/fiber based execution</strong></span>
+          <p>
+            The current scheduling does not scale. Replacing it with a superior solution
+            is a must to improve throughput and lower latency.
+          </p>
+          <p>
+            <span class="emphasis"><em>Difficulty</em></span>: hard
+          </p>
         </li>
 <li class="listitem">
-          queue_back/queue_front type erasure
+          <span class="bold"><strong>queue_back/queue_front type erasure</strong></span>
+          <p>
+            Currently the underlying queue is hard coded and it's not possible to
+            use different backends in the same application. Type erasure should be
+            used instead, because bounded queue size affects latency and parallel
+            segments require different synchronization than serial ones.
+          </p>
+          <p>
+            <span class="emphasis"><em>Difficulty</em></span>: medium
+          </p>
         </li>
 <li class="listitem">
-          parallel()
+          <span class="bold"><strong>parallel()</strong></span>
+          <p>
+            The last missing piece of the N3534 proposal. A <code class="computeroutput"><span class="identifier">parallel_segment_wrapper</span></code>
+            which instantiates and schedules several <code class="computeroutput"><span class="identifier">task</span></code>s
+            will do.
+          </p>
+          <p>
+            <span class="emphasis"><em>Difficulty</em></span>: medium
+          </p>
         </li>
 <li class="listitem">
-          inefficient queue_output_task
+          <span class="bold"><strong>Thread pool type erasure</strong></span>
+          <p>
+            Currently it's not possible to use a different thread pool than the one
+            provided. Application writer should be able to use a custom executor
+            which implements documented requirements.
+          </p>
+          <p>
+            <span class="emphasis"><em>Difficulty</em></span>: medium
+          </p>
         </li>
 <li class="listitem">
-          test all combination of segments
-        </li>
-<li class="listitem">
-          remove invalid methods from segment&lt;I,O&gt; interface
-        </li>
-<li class="listitem">
-          make from(const container) work
-        </li>
-<li class="listitem">
-          use coroutine/fibers
+          <span class="bold"><strong>Scheduling configuration</strong></span>
+          <p>
+            An optional <code class="computeroutput"><span class="identifier">configuration</span></code>
+            object might be passed to the <code class="computeroutput"><span class="identifier">run</span><span class="special">()</span></code> method to change default queue size,
+            spin lock duration or opt-in pass-through processing.
+          </p>
+          <p>
+            <span class="emphasis"><em>Difficulty</em></span>: hard
+          </p>
         </li>
 </ul></div>
 </div>
@@ -57,7 +87,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="acknowledgments.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="reference.html"><img src="../images/next.png" alt="Next"></a>
+<a accesskey="p" href="acknowledgments.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a>
 </div>
 </body>
 </html>

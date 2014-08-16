@@ -7,11 +7,11 @@
 <link rel="home" href="../../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
 <link rel="up" href="../../pipeline/reference.html#header.boost.pipeline.execution_hpp" title="Header &lt;boost/pipeline/execution.hpp&gt;">
 <link rel="prev" href="../../pipeline/reference.html" title="Reference">
-<link rel="next" href="from_idp15228160.html" title="Function template from">
+<link rel="next" href="from_idp21836912.html" title="Function template from">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="spirit-nav">
-<a accesskey="p" href="../../pipeline/reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.execution_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="from_idp15228160.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../../pipeline/reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.execution_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="from_idp21836912.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 <div class="refentry">
 <a name="boost.pipeline.execution"></a><div class="titlepage"></div>
@@ -26,24 +26,24 @@
 <span class="keyword">class</span> <a class="link" href="execution.html" title="Class execution">execution</a> <span class="special">{</span>
 <span class="keyword">public</span><span class="special">:</span>
   <span class="comment">// <a class="link" href="execution.html#boost.pipeline.executionconstruct-copy-destruct">construct/copy/destruct</a></span>
-  <a class="link" href="execution.html#idp15264448-bb"><span class="identifier">execution</span></a><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">future</span><span class="special">&lt;</span> <span class="keyword">void</span> <span class="special">&gt;</span> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
+  <a class="link" href="execution.html#idp21872400-bb"><span class="identifier">execution</span></a><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">future</span><span class="special">&lt;</span> <span class="keyword">void</span> <span class="special">&gt;</span> <span class="special">&amp;&amp;</span><span class="special">)</span><span class="special">;</span>
 
-  <span class="comment">// <a class="link" href="execution.html#idp15259824-bb">public member functions</a></span>
-  <span class="keyword">bool</span> <a class="link" href="execution.html#idp15260384-bb"><span class="identifier">is_done</span></a><span class="special">(</span><span class="special">)</span><span class="special">;</span>
-  <span class="keyword">void</span> <a class="link" href="execution.html#idp15262336-bb"><span class="identifier">wait</span></a><span class="special">(</span><span class="special">)</span><span class="special">;</span>
+  <span class="comment">// <a class="link" href="execution.html#idp21867824-bb">public member functions</a></span>
+  <span class="keyword">bool</span> <a class="link" href="execution.html#idp21868384-bb"><span class="identifier">is_done</span></a><span class="special">(</span><span class="special">)</span><span class="special">;</span>
+  <span class="keyword">void</span> <a class="link" href="execution.html#idp21870288-bb"><span class="identifier">wait</span></a><span class="special">(</span><span class="special">)</span><span class="special">;</span>
 <span class="special">}</span><span class="special">;</span></pre></div>
 <div class="refsect1">
-<a name="idp91951264"></a><h2>Description</h2>
+<a name="idp76785808"></a><h2>Description</h2>
 <p>Handle to an executing pipeline.</p>
 <p>An instance of this class returned every time <code class="computeroutput">run()</code> is called on a complete pipeline.</p>
 <p>Holds a future which is set on pipeline completition, destructor blocks until pipeline is terminated. <code class="computeroutput">std::move</code> it if it's not desired. </p>
 <div class="refsect2">
-<a name="idp91953776"></a><h3>
+<a name="idp76788320"></a><h3>
 <a name="boost.pipeline.executionconstruct-copy-destruct"></a><code class="computeroutput">execution</code> 
         public
        construct/copy/destruct</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
-<pre class="literallayout"><a name="idp15264448-bb"></a><span class="identifier">execution</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">future</span><span class="special">&lt;</span> <span class="keyword">void</span> <span class="special">&gt;</span> <span class="special">&amp;&amp;</span> future<span class="special">)</span><span class="special">;</span></pre>
+<pre class="literallayout"><a name="idp21872400-bb"></a><span class="identifier">execution</span><span class="special">(</span><span class="identifier">std</span><span class="special">::</span><span class="identifier">future</span><span class="special">&lt;</span> <span class="keyword">void</span> <span class="special">&gt;</span> <span class="special">&amp;&amp;</span> future<span class="special">)</span><span class="special">;</span></pre>
 <p>Creates an exectution holding <code class="computeroutput">future</code></p>
 <p>
 </p>
@@ -69,11 +69,11 @@
 </li></ol></div>
 </div>
 <div class="refsect2">
-<a name="idp91966832"></a><h3>
-<a name="idp15259824-bb"></a><code class="computeroutput">execution</code> public member functions</h3>
+<a name="idp76801376"></a><h3>
+<a name="idp21867824-bb"></a><code class="computeroutput">execution</code> public member functions</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1">
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">bool</span> <a name="idp15260384-bb"></a><span class="identifier">is_done</span><span class="special">(</span><span class="special">)</span><span class="special">;</span></pre>
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp21868384-bb"></a><span class="identifier">is_done</span><span class="special">(</span><span class="special">)</span><span class="special">;</span></pre>
 <p>Checks if the pipeline has terminated</p>
 <p>
 </p>
@@ -89,7 +89,7 @@
 </table></div>
 </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">void</span> <a name="idp15262336-bb"></a><span class="identifier">wait</span><span class="special">(</span><span class="special">)</span><span class="special">;</span></pre>
+<pre class="literallayout"><span class="keyword">void</span> <a name="idp21870288-bb"></a><span class="identifier">wait</span><span class="special">(</span><span class="special">)</span><span class="special">;</span></pre>
 <p>Waits until the execution of the pipeline is completed</p>
 <p>
 </p>
@@ -118,7 +118,7 @@
 </tr></table>
 <hr>
 <div class="spirit-nav">
-<a accesskey="p" href="../../pipeline/reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.execution_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="from_idp15228160.html"><img src="../../images/next.png" alt="Next"></a>
+<a accesskey="p" href="../../pipeline/reference.html"><img src="../../images/prev.png" alt="Prev"></a><a accesskey="u" href="../../pipeline/reference.html#header.boost.pipeline.execution_hpp"><img src="../../images/up.png" alt="Up"></a><a accesskey="h" href="../../index.html"><img src="../../images/home.png" alt="Home"></a><a accesskey="n" href="from_idp21836912.html"><img src="../../images/next.png" alt="Next"></a>
 </div>
 </body>
 </html>

@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<title>Design Rationale</title>
+<link rel="stylesheet" href="http://www.boost.org/doc/libs/1_55_0/doc/src/boostbook.css" type="text/css">
+<meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
+<link rel="home" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="up" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="prev" href="../index.html" title="Chapter&#160;1.&#160;Boost.Pipeline 1">
+<link rel="next" href="quick_start.html" title="Quick Start">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<div class="spirit-nav">
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="quick_start.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h2 class="title" style="clear: both">
+<a name="pipeline.design_rationale"></a><a class="link" href="design_rationale.html" title="Design Rationale">Design Rationale</a>
+</h2></div></div></div>
+<p>
+      The interface of Pipeline is based on the <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3534.html" target="_top">N3534</a>
+      proposal which offers a way to emulate <a href="http://en.wikipedia.org/wiki/Pipeline_%28Unix%29" target="_top">UNIX
+      pipelines</a>. The point of pipelines is to describe the processing of
+      the input as a series of <span class="emphasis"><em>transformations</em></span>. Transformations
+      are connected and can operate parallel.
+    </p>
+<p>
+      Using such pipelines is beneficial also in the C++ programming environment.
+      Advantages of a pipeline based solution include:
+    </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+          Stand alone transformations are easier to design, test and reason about
+          because of decoupling.
+        </li>
+<li class="listitem">
+          It's trivial to run independent transformations parallel and thus leverage
+          multiple execution agent.
+        </li>
+<li class="listitem">
+          Because of separation, race conditions and deadlocks are less likely to
+          happen.
+        </li>
+<li class="listitem">
+          By fine tuning scheduling parameters it's possible to achieve desirable
+          throughput/latency balance.
+        </li>
+</ol></div>
+<p>
+      This library implements all of the abstractions and operations of the N3534
+      proposal except the <code class="computeroutput"><span class="identifier">parallel</span><span class="special">()</span></code> function. The <code class="computeroutput"><span class="identifier">parallel</span><span class="special">()</span></code> function is yet missing but soon to be implemented.
+      The next step is to provide a coroutine/fiber based execution scheme to improve
+      on the classic thread-based scheduling.
+    </p>
+<p>
+      There is a <a href="https://code.google.com/p/google-concurrency-library/source/browse/include/pipeline.h" target="_top">reference
+      implementation</a> of the original proposal. The Boost.Pipeline is different
+      in some ways. The most important points are:
+    </p>
+<div class="orderedlist"><ol class="orderedlist" type="1">
+<li class="listitem">
+          Boost.Pipeline is C++11 only, because it makes the code cleaner and easier
+          to understand. Probably when the library is stable, C++11 will be a default,
+          at least for new projects, if it's not already.
+        </li>
+<li class="listitem">
+          Thanks to C++11 features, Boost.Pipeline supports a wide variety of transformations:
+          function pointers, functors, function objects, lambdas and bind expressions.
+          The reference implementation does not seem to accept the last three. <a href="#ftn.pipeline.design_rationale.f0" class="footnote" name="pipeline.design_rationale.f0"><sup class="footnote">[1]</sup></a>
+        </li>
+<li class="listitem">
+          Boost.Pipeline takes advantage of value semantics wherever it's possible
+          and avoids use of dynamic memory. E.g: Connecting two segments results
+          in a new segment type, the type of a plan encodes all the contained segments.
+          The reference implementation, on the other hand, uses dynamic memory and
+          type erasure excessively.
+        </li>
+</ol></div>
+<div class="footnotes">
+<br><hr style="width:100; text-align:left;margin-left: 0">
+<div id="ftn.pipeline.design_rationale.f0" class="footnote"><p><a href="#pipeline.design_rationale.f0" class="para"><sup class="para">[1] </sup></a>
+            Because of broken tests, it's hard to tell.
+          </p></div>
+</div>
+</div>
+<table xmlns:rev="http://www.cs.rpi.edu/~gregod/boost/tools/doc/revision" width="100%"><tr>
+<td align="left"></td>
+<td align="right"><div class="copyright-footer">Copyright &#169; 2014 Benedek Thaler<p>
+        Distributed under the Boost Software License, Version 1.0. (See accompanying
+        file LICENSE_1_0.txt or copy at <a href="http://www.boost.org/LICENSE_1_0.txt" target="_top">http://www.boost.org/LICENSE_1_0.txt</a>)
+      </p>
+</div></td>
+</tr></table>
+<hr>
+<div class="spirit-nav">
+<a accesskey="p" href="../index.html"><img src="../images/prev.png" alt="Prev"></a><a accesskey="u" href="../index.html"><img src="../images/up.png" alt="Up"></a><a accesskey="h" href="../index.html"><img src="../images/home.png" alt="Home"></a><a accesskey="n" href="quick_start.html"><img src="../images/next.png" alt="Next"></a>
+</div>
+</body>
+</html>
