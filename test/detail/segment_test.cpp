@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE(SegmentOneToNTrafo)
 
   exec.wait();
 
-  BOOST_CHECK_EQUAL(nums_out.size(), 10);
+  BOOST_CHECK_EQUAL(nums_out.size(), 10u);
   BOOST_CHECK_EQUAL(nums_out[0], 2);
   BOOST_CHECK_EQUAL(nums_out[1], 2);
   BOOST_CHECK_EQUAL(nums_out[2], 3);
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE(SegmentNToMTrafo)
 
   exec.wait();
 
-  BOOST_CHECK_EQUAL(nums_out.size(), 6);
+  BOOST_CHECK_EQUAL(nums_out.size(), 6u);
   BOOST_CHECK_EQUAL(nums_out[0], 1);
   BOOST_CHECK_EQUAL(nums_out[1], -1);
   BOOST_CHECK_EQUAL(nums_out[2], 0);
@@ -207,7 +207,7 @@ void generated_segment_test(Callable& generator)
 
   exec.wait();
 
-  BOOST_CHECK_EQUAL(nums_out.size(), 5);
+  BOOST_CHECK_EQUAL(nums_out.size(), 5u);
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);
   BOOST_CHECK_EQUAL(nums_out[2], 2);
@@ -240,7 +240,7 @@ void generated_segment_test_hinted(Callable& generator)
 
   exec.wait();
 
-  BOOST_CHECK_EQUAL(nums_out.size(), 5);
+  BOOST_CHECK_EQUAL(nums_out.size(), 5u);
   BOOST_CHECK_EQUAL(nums_out[0], 0);
   BOOST_CHECK_EQUAL(nums_out[1], 1);
   BOOST_CHECK_EQUAL(nums_out[2], 2);
