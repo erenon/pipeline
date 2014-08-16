@@ -31,6 +31,10 @@ namespace detail {
 template <typename Input, typename Output>
 class segment;
 
+//
+// Concepts
+//
+
 template <typename Output>
 class runnable_concept
 {
@@ -84,6 +88,10 @@ public:
   virtual std::unique_ptr<segment_concept<terminated, terminated>> clone() const = 0;
 };
 
+//
+// Utilities
+//
+
 struct unknown_type {};
 
 template <typename Input>
@@ -107,6 +115,22 @@ public:
 private:
   runnable_concept<Input>* _parent = nullptr;
 };
+
+template <typename Segment>
+inline void connect_to(Segment& segment, runnable_concept<typename Segment::root_type>& parent)
+{
+  segment.connect_to(parent);
+}
+
+template <typename Input, typename Output>
+inline void connect_to(
+  segment<Input, Output>& handle,
+  runnable_concept<typename segment<Input, Output>::root_type>& parent
+); // implementation far below
+
+//
+// connected_segment<> and specializations
+//
 
 template <typename Input, typename Middle, typename Output>
 class connected_segment
@@ -192,6 +216,10 @@ private:
   std::unique_ptr<segment_concept<Middle, terminated>> _impl;
 };
 
+//
+// segment<I,O> and specializations
+//
+
 template <typename Input, typename Output>
 class segment
 {
@@ -226,17 +254,17 @@ public:
     ));
   }
 
-  void connect_to(runnable_concept<Input>& parent)
-  {
-    _impl->connect_to(parent);
-  }
-
   void run(thread_pool& pool, const queue_back<Output>& target)
   {
     _impl->run(pool, target);
   }
 
 private:
+  friend void connect_to<>(
+    segment<Input, Output>&,
+    runnable_concept<Input>&
+  ); // don't move this above root_type typedef
+
   std::unique_ptr<segment_concept<Input, Output>> _impl;
 };
 
@@ -352,6 +380,19 @@ struct is_connectable_segment<segment<I, O>> : public std::true_type {};
 
 template <typename I>
 struct is_connectable_segment<upstream_proxy<I>> : public std::true_type {};
+
+//
+// Utilities (part 2)
+//
+
+template <typename Input, typename Output>
+inline void connect_to(
+  segment<Input, Output>& handle,
+  runnable_concept<typename segment<Input, Output>::root_type>& parent
+)
+{
+  handle._impl->connect_to(parent);
+}
 
 } // namespace detail
 

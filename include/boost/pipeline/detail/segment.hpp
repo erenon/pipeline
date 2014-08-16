@@ -93,7 +93,8 @@ public:
 
   void connect_to(runnable_concept<root_type>& parent)
   {
-    _parent.connect_to(parent);
+//    _parent.connect_to(parent);
+    ::boost::pipeline::detail::connect_to(_parent, parent);
   }
 
 protected:
