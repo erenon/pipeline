@@ -29,15 +29,15 @@
   <span class="keyword">typedef</span> <span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span><span class="special">::</span><span class="identifier">value_type</span> <a class="link" href="queue_front.html#boost.pipeline.queue_front.value_type"><span class="identifier">value_type</span></a><span class="special">;</span>
 
   <span class="comment">// <a class="link" href="queue_front.html#boost.pipeline.queue_frontconstruct-copy-destruct">construct/copy/destruct</a></span>
-  <a class="link" href="queue_front.html#idp28038224-bb"><span class="identifier">queue_front</span></a><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+  <a class="link" href="queue_front.html#idp41730736-bb"><span class="identifier">queue_front</span></a><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
 
-  <span class="comment">// <a class="link" href="queue_front.html#idp28030096-bb">public member functions</a></span>
-  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp28030592-bb"><span class="identifier">wait_pull</span></a><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
-  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp28033808-bb"><span class="identifier">is_empty</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
-  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp28036080-bb"><span class="identifier">is_closed</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="comment">// <a class="link" href="queue_front.html#idp41722608-bb">public member functions</a></span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp41723104-bb"><span class="identifier">wait_pull</span></a><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span><span class="special">)</span><span class="special">;</span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp41726320-bb"><span class="identifier">is_empty</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
+  <span class="keyword">bool</span> <a class="link" href="queue_front.html#idp41728592-bb"><span class="identifier">is_closed</span></a><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span>
 <span class="special">}</span><span class="special">;</span></pre></div>
 <div class="refsect1">
-<a name="idp77310816"></a><h2>Description</h2>
+<a name="idp99796048"></a><h2>Description</h2>
 <p>Consumer handle to a buffer queue between segments.</p>
 <p>Each transformation consuming multiple items on each call receive a <code class="computeroutput"><a class="link" href="queue_front.html" title="Class template queue_front">queue_front</a></code> instance which is used to access to the upstream queue.</p>
 <p>A handle is valid until the segment which owns the input queue terminates.</p>
@@ -46,7 +46,7 @@
 <p>
 </p>
 <div class="refsect2">
-<a name="idp77315552"></a><h3>
+<a name="idp99800784"></a><h3>
 <a name="boost.pipeline.queue_fronttypes"></a><code class="computeroutput">queue_front</code> 
         public
        types</h3>
@@ -57,12 +57,12 @@
 </li></ol></div>
 </div>
 <div class="refsect2">
-<a name="idp77324480"></a><h3>
+<a name="idp99809648"></a><h3>
 <a name="boost.pipeline.queue_frontconstruct-copy-destruct"></a><code class="computeroutput">queue_front</code> 
         public
        construct/copy/destruct</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1"><li class="listitem">
-<pre class="literallayout"><a name="idp28038224-bb"></a><span class="identifier">queue_front</span><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">&amp;</span> queue<span class="special">)</span><span class="special">;</span></pre>
+<pre class="literallayout"><a name="idp41730736-bb"></a><span class="identifier">queue_front</span><span class="special">(</span><span class="identifier">queue</span><span class="special">&lt;</span> <span class="identifier">T</span> <span class="special">&gt;</span> <span class="special">&amp;</span> queue<span class="special">)</span><span class="special">;</span></pre>
 <p>Creates a handle to the given queue.</p>
 <p>The constructed object does <span class="emphasis"><em>not</em></span> take ownership of the give queue.</p>
 <p>
@@ -70,11 +70,11 @@
 </li></ol></div>
 </div>
 <div class="refsect2">
-<a name="idp77334896"></a><h3>
-<a name="idp28030096-bb"></a><code class="computeroutput">queue_front</code> public member functions</h3>
+<a name="idp99820128"></a><h3>
+<a name="idp41722608-bb"></a><code class="computeroutput">queue_front</code> public member functions</h3>
 <div class="orderedlist"><ol class="orderedlist" type="1">
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">bool</span> <a name="idp28030592-bb"></a><span class="identifier">wait_pull</span><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span> ret<span class="special">)</span><span class="special">;</span></pre>
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp41723104-bb"></a><span class="identifier">wait_pull</span><span class="special">(</span><span class="identifier">T</span> <span class="special">&amp;</span> ret<span class="special">)</span><span class="special">;</span></pre>
 <p>Pulls the front item of the queue.</p>
 <p>Blocks until an item becomes available or the underlying queue gets closed.</p>
 <p>
@@ -107,7 +107,7 @@
 </table></div>
 </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">bool</span> <a name="idp28033808-bb"></a><span class="identifier">is_empty</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp41726320-bb"></a><span class="identifier">is_empty</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
 <p>Checks the underlying queue for emptiness.</p>
 <p>This call is subject to race.</p>
 <p>
@@ -124,7 +124,7 @@
 </table></div>
 </li>
 <li class="listitem">
-<pre class="literallayout"><span class="keyword">bool</span> <a name="idp28036080-bb"></a><span class="identifier">is_closed</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
+<pre class="literallayout"><span class="keyword">bool</span> <a name="idp41728592-bb"></a><span class="identifier">is_closed</span><span class="special">(</span><span class="special">)</span> <span class="keyword">const</span><span class="special">;</span></pre>
 <p>Checks whether the underlying queue is closed.</p>
 <p>
 </p>

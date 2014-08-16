@@ -22,6 +22,8 @@
 <dt><span class="section"><a href="components.html#pipeline.components.transformations">Transformations</a></span></dt>
 <dt><span class="section"><a href="components.html#pipeline.components.open_segments">Open Segments</a></span></dt>
 <dt><span class="section"><a href="components.html#pipeline.components.type_erasure">Type erasure</a></span></dt>
+<dt><span class="section"><a href="components.html#pipeline.components.item_type_requirements">Item type
+      requirements</a></span></dt>
 <dt><span class="section"><a href="components.html#pipeline.components.scheduling">Scheduling</a></span></dt>
 </dl></div>
 <div class="section">
@@ -153,7 +155,7 @@
 <p>
         Sometimes it's not feasible to assemble a pipeline in one go. One might want
         to build up smaller chunks and connect them dynamically. It's possible to
-        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp27978336.html" title="Function template make">make()</a></code>:
+        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp41671024.html" title="Function template make">make()</a></code>:
       </p>
 <pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">s2</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">make</span><span class="special">(</span><span class="identifier">length</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">output</span><span class="special">;</span>
 <span class="keyword">auto</span> <span class="identifier">s1</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">lines</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">trim</span><span class="special">;</span>
@@ -204,6 +206,34 @@
 <p>
         However, using these aliases does not come for free: it involves allocation
         of dynamic memory and indirection. It's recommended to use the <code class="computeroutput"><span class="keyword">auto</span></code> keyword instead wherever it's possible.
+      </p>
+</div>
+<div class="section">
+<div class="titlepage"><div><div><h3 class="title">
+<a name="pipeline.components.item_type_requirements"></a><a class="link" href="components.html#pipeline.components.item_type_requirements" title="Item type requirements">Item type
+      requirements</a>
+</h3></div></div></div>
+<p>
+        Items pushed through the pipeline must be transferred from one transformation
+        to the other and stored in queues. This imposes the following constraints
+        on the <code class="computeroutput"><span class="identifier">T</span></code> type of such items:
+      </p>
+<div class="itemizedlist"><ul class="itemizedlist" style="list-style-type: disc; ">
+<li class="listitem">
+            <code class="computeroutput"><span class="identifier">T</span></code> must be <span class="bold"><strong>default
+            constructible</strong></span>
+          </li>
+<li class="listitem">
+            <code class="computeroutput"><span class="identifier">T</span></code> must be <span class="bold"><strong>movable</strong></span>
+          </li>
+<li class="listitem">
+            <code class="computeroutput"><span class="identifier">T</span></code> must be <span class="bold"><strong>move
+            assignable</strong></span>
+          </li>
+</ul></div>
+<p>
+        Example of such a type and verification of these requirements can be found
+        in <a href="https://github.com/erenon/pipeline/blob/master/example/item_type_requirements_test.cpp" target="_top">example/item_type_requirements_test.cpp</a>
       </p>
 </div>
 <div class="section">
