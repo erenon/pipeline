@@ -155,7 +155,7 @@
 <p>
         Sometimes it's not feasible to assemble a pipeline in one go. One might want
         to build up smaller chunks and connect them dynamically. It's possible to
-        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp41611200.html" title="Function template make">make()</a></code>:
+        create incomplete plans (i.e: <span class="emphasis"><em>segments</em></span>) using <code class="computeroutput"><a class="link" href="../boost/pipeline/make_idp30811344.html" title="Function template make">make()</a></code>:
       </p>
 <pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">s2</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">make</span><span class="special">(</span><span class="identifier">length</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">output</span><span class="special">;</span>
 <span class="keyword">auto</span> <span class="identifier">s1</span> <span class="special">=</span> <span class="identifier">ppl</span><span class="special">::</span><span class="identifier">from</span><span class="special">(</span><span class="identifier">lines</span><span class="special">)</span> <span class="special">|</span> <span class="identifier">trim</span><span class="special">;</span>
@@ -178,8 +178,8 @@
         type is required. We always used the <code class="computeroutput"><span class="keyword">auto</span></code>
         keyword so far when it came to segments, because the actual type is rather
         complex and internal to the library. However, type erased handles are provided
-        to be able to refer to them. <code class="computeroutput">segment&lt;Input,
-        Ouput&gt;</code> can refer to any segment or plan which takes <code class="computeroutput"><span class="identifier">Input</span></code>s as input and produces <code class="computeroutput"><span class="identifier">Output</span></code>s. The tag <code class="computeroutput"><span class="identifier">terminated</span></code>
+        to be able to refer to them. <code class="computeroutput"><a class="link" href="../boost/pipeline/segment.html" title="Class template segment">segment&lt;Input,
+        Ouput&gt;</a></code> can refer to any segment or plan which takes <code class="computeroutput"><span class="identifier">Input</span></code>s as input and produces <code class="computeroutput"><span class="identifier">Output</span></code>s. The tag <code class="computeroutput"><span class="identifier">terminated</span></code>
         denotes a closed end. A complete pipeline can be referenced as <code class="computeroutput"><span class="identifier">segment</span><span class="special">&lt;</span><span class="identifier">terminated</span><span class="special">,</span> <span class="identifier">terminated</span><span class="special">&gt;</span></code>
         or just simply <code class="computeroutput"><span class="identifier">ppl</span><span class="special">::</span><span class="identifier">plan</span></code>:
       </p>

@@ -27,7 +27,7 @@
 </h3></div></div></div>
 <p>
         The following (incomplete) example shows a simple way to utilize the pipeline
-        using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp35518608.html" title="Function template from">from()</a></code>:
+        using <code class="computeroutput"><a class="link" href="../boost/pipeline/from_idp24602768.html" title="Function template from">from()</a></code>:
       </p>
 <pre class="programlisting"><span class="keyword">auto</span> <span class="identifier">grep_error</span> <span class="special">=</span> <span class="identifier">std</span><span class="special">::</span><span class="identifier">bind</span><span class="special">(</span><span class="identifier">grep</span><span class="special">,</span> <span class="string">"Error.*"</span><span class="special">,</span> <span class="identifier">_1</span><span class="special">,</span> <span class="identifier">_2</span><span class="special">);</span>
 
@@ -141,7 +141,7 @@
         is a callable receiving a <code class="computeroutput"><span class="identifier">queue_front</span></code>
         which can be pulled for items until there is no more. Usually, the library
         can recognize when an output segment is specified, however, there is no difference
-        between consumers and n-to-one transformations. For such cases, use <code class="computeroutput"><a class="link" href="../boost/pipeline/to_idp41626976.html" title="Function template to">to()</a></code>:
+        between consumers and n-to-one transformations. For such cases, use <code class="computeroutput"><a class="link" href="../boost/pipeline/to_idp30827120.html" title="Function template to">to()</a></code>:
       </p>
 <pre class="programlisting"><span class="keyword">void</span> <span class="identifier">consumer_a</span><span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">upstream</span><span class="special">);</span> <span class="comment">// returns void</span>
 <span class="keyword">int</span>  <span class="identifier">consumer_b</span><span class="special">(</span><span class="identifier">queue_front</span><span class="special">&lt;</span><span class="keyword">int</span><span class="special">&gt;</span> <span class="identifier">upstream</span><span class="special">);</span> <span class="comment">// returns int, might be mistaken for an n-to-one transformation</span>
