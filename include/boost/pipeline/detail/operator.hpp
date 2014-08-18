@@ -99,7 +99,6 @@ auto operator|(queue<T>& queue, Container& container)
 
 namespace detail {
 
-//template <typename, typename, int, typename, int>
 using boost::pipeline::operator|;
 
 } // namespace detail
