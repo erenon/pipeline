@@ -15,7 +15,6 @@
 
 #include <type_traits>
 
-#include <boost/pipeline/type_erasure.hpp>
 #include <boost/pipeline/detail/segment.hpp>
 #include <boost/pipeline/detail/connector.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
@@ -23,6 +22,7 @@
 
 namespace boost {
 namespace pipeline {
+
 namespace detail {
 
 template <typename Connection>
@@ -35,12 +35,14 @@ using enable_if_connectable = typename std::enable_if<
   is_connectable_segment<Segment>::value
 ,int>::type;
 
+} // namespace detail
+
 // segment | transformation
 template <
   typename Segment, typename Function,
-  enable_if_connectable<Segment> = 0,
-  typename Result = typename connector<Segment, Function>::type,
-  valid_connection<Result> = 0
+  detail::enable_if_connectable<Segment> = 0,
+  typename Result = typename detail::connector<Segment, Function>::type,
+  detail::valid_connection<Result> = 0
 >
 Result operator|(const Segment& segment, const Function& f)
 {
@@ -50,9 +52,9 @@ Result operator|(const Segment& segment, const Function& f)
 // segment | container
 template <
   typename Segment, typename Container,
-  enable_if_connectable<Segment> = 0,
-  typename Result = typename connector<Segment, Container>::type,
-  valid_connection<Result> = 0
+  detail::enable_if_connectable<Segment> = 0,
+  typename Result = typename detail::connector<Segment, Container>::type,
+  detail::valid_connection<Result> = 0
 >
 Result operator|(const Segment& segment, Container& c)
 {
@@ -60,8 +62,8 @@ Result operator|(const Segment& segment, Container& c)
 }
 
 // segment | open_segment
-template <typename Segment, typename... Trafos, enable_if_connectable<Segment> = 0>
-auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
+template <typename Segment, typename... Trafos, detail::enable_if_connectable<Segment> = 0>
+auto operator|(const Segment& segment, const detail::open_segment<Trafos...>& open_s)
   -> decltype(open_s.connect_to(segment))
 {
   return open_s.connect_to(segment);
@@ -70,16 +72,14 @@ auto operator|(const Segment& segment, const open_segment<Trafos...>& open_s)
 // segment | closed_segment
 template <
   typename Segment, typename Trafo,
-  enable_if_connectable<Segment> = 0,
-  typename OpenResult = typename connector<Segment, Trafo>::type,
-  typename Result = typename to_sink_segment<OpenResult>::type
+  detail::enable_if_connectable<Segment> = 0,
+  typename OpenResult = typename detail::connector<Segment, Trafo>::type,
+  typename Result = typename detail::to_sink_segment<OpenResult>::type
 >
-Result operator|(const Segment& segment, const closed_segment<Trafo>& closed)
+Result operator|(const Segment& segment, const detail::closed_segment<Trafo>& closed)
 {
   return Result(segment, closed.transformation);
 }
-
-} // namespace detail
 
 // queue | transformation / segment / open_segment / closed_segment
 template <typename T, typename Connectable>
@@ -96,6 +96,13 @@ auto operator|(queue<T>& queue, Container& container)
 {
   return detail::queue_input_segment<T>(queue) | container;
 }
+
+namespace detail {
+
+//template <typename, typename, int, typename, int>
+using boost::pipeline::operator|;
+
+} // namespace detail
 
 } // namespace pipeline
 } // namespace boost

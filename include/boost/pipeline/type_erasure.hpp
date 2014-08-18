@@ -18,6 +18,7 @@
 #include <boost/pipeline/threading.hpp>
 #include <boost/pipeline/execution.hpp>
 #include <boost/pipeline/queue.hpp>
+#include <boost/pipeline/detail/segment_concept.hpp>
 #include <boost/pipeline/detail/open_segment.hpp>
 #include <boost/pipeline/detail/closed_segment.hpp>
 
@@ -27,66 +28,6 @@ namespace pipeline {
 typedef void terminated;
 
 namespace detail {
-
-template <typename Input, typename Output>
-class segment;
-
-//
-// Concepts
-//
-
-template <typename Output>
-class runnable_concept
-{
-public:
-  virtual ~runnable_concept() {}
-  virtual void run(thread_pool&, const queue_back<Output>&) = 0;
-};
-
-template <>
-class runnable_concept<terminated>
-{
-public:
-  virtual ~runnable_concept() {}
-  virtual execution run(thread_pool&) = 0;
-};
-
-template <typename Input, typename Output>
-class segment_concept
-  : public runnable_concept<Output>
-{
-public:
-  typedef Input root_type;
-  typedef Output value_type;
-
-  virtual ~segment_concept() {}
-  virtual std::unique_ptr<segment_concept<Input, Output>> clone() const = 0;
-  virtual void connect_to(runnable_concept<Input>&) = 0;
-};
-
-template <typename Output>
-class segment_concept<terminated, Output>
-  : public runnable_concept<Output>
-{
-public:
-  typedef terminated root_type;
-  typedef Output value_type;
-
-  virtual ~segment_concept() {}
-  virtual std::unique_ptr<segment_concept<terminated, Output>> clone() const = 0;
-};
-
-template <>
-class segment_concept<terminated, terminated>
-  : public runnable_concept<terminated>
-{
-public:
-  typedef terminated root_type;
-  typedef terminated value_type;
-
-  virtual ~segment_concept() {}
-  virtual std::unique_ptr<segment_concept<terminated, terminated>> clone() const = 0;
-};
 
 //
 // Utilities
@@ -216,6 +157,8 @@ private:
   std::unique_ptr<segment_concept<Middle, terminated>> _impl;
 };
 
+} // namespace detail
+
 //
 // segment<I,O> and specializations
 //
@@ -226,7 +169,7 @@ class segment
   template <typename, typename>
   friend class segment;
 
-  typedef upstream_proxy<Input> proxy;
+  typedef detail::upstream_proxy<Input> proxy;
 
 public:
   typedef Input  root_type;
@@ -236,12 +179,12 @@ public:
     :_impl(rhs._impl->clone())
   {}
 
-  segment(const segment_concept<Input, Output>& impl)
+  segment(const detail::segment_concept<Input, Output>& impl)
     :_impl(impl.clone())
   {}
 
   template <typename... Trafos>
-  segment(const open_segment<Trafos...>& impl)
+  segment(const detail::open_segment<Trafos...>& impl)
     :_impl(impl.connect_to(proxy()).clone())
   {}
 
@@ -249,7 +192,7 @@ public:
   segment<Input, NewOutput>
   operator|(const segment<Output, NewOutput>& rhs) const
   {
-    return connected_segment<Input, Output, NewOutput>(
+    return detail::connected_segment<Input, Output, NewOutput>(
       *_impl, *rhs._impl
     );
   }
@@ -260,12 +203,12 @@ public:
   }
 
 private:
-  friend void connect_to<>(
+  friend void detail::connect_to<>(
     segment<Input, Output>&,
-    runnable_concept<Input>&
+    detail::runnable_concept<Input>&
   ); // don't move this above root_type typedef
 
-  std::unique_ptr<segment_concept<Input, Output>> _impl;
+  std::unique_ptr<detail::segment_concept<Input, Output>> _impl;
 };
 
 template <typename Output>
@@ -282,7 +225,7 @@ public:
     :_impl(rhs._impl->clone())
   {}
 
-  segment(const segment_concept<terminated, Output>& impl)
+  segment(const detail::segment_concept<terminated, Output>& impl)
     :_impl(impl.clone())
   {}
 
@@ -290,7 +233,7 @@ public:
   segment<terminated, NewOutput>
   operator|(const segment<Output, NewOutput>& rhs) const
   {
-    return connected_segment<terminated, Output, NewOutput>(
+    return detail::connected_segment<terminated, Output, NewOutput>(
       *_impl, *rhs._impl
     );
   }
@@ -301,7 +244,7 @@ public:
   }
 
 private:
-  std::unique_ptr<segment_concept<terminated, Output>> _impl;
+  std::unique_ptr<detail::segment_concept<terminated, Output>> _impl;
 };
 
 template <typename Input>
@@ -317,17 +260,17 @@ public:
     :_impl(rhs._impl->clone())
   {}
 
-  segment(const segment_concept<Input, terminated>& impl)
+  segment(const detail::segment_concept<Input, terminated>& impl)
     :_impl(impl.clone())
   {}
 
   template <typename... Trafos>
-  segment(const open_segment<Trafos...>& impl)
+  segment(const detail::open_segment<Trafos...>& impl)
     :_impl(impl.connect_to(proxy()).clone())
   {}
 
   template <typename Trafo>
-  segment(const closed_segment<Trafo>& impl)
+  segment(const detail::closed_segment<Trafo>& impl)
     :_impl((proxy() | impl).clone())
   {}
 
@@ -338,7 +281,7 @@ public:
   }
 
 private:
-  std::unique_ptr<segment_concept<Input, terminated>> _impl;
+  std::unique_ptr<detail::segment_concept<Input, terminated>> _impl;
 };
 
 template <>
@@ -352,7 +295,7 @@ public:
     :_impl(rhs._impl->clone())
   {}
 
-  segment(const segment_concept<terminated, terminated>& impl)
+  segment(const detail::segment_concept<terminated, terminated>& impl)
     :_impl(impl.clone())
   {}
 
@@ -362,8 +305,12 @@ public:
   }
 
 private:
-  std::unique_ptr<segment_concept<terminated, terminated>> _impl;
+  std::unique_ptr<detail::segment_concept<terminated, terminated>> _impl;
 };
+
+using plan = segment<terminated, terminated>;
+
+namespace detail {
 
 //
 // is_connectable_segment predicate specializations
@@ -395,10 +342,6 @@ inline void connect_to(
 }
 
 } // namespace detail
-
-using detail::segment;
-
-using plan = detail::segment<terminated, terminated>;
 
 } // namespace pipeline
 } // namespace boost
