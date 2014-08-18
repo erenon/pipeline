@@ -15,8 +15,6 @@
 
 #include <memory>
 
-#include <boost/core/null_deleter.hpp>
-
 #include <boost/pipeline/queue.hpp>
 
 namespace boost {

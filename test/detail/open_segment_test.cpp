@@ -15,13 +15,11 @@
 #include <functional>
 
 #include <boost/pipeline.hpp>
-#include <boost/pipeline/detail/open_segment.hpp>
 
 #define BOOST_TEST_MODULE OpenSegment
 #include <boost/test/unit_test.hpp>
 
 using namespace boost::pipeline;
-using namespace boost::pipeline::detail;
 
 int iidentity(const int a)
 {
