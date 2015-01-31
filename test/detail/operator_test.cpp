@@ -75,7 +75,7 @@ void init_queue(queue<Argon>& input_queue)
   for (int i = 0; i < 100; ++i)
   {
     Argon a{i};
-    input_queue.push_back(std::move(a));
+    input_queue.push(std::move(a));
   }
 
   input_queue.close();
@@ -180,7 +180,7 @@ void verify_queue(queue<Argon>& output)
   for (int i = 0; i < 100; ++i)
   {
     Argon out;
-    output.wait_pull_front(out);
+    output.wait_pull(out);
     BOOST_CHECK_EQUAL(out.value, i);
   }
 }

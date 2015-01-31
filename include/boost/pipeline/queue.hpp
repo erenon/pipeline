@@ -64,13 +64,13 @@ public:
    */
   void push(const T& item)
   {
-    _queue.push_back(item);
+    _queue.push(item);
   }
 
   /** @copydoc push */
   void push(T&& item)
   {
-    _queue.push_back(std::forward<T>(item));
+    _queue.push(std::forward<T>(item));
   }
 
   /**
@@ -131,7 +131,7 @@ public:
    */
   bool wait_pull(T& ret)
   {
-    auto status = _queue.wait_pull_front(ret);
+    auto status = _queue.wait_pull(ret);
     return (status == queue_op_status::success);
   }
 
